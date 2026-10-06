@@ -170,6 +170,42 @@ FINANCIAL_ENTITIES: Dict[str, Dict[str, Any]] = {
         "jurisdiction": "TRANSATLANTIC",
         "description": "Standing reciprocal currency arrangement serving as emergency dollar backstop ($207M active).",
     },
+    # Global Liquidity Triangle: Yen Carry Faucet, Corporate Buyback Sink, Petrodollar Recycling
+    "japan_mof_boj_carry_faucet": {
+        "tier": MonetaryTier.GENESIS,
+        "name": "Japan Ministry of Finance & Bank of Japan Zero-Rate Faucet",
+        "sector": "japan_carry_faucet",
+        "jurisdiction": "JP",
+        "description": "Genesis provider of zero/ultra-low cost JPY liquidity anchoring $1.104T in US Treasuries.",
+    },
+    "japan_institutional_carry_desk": {
+        "tier": MonetaryTier.TRANSMISSION,
+        "name": "Japanese Institutional Carry Desks (Norinchukin / Japan Post / Lifers)",
+        "sector": "institutional_carry_desk",
+        "jurisdiction": "JP",
+        "description": "Institutional conduits executing cross-currency FX basis swaps to fund USD repo and sovereign debt.",
+    },
+    "apple_bigtech_treasury_vault": {
+        "tier": MonetaryTier.SINK,
+        "name": "Apple Big Tech Enterprise Treasury Cash Hoard",
+        "sector": "corporate_treasury_vault",
+        "jurisdiction": "US",
+        "description": "Corporate cash and marketable securities hoard ($62.40B) absorbing commercial paper and T-bills.",
+    },
+    "corporate_share_buyback_burn_chamber": {
+        "tier": MonetaryTier.SINK,
+        "name": "Corporate Share Buyback Equity Retirement Burn Chamber",
+        "sector": "corporate_buyback_burn",
+        "jurisdiction": "US",
+        "description": "Permanent equity capital retirement destroying liquid corporate cash flow ($62.09B buyback burn).",
+    },
+    "gulf_petrodollar_sovereign_wealth_basin": {
+        "tier": MonetaryTier.SINK,
+        "name": "Gulf GCC Sovereign Wealth Fund Energy Surplus Basin (ADIA / PIF / QIA)",
+        "sector": "petrodollar_wealth_basin",
+        "jurisdiction": "MIDDLE_EAST",
+        "description": "Petrodollar accumulation pool recycling $85B+ energy trade surpluses into Western sovereign assets.",
+    },
 }
 
 
@@ -319,6 +355,14 @@ class ManifoldPGMBridge:
             "cayman_shadow_capital_flight",
             "emergency_fx_swap_activation",
             "central_bank_dollar_injection",
+            # Global Liquidity Triangle: Yen Carry, Corporate Buybacks, Petrodollars
+            "jpy_zero_interest_liquidity_provision",
+            "yen_carry_dollar_treasury_absorption",
+            "corporate_commercial_paper_and_t_bill_placement",
+            "equity_share_retirement_buyback_burn",
+            "petrodollar_energy_surplus_accumulation",
+            "sovereign_wealth_oat_diversification",
+            "global_enterprise_tech_inflow",
         ]
         for idx, r_name in enumerate(relation_types):
             vec = np.zeros(self.rel_dim, dtype=np.float32)
@@ -371,6 +415,12 @@ class ManifoldPGMBridge:
             "offshore_hedge_pool": 55,
             "london_eurodollar_nexus": 49,
             "central_bank_swap_facility": 46,
+            # Global Liquidity Triangle sectors
+            "japan_carry_faucet": 37,
+            "institutional_carry_desk": 45,
+            "corporate_treasury_vault": 54,
+            "corporate_buyback_burn": 58,
+            "petrodollar_wealth_basin": 56,
         }
 
         for eid, meta in FINANCIAL_ENTITIES.items():
@@ -402,6 +452,10 @@ class ManifoldPGMBridge:
             if "TRANSATLANTIC" in meta["jurisdiction"]:
                 vec[34] += 0.8
                 vec[35] += 0.8
+            if "JP" in meta["jurisdiction"]:
+                vec[35] += 0.9
+            if "MIDDLE_EAST" in meta["jurisdiction"]:
+                vec[34] += 0.9
 
             # 3. Balance Sheet Modality Subspace (64..95)
             if tier == MonetaryTier.GENESIS:
@@ -454,6 +508,17 @@ class ManifoldPGMBridge:
                 vec[112:120] = np.array([0.5, 0.9, 1.4, 1.3, 0.4, 1.0, 0.8, 0.6], dtype=np.float32)
             elif eid == "fed_ecb_liquidity_swap_line":
                 vec[104:112] = np.array([spread_norm * 1.6, pressure_norm * 1.2, 1.4, 1.0, 0.8, 0.6, 0.5, 0.4], dtype=np.float32)
+            # Global Liquidity Triangle
+            elif eid == "japan_mof_boj_carry_faucet":
+                vec[96:104] = np.array([0.1, 0.2, 0.4, 0.9, 1.5, 1.2, 0.8, 0.6], dtype=np.float32)
+            elif eid == "japan_institutional_carry_desk":
+                vec[104:112] = np.array([spread_norm * 0.8, 0.7, 1.3, 1.1, 0.6, 0.8, 0.4, 0.5], dtype=np.float32)
+            elif eid == "apple_bigtech_treasury_vault":
+                vec[120:128] = np.array([0.1, 0.4, 1.6, 1.5, 0.2, 0.8, 1.2, 0.9], dtype=np.float32)
+            elif eid == "corporate_share_buyback_burn_chamber":
+                vec[120:128] = np.array([1.8, 0.2, 0.8, 1.6, 0.1, 0.5, 1.4, 1.1], dtype=np.float32)
+            elif eid == "gulf_petrodollar_sovereign_wealth_basin":
+                vec[120:128] = np.array([0.3, 0.5, 1.4, 1.2, 0.7, 1.0, 0.9, 0.8], dtype=np.float32)
 
             # Strict L2 normalization to unit sphere
             norm = np.linalg.norm(vec)
@@ -875,6 +940,118 @@ class ManifoldPGMBridge:
             metadata={"dollar_injection": True, "tier_step": "1->1"},
         )
 
+        # Corridor 7: The Global Liquidity Triangle (Transpacific Yen Carry, Corporate Buybacks, Petrodollars)
+        # A) Japan Carry Faucet -> Japanese Institutional Desks -> US Triparty Repo
+        w_jpy_faucet = self.compute_edge_weight(
+            base_weight=0.90,
+            flow_volume_eur=1104.4e9,
+            risk_friction=0.10,  # Zero interest rate policy anchor
+            is_domestic_retention=False,
+        )
+        self.substrate.add_relation(
+            source_id="japan_mof_boj_carry_faucet",
+            target_id="japan_institutional_carry_desk",
+            relation="jpy_zero_interest_liquidity_provision",
+            weight=w_jpy_faucet,
+            rel_embedding=self.relation_embeddings["jpy_zero_interest_liquidity_provision"],
+            metadata={"japan_tic_usd": 1104.4e9, "tier_step": "0->1"},
+        )
+
+        w_yen_carry = self.compute_edge_weight(
+            base_weight=1.05,
+            flow_volume_eur=800.0e9,
+            risk_friction=spread_friction * 0.9,
+            is_domestic_retention=False,
+        )
+        self.substrate.add_relation(
+            source_id="japan_institutional_carry_desk",
+            target_id="us_triparty_repo_pool",
+            relation="yen_carry_dollar_treasury_absorption",
+            weight=w_yen_carry,
+            rel_embedding=self.relation_embeddings["yen_carry_dollar_treasury_absorption"],
+            metadata={"fx_carry_usd": 800.0e9, "tier_step": "1->2"},
+        )
+
+        # B) Corporate Cash Flow & Buyback Burn:
+        # Prime MMF Basin -> Apple Treasury Vault -> Corporate Share Buyback Burn Chamber
+        # And Real Economy Exporters -> Apple Treasury Vault
+        w_corp_paper = self.compute_edge_weight(
+            base_weight=0.95,
+            flow_volume_eur=62.4e9,
+            risk_friction=0.20,
+            is_domestic_retention=False,
+        )
+        self.substrate.add_relation(
+            source_id="us_prime_mmf_basin",
+            target_id="apple_bigtech_treasury_vault",
+            relation="corporate_commercial_paper_and_t_bill_placement",
+            weight=w_corp_paper,
+            rel_embedding=self.relation_embeddings["corporate_commercial_paper_and_t_bill_placement"],
+            metadata={"liquid_hoard_usd": 62.4e9, "tier_step": "3->3"},
+        )
+
+        w_tech_inflow = self.compute_edge_weight(
+            base_weight=1.00,
+            flow_volume_eur=100.0e9,
+            risk_friction=0.30,
+            is_domestic_retention=False,
+        )
+        self.substrate.add_relation(
+            source_id="foreign_export_economies",
+            target_id="apple_bigtech_treasury_vault",
+            relation="global_enterprise_tech_inflow",
+            weight=w_tech_inflow,
+            rel_embedding=self.relation_embeddings["global_enterprise_tech_inflow"],
+            metadata={"enterprise_tech_sales_usd": 100.0e9, "tier_step": "3->3"},
+        )
+
+        w_buyback_burn = self.compute_edge_weight(
+            base_weight=1.15,
+            flow_volume_eur=62.094e9,
+            risk_friction=0.25,
+            is_domestic_retention=True,
+        )
+        self.substrate.add_relation(
+            source_id="apple_bigtech_treasury_vault",
+            target_id="corporate_share_buyback_burn_chamber",
+            relation="equity_share_retirement_buyback_burn",
+            weight=w_buyback_burn,
+            rel_embedding=self.relation_embeddings["equity_share_retirement_buyback_burn"],
+            metadata={"apple_buybacks_usd": 62.094e9, "tier_step": "3->3"},
+        )
+
+        # C) Petrodollar Recycling Loop:
+        # Exporters -> Gulf Petrodollar Basin -> SVT Dealers
+        w_petro_accum = self.compute_edge_weight(
+            base_weight=0.95,
+            flow_volume_eur=85.0e9,
+            risk_friction=0.20,
+            is_domestic_retention=False,
+        )
+        self.substrate.add_relation(
+            source_id="foreign_export_economies",
+            target_id="gulf_petrodollar_sovereign_wealth_basin",
+            relation="petrodollar_energy_surplus_accumulation",
+            weight=w_petro_accum,
+            rel_embedding=self.relation_embeddings["petrodollar_energy_surplus_accumulation"],
+            metadata={"petrodollar_recycling_usd": 85.0e9, "tier_step": "3->3"},
+        )
+
+        w_petro_recycle = self.compute_edge_weight(
+            base_weight=1.10,
+            flow_volume_eur=40.0e9,
+            risk_friction=spread_friction * 1.1,
+            is_domestic_retention=False,
+        )
+        self.substrate.add_relation(
+            source_id="gulf_petrodollar_sovereign_wealth_basin",
+            target_id="svt_dealers_bnp_socgen",
+            relation="sovereign_wealth_oat_diversification",
+            weight=w_petro_recycle,
+            rel_embedding=self.relation_embeddings["sovereign_wealth_oat_diversification"],
+            metadata={"oat_diversification_usd": 40.0e9, "tier_step": "3->1"},
+        )
+
     def initialize_landmarks(self) -> None:
         """Builds coarse landmark clusters strictly aligned with the 4 monetary tiers."""
         lm = self.engine.landmark_graph
@@ -961,9 +1138,12 @@ class ManifoldPGMBridge:
         res_mmf = self.materialize_liquidity_path(src, tgt_mmf)
         res_cayman = self.materialize_liquidity_path(src, tgt_cayman)
         res_burn = self.materialize_liquidity_path(tgt_mmf, tgt_burn)
+        res_carry = self.materialize_liquidity_path("japan_mof_boj_carry_faucet", "us_treasury_tga")
+        res_buyback = self.materialize_liquidity_path(src, "corporate_share_buyback_burn_chamber")
+        res_petro = self.materialize_liquidity_path(src, "gulf_petrodollar_sovereign_wealth_basin")
 
         all_bridge_entities = set()
-        for res in [res_t2, res_bund, res_trade, res_mmf, res_cayman, res_burn]:
+        for res in [res_t2, res_bund, res_trade, res_mmf, res_cayman, res_burn, res_carry, res_buyback, res_petro]:
             if res.success and len(res.path_nodes) > 2:
                 # Bridge entities are intermediate nodes excluding src and tgt
                 all_bridge_entities.update(res.path_nodes[1:-1])
@@ -978,6 +1158,9 @@ class ManifoldPGMBridge:
             "transatlantic_mmf_reachability": res_mmf.success,
             "cayman_capital_flight_reachability": res_cayman.success,
             "qt_money_burn_reachability": res_burn.success,
+            "transpacific_carry_reachability": res_carry.success,
+            "corporate_buyback_reachability": res_buyback.success,
+            "petrodollar_reachability": res_petro.success,
             "bridge_entities_shielded": len(all_bridge_entities) > 0,
             "l1_memory_contained": telemetry["active_l1_nodes"] <= self.max_nodes_k,
         }
@@ -1031,6 +1214,30 @@ class ManifoldPGMBridge:
                     "total_cost": res_burn.total_cost,
                     "iterations": res_burn.iterations,
                     "expanded_nodes": res_burn.expanded_nodes,
+                },
+                "transpacific_yen_carry": {
+                    "success": res_carry.success,
+                    "nodes": res_carry.path_nodes,
+                    "edges": [e.relation for e in res_carry.path_edges],
+                    "total_cost": res_carry.total_cost,
+                    "iterations": res_carry.iterations,
+                    "expanded_nodes": res_carry.expanded_nodes,
+                },
+                "corporate_share_buyback_burn": {
+                    "success": res_buyback.success,
+                    "nodes": res_buyback.path_nodes,
+                    "edges": [e.relation for e in res_buyback.path_edges],
+                    "total_cost": res_buyback.total_cost,
+                    "iterations": res_buyback.iterations,
+                    "expanded_nodes": res_buyback.expanded_nodes,
+                },
+                "petrodollar_recycling_loop": {
+                    "success": res_petro.success,
+                    "nodes": res_petro.path_nodes,
+                    "edges": [e.relation for e in res_petro.path_edges],
+                    "total_cost": res_petro.total_cost,
+                    "iterations": res_petro.iterations,
+                    "expanded_nodes": res_petro.expanded_nodes,
                 },
             },
             "bridge_entities": sorted(list(all_bridge_entities)),

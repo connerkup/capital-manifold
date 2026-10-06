@@ -44,6 +44,7 @@ class EntityCategory(str, Enum):
     DECOY_OFFSHORE_SPV = "decoy_offshore_spv"
     DARK_FOREST_TRANSATLANTIC = "dark_forest_transatlantic"
     DARK_FOREST_RING2 = "dark_forest_ring2"
+    GLOBAL_TRIANGLE = "global_triangle"
 
 
 @dataclass
@@ -158,6 +159,14 @@ class AdversarialSubstrateBuilder:
             "cayman_shadow_capital_flight",
             "emergency_fx_swap_activation",
             "central_bank_dollar_injection",
+            # Global Liquidity Triangle: Yen Carry, Corporate Buybacks, Petrodollars
+            "jpy_zero_interest_liquidity_provision",
+            "yen_carry_dollar_treasury_absorption",
+            "corporate_commercial_paper_and_t_bill_placement",
+            "global_enterprise_tech_inflow",
+            "equity_share_retirement_buyback_burn",
+            "petrodollar_energy_surplus_accumulation",
+            "sovereign_wealth_oat_diversification",
             # Decoy edge types
             "retail_deposit_aggregation",
             "utility_corporate_financing",
@@ -444,6 +453,43 @@ class AdversarialSubstrateBuilder:
             central_bank_refi_access=1.0, regulatory_tier_rank=1.0,
         ))
 
+        # 10. Global Liquidity Triangle: Yen Carry, Corporate Buyback Sink, Petrodollar Recycling (5 nodes)
+        self._register("japan_mof_boj_carry_faucet", EntityCategory.GLOBAL_TRIANGLE, BalanceSheetMetrics(
+            log_total_assets=0.99, leverage_ratio=0.01, cash_reserves_ratio=0.50, svt_dealer_mandate=0.0,
+            target2_direct_participant=0.0, wholesale_repo_volume=0.90, cross_border_liability_ratio=0.85,
+            duration_sensitivity=0.80, state_ownership_pct=1.00, npl_ratio=0.000, deposit_funded_ratio=0.00,
+            interbank_lending_ratio=0.70, trade_finance_exposure=0.00, sovereign_holding_ratio=0.99,
+            central_bank_refi_access=1.0, regulatory_tier_rank=1.0,
+        ))
+        self._register("japan_institutional_carry_desk", EntityCategory.GLOBAL_TRIANGLE, BalanceSheetMetrics(
+            log_total_assets=0.94, leverage_ratio=0.04, cash_reserves_ratio=0.15, svt_dealer_mandate=0.0,
+            target2_direct_participant=0.0, wholesale_repo_volume=0.95, cross_border_liability_ratio=0.90,
+            duration_sensitivity=0.70, state_ownership_pct=0.10, npl_ratio=0.008, deposit_funded_ratio=0.40,
+            interbank_lending_ratio=0.50, trade_finance_exposure=0.10, sovereign_holding_ratio=0.60,
+            central_bank_refi_access=1.0, regulatory_tier_rank=0.85,
+        ))
+        self._register("apple_bigtech_treasury_vault", EntityCategory.GLOBAL_TRIANGLE, BalanceSheetMetrics(
+            log_total_assets=0.86, leverage_ratio=0.30, cash_reserves_ratio=0.40, svt_dealer_mandate=0.0,
+            target2_direct_participant=0.0, wholesale_repo_volume=0.40, cross_border_liability_ratio=0.60,
+            duration_sensitivity=0.15, state_ownership_pct=0.00, npl_ratio=0.000, deposit_funded_ratio=0.00,
+            interbank_lending_ratio=0.00, trade_finance_exposure=0.10, sovereign_holding_ratio=0.30,
+            central_bank_refi_access=0.0, regulatory_tier_rank=0.70,
+        ))
+        self._register("corporate_share_buyback_burn_chamber", EntityCategory.GLOBAL_TRIANGLE, BalanceSheetMetrics(
+            log_total_assets=0.85, leverage_ratio=0.01, cash_reserves_ratio=0.01, svt_dealer_mandate=0.0,
+            target2_direct_participant=0.0, wholesale_repo_volume=0.00, cross_border_liability_ratio=0.10,
+            duration_sensitivity=0.00, state_ownership_pct=0.00, npl_ratio=0.000, deposit_funded_ratio=0.00,
+            interbank_lending_ratio=0.00, trade_finance_exposure=0.00, sovereign_holding_ratio=0.00,
+            central_bank_refi_access=0.0, regulatory_tier_rank=0.50,
+        ))
+        self._register("gulf_petrodollar_sovereign_wealth_basin", EntityCategory.GLOBAL_TRIANGLE, BalanceSheetMetrics(
+            log_total_assets=0.96, leverage_ratio=0.90, cash_reserves_ratio=0.35, svt_dealer_mandate=0.0,
+            target2_direct_participant=0.0, wholesale_repo_volume=0.70, cross_border_liability_ratio=0.95,
+            duration_sensitivity=0.40, state_ownership_pct=1.00, npl_ratio=0.000, deposit_funded_ratio=0.00,
+            interbank_lending_ratio=0.20, trade_finance_exposure=0.30, sovereign_holding_ratio=0.50,
+            central_bank_refi_access=0.0, regulatory_tier_rank=0.95,
+        ))
+
     def build_adversarial_substrate(self) -> Tuple[L3LatentSubstrate, Dict[str, BalanceSheetMetrics]]:
         """Constructs L3 substrate with 80+ entities and dynamically synthesized institutional edges."""
         self._define_entities()
@@ -665,7 +711,65 @@ class AdversarialSubstrateBuilder:
             metadata={"emergency_valve": True},
         )
 
-        # G) Deceptive Local Commercial Edges for Decoy Nodes
+        # G) Global Liquidity Triangle: Yen Carry, Corporate Buybacks, Petrodollars
+        sub.add_relation(
+            source_id="japan_mof_boj_carry_faucet",
+            target_id="japan_institutional_carry_desk",
+            relation="jpy_zero_interest_liquidity_provision",
+            weight=0.90,
+            rel_embedding=self.relation_embeddings["jpy_zero_interest_liquidity_provision"],
+            metadata={"japan_tic_usd": 1104.4e9},
+        )
+        sub.add_relation(
+            source_id="japan_institutional_carry_desk",
+            target_id="us_triparty_repo_pool",
+            relation="yen_carry_dollar_treasury_absorption",
+            weight=1.05,
+            rel_embedding=self.relation_embeddings["yen_carry_dollar_treasury_absorption"],
+            metadata={"fx_carry_usd": 800.0e9},
+        )
+        sub.add_relation(
+            source_id="us_prime_mmf_basin",
+            target_id="apple_bigtech_treasury_vault",
+            relation="corporate_commercial_paper_and_t_bill_placement",
+            weight=0.95,
+            rel_embedding=self.relation_embeddings["corporate_commercial_paper_and_t_bill_placement"],
+            metadata={"liquid_hoard_usd": 62.4e9},
+        )
+        sub.add_relation(
+            source_id="foreign_export_economies",
+            target_id="apple_bigtech_treasury_vault",
+            relation="global_enterprise_tech_inflow",
+            weight=1.00,
+            rel_embedding=self.relation_embeddings["global_enterprise_tech_inflow"],
+            metadata={"enterprise_sales_usd": 100.0e9},
+        )
+        sub.add_relation(
+            source_id="apple_bigtech_treasury_vault",
+            target_id="corporate_share_buyback_burn_chamber",
+            relation="equity_share_retirement_buyback_burn",
+            weight=1.15,
+            rel_embedding=self.relation_embeddings["equity_share_retirement_buyback_burn"],
+            metadata={"apple_buybacks_usd": 62.094e9},
+        )
+        sub.add_relation(
+            source_id="foreign_export_economies",
+            target_id="gulf_petrodollar_sovereign_wealth_basin",
+            relation="petrodollar_energy_surplus_accumulation",
+            weight=0.95,
+            rel_embedding=self.relation_embeddings["petrodollar_energy_surplus_accumulation"],
+            metadata={"petrodollar_recycling_usd": 85.0e9},
+        )
+        sub.add_relation(
+            source_id="gulf_petrodollar_sovereign_wealth_basin",
+            target_id="svt_dealers_bnp_socgen",
+            relation="sovereign_wealth_oat_diversification",
+            weight=1.10,
+            rel_embedding=self.relation_embeddings["sovereign_wealth_oat_diversification"],
+            metadata={"oat_diversification_usd": 40.0e9},
+        )
+
+        # H) Deceptive Local Commercial Edges for Decoy Nodes
         # Regional banks connect to consumer fintechs (retail deposit aggregation)
         reg_banks = [eid for eid, cat in self.entity_categories.items() if cat == EntityCategory.DECOY_REGIONAL_SAVINGS]
         fintech_list = [eid for eid, cat in self.entity_categories.items() if cat == EntityCategory.DECOY_CONSUMER_FINTECH]
