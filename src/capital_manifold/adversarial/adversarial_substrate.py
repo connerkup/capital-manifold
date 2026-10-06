@@ -43,6 +43,7 @@ class EntityCategory(str, Enum):
     DECOY_CONSUMER_FINTECH = "decoy_consumer_fintech"
     DECOY_OFFSHORE_SPV = "decoy_offshore_spv"
     DARK_FOREST_TRANSATLANTIC = "dark_forest_transatlantic"
+    DARK_FOREST_RING2 = "dark_forest_ring2"
 
 
 @dataclass
@@ -149,6 +150,14 @@ class AdversarialSubstrateBuilder:
             "mmf_cash_repo_lending",
             "repo_liquidity_absorption",
             "tga_reserve_absorption_drain",
+            # Dark Forest Ring 2: QT Burn, RRP Drain & Offshore Eurodollar Sinks
+            "rrp_cash_parking",
+            "tga_debt_issuance_absorption",
+            "qt_redemption_money_burn",
+            "eurodollar_syndication",
+            "cayman_shadow_capital_flight",
+            "emergency_fx_swap_activation",
+            "central_bank_dollar_injection",
             # Decoy edge types
             "retail_deposit_aggregation",
             "utility_corporate_financing",
@@ -398,6 +407,43 @@ class AdversarialSubstrateBuilder:
             central_bank_refi_access=0.0, regulatory_tier_rank=1.0,
         ))
 
+        # 9. Dark Forest Ring 2: The QT Burn Chamber, Evaporating RRP Buffer, and Offshore Eurodollar Sinks (5 nodes)
+        self._register("fed_soma_qt_burn_chamber", EntityCategory.DARK_FOREST_RING2, BalanceSheetMetrics(
+            log_total_assets=0.98, leverage_ratio=0.01, cash_reserves_ratio=0.01, svt_dealer_mandate=0.0,
+            target2_direct_participant=0.0, wholesale_repo_volume=0.00, cross_border_liability_ratio=0.10,
+            duration_sensitivity=0.90, state_ownership_pct=1.00, npl_ratio=0.000, deposit_funded_ratio=0.00,
+            interbank_lending_ratio=0.00, trade_finance_exposure=0.00, sovereign_holding_ratio=0.95,
+            central_bank_refi_access=0.0, regulatory_tier_rank=1.0,
+        ))
+        self._register("fed_on_rrp_buffer_sink", EntityCategory.DARK_FOREST_RING2, BalanceSheetMetrics(
+            log_total_assets=0.95, leverage_ratio=0.01, cash_reserves_ratio=0.90, svt_dealer_mandate=0.0,
+            target2_direct_participant=0.0, wholesale_repo_volume=0.85, cross_border_liability_ratio=0.10,
+            duration_sensitivity=0.01, state_ownership_pct=1.00, npl_ratio=0.000, deposit_funded_ratio=0.00,
+            interbank_lending_ratio=0.00, trade_finance_exposure=0.00, sovereign_holding_ratio=0.90,
+            central_bank_refi_access=0.0, regulatory_tier_rank=1.0,
+        ))
+        self._register("offshore_cayman_hedge_pool", EntityCategory.DARK_FOREST_RING2, BalanceSheetMetrics(
+            log_total_assets=0.88, leverage_ratio=0.20, cash_reserves_ratio=0.15, svt_dealer_mandate=0.0,
+            target2_direct_participant=0.0, wholesale_repo_volume=0.90, cross_border_liability_ratio=0.95,
+            duration_sensitivity=0.75, state_ownership_pct=0.00, npl_ratio=0.020, deposit_funded_ratio=0.00,
+            interbank_lending_ratio=0.20, trade_finance_exposure=0.00, sovereign_holding_ratio=0.35,
+            central_bank_refi_access=0.0, regulatory_tier_rank=0.40,
+        ))
+        self._register("london_eurodollar_pool", EntityCategory.DARK_FOREST_RING2, BalanceSheetMetrics(
+            log_total_assets=0.92, leverage_ratio=0.05, cash_reserves_ratio=0.20, svt_dealer_mandate=0.0,
+            target2_direct_participant=0.0, wholesale_repo_volume=0.95, cross_border_liability_ratio=0.90,
+            duration_sensitivity=0.50, state_ownership_pct=0.00, npl_ratio=0.010, deposit_funded_ratio=0.20,
+            interbank_lending_ratio=0.60, trade_finance_exposure=0.40, sovereign_holding_ratio=0.40,
+            central_bank_refi_access=0.0, regulatory_tier_rank=0.85,
+        ))
+        self._register("fed_ecb_liquidity_swap_line", EntityCategory.DARK_FOREST_RING2, BalanceSheetMetrics(
+            log_total_assets=0.90, leverage_ratio=0.01, cash_reserves_ratio=0.80, svt_dealer_mandate=0.0,
+            target2_direct_participant=1.0, wholesale_repo_volume=0.50, cross_border_liability_ratio=0.99,
+            duration_sensitivity=0.10, state_ownership_pct=1.00, npl_ratio=0.000, deposit_funded_ratio=0.00,
+            interbank_lending_ratio=0.90, trade_finance_exposure=0.00, sovereign_holding_ratio=0.00,
+            central_bank_refi_access=1.0, regulatory_tier_rank=1.0,
+        ))
+
     def build_adversarial_substrate(self) -> Tuple[L3LatentSubstrate, Dict[str, BalanceSheetMetrics]]:
         """Constructs L3 substrate with 80+ entities and dynamically synthesized institutional edges."""
         self._define_entities()
@@ -561,7 +607,65 @@ class AdversarialSubstrateBuilder:
             metadata={"tga_closing_usd": 883.335e9, "net_drain_usd": 12.154e9},
         )
 
-        # F) Deceptive Local Commercial Edges for Decoy Nodes
+        # F) Dark Forest Ring 2: QT Burn Chamber, Evaporating RRP Buffer, and Offshore Eurodollar Sinks
+        sub.add_relation(
+            source_id="us_prime_mmf_basin",
+            target_id="fed_on_rrp_buffer_sink",
+            relation="rrp_cash_parking",
+            weight=1.05,
+            rel_embedding=self.relation_embeddings["rrp_cash_parking"],
+            metadata={"on_rrp_balance_usd": 361.883e9},
+        )
+        sub.add_relation(
+            source_id="us_triparty_repo_pool",
+            target_id="us_treasury_tga",
+            relation="tga_debt_issuance_absorption",
+            weight=1.10,
+            rel_embedding=self.relation_embeddings["tga_debt_issuance_absorption"],
+            metadata={"tga_absorption_usd": 984.046e9},
+        )
+        sub.add_relation(
+            source_id="us_treasury_tga",
+            target_id="fed_soma_qt_burn_chamber",
+            relation="qt_redemption_money_burn",
+            weight=1.20,
+            rel_embedding=self.relation_embeddings["qt_redemption_money_burn"],
+            metadata={"cumulative_qt_burn_usd": 2156.969e9},
+        )
+        sub.add_relation(
+            source_id="offshore_fx_swap_desk",
+            target_id="london_eurodollar_pool",
+            relation="eurodollar_syndication",
+            weight=1.10,
+            rel_embedding=self.relation_embeddings["eurodollar_syndication"],
+            metadata={"uk_eurodollar_holding_usd": 668.3e9},
+        )
+        sub.add_relation(
+            source_id="london_eurodollar_pool",
+            target_id="offshore_cayman_hedge_pool",
+            relation="cayman_shadow_capital_flight",
+            weight=1.15,
+            rel_embedding=self.relation_embeddings["cayman_shadow_capital_flight"],
+            metadata={"cayman_holding_usd": 285.3e9},
+        )
+        sub.add_relation(
+            source_id="banque_de_france",
+            target_id="fed_ecb_liquidity_swap_line",
+            relation="emergency_fx_swap_activation",
+            weight=1.30,
+            rel_embedding=self.relation_embeddings["emergency_fx_swap_activation"],
+            metadata={"active_swaps_usd": 207e6},
+        )
+        sub.add_relation(
+            source_id="fed_ecb_liquidity_swap_line",
+            target_id="offshore_fx_swap_desk",
+            relation="central_bank_dollar_injection",
+            weight=1.15,
+            rel_embedding=self.relation_embeddings["central_bank_dollar_injection"],
+            metadata={"emergency_valve": True},
+        )
+
+        # G) Deceptive Local Commercial Edges for Decoy Nodes
         # Regional banks connect to consumer fintechs (retail deposit aggregation)
         reg_banks = [eid for eid, cat in self.entity_categories.items() if cat == EntityCategory.DECOY_REGIONAL_SAVINGS]
         fintech_list = [eid for eid, cat in self.entity_categories.items() if cat == EntityCategory.DECOY_CONSUMER_FINTECH]

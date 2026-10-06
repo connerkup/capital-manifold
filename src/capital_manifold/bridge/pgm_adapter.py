@@ -134,6 +134,42 @@ FINANCIAL_ENTITIES: Dict[str, Dict[str, Any]] = {
         "jurisdiction": "US",
         "description": "Operating cash balance of the US Treasury ($883.3B) absorbing banking reserves.",
     },
+    # Dark Forest Ring 2: The QT Burn Chamber, Evaporating RRP Buffer, and Offshore Eurodollar Sinks
+    "fed_soma_qt_burn_chamber": {
+        "tier": MonetaryTier.SINK,
+        "name": "Federal Reserve SOMA QT Money Burn Chamber",
+        "sector": "qt_burn_chamber",
+        "jurisdiction": "US",
+        "description": "Literal destruction of central bank base money via maturing bond runoff ($2.157T burned).",
+    },
+    "fed_on_rrp_buffer_sink": {
+        "tier": MonetaryTier.SINK,
+        "name": "Fed Overnight Reverse Repo (ON RRP) Liquidity Buffer",
+        "sector": "fed_rrp_facility",
+        "jurisdiction": "US",
+        "description": "Fed facility for non-bank cash parking, depleted 85% from $2.55T peak down to $361.88B.",
+    },
+    "offshore_cayman_hedge_pool": {
+        "tier": MonetaryTier.SINK,
+        "name": "Cayman Islands Offshore Hedge Fund Collateral Basin",
+        "sector": "offshore_hedge_pool",
+        "jurisdiction": "GLOBAL_OFFSHORE",
+        "description": "Offshore shadow banking liquidity and Treasury collateral sink ($285.3B TIC).",
+    },
+    "london_eurodollar_pool": {
+        "tier": MonetaryTier.TRAVERSAL,
+        "name": "London Eurodollar Cross-Border Treasury Nexus",
+        "sector": "london_eurodollar_nexus",
+        "jurisdiction": "UK",
+        "description": "London interbank and wholesale Eurodollar financing conduit holding $668.3B US Treasuries.",
+    },
+    "fed_ecb_liquidity_swap_line": {
+        "tier": MonetaryTier.TRANSMISSION,
+        "name": "Federal Reserve / ECB Central Bank Liquidity Swap Line",
+        "sector": "central_bank_swap_facility",
+        "jurisdiction": "TRANSATLANTIC",
+        "description": "Standing reciprocal currency arrangement serving as emergency dollar backstop ($207M active).",
+    },
 }
 
 
@@ -275,6 +311,14 @@ class ManifoldPGMBridge:
             "mmf_cash_repo_lending",
             "repo_liquidity_absorption",
             "tga_reserve_absorption_drain",
+            # Dark Forest Ring 2: QT Burn, RRP Drain & Offshore Eurodollar Sinks
+            "rrp_cash_parking",
+            "tga_debt_issuance_absorption",
+            "qt_redemption_money_burn",
+            "eurodollar_syndication",
+            "cayman_shadow_capital_flight",
+            "emergency_fx_swap_activation",
+            "central_bank_dollar_injection",
         ]
         for idx, r_name in enumerate(relation_types):
             vec = np.zeros(self.rel_dim, dtype=np.float32)
@@ -321,6 +365,12 @@ class ManifoldPGMBridge:
             "us_repo_clearing": 50,
             "us_dollar_cash_pool": 58,
             "us_sovereign_cash_vault": 61,
+            # Dark Forest Ring 2 sectors
+            "qt_burn_chamber": 59,
+            "fed_rrp_facility": 57,
+            "offshore_hedge_pool": 55,
+            "london_eurodollar_nexus": 49,
+            "central_bank_swap_facility": 46,
         }
 
         for eid, meta in FINANCIAL_ENTITIES.items():
@@ -347,6 +397,11 @@ class ManifoldPGMBridge:
                 vec[35] += 1.2
             if "OFFSHORE" in meta["jurisdiction"]:
                 vec[34] += 0.9
+            if "UK" in meta["jurisdiction"]:
+                vec[33] += 0.9
+            if "TRANSATLANTIC" in meta["jurisdiction"]:
+                vec[34] += 0.8
+                vec[35] += 0.8
 
             # 3. Balance Sheet Modality Subspace (64..95)
             if tier == MonetaryTier.GENESIS:
@@ -388,6 +443,17 @@ class ManifoldPGMBridge:
                 vec[120:128] = np.array([0.2, 0.5, 1.4, 1.3, 0.1, 0.9, 1.2, 0.8], dtype=np.float32)
             elif eid == "us_treasury_tga":
                 vec[120:128] = np.array([0.8, 0.9, 1.1, 1.6, 0.4, 0.7, 1.5, 1.2], dtype=np.float32)
+            # Dark Forest Ring 2
+            elif eid == "fed_soma_qt_burn_chamber":
+                vec[120:128] = np.array([1.5, 0.4, 0.9, 1.8, 0.2, 0.6, 1.3, 1.0], dtype=np.float32)
+            elif eid == "fed_on_rrp_buffer_sink":
+                vec[120:128] = np.array([0.3, 0.6, 1.2, 1.1, 0.1, 0.8, 1.0, 0.7], dtype=np.float32)
+            elif eid == "offshore_cayman_hedge_pool":
+                vec[120:128] = np.array([0.4, 0.7, 1.3, 1.2, 0.3, 0.9, 1.1, 0.8], dtype=np.float32)
+            elif eid == "london_eurodollar_pool":
+                vec[112:120] = np.array([0.5, 0.9, 1.4, 1.3, 0.4, 1.0, 0.8, 0.6], dtype=np.float32)
+            elif eid == "fed_ecb_liquidity_swap_line":
+                vec[104:112] = np.array([spread_norm * 1.6, pressure_norm * 1.2, 1.4, 1.0, 0.8, 0.6, 0.5, 0.4], dtype=np.float32)
 
             # Strict L2 normalization to unit sphere
             norm = np.linalg.norm(vec)
@@ -706,12 +772,149 @@ class ManifoldPGMBridge:
             metadata={"tga_closing_usd": 883.335e9, "net_drain_usd": 12.154e9, "tier_step": "3->2"},
         )
 
+        # Corridor 6: Dark Forest Ring 2: QT Burn Chamber, Evaporating RRP Buffer, and Offshore Eurodollar Sinks
+        # A) Prime MMF Basin -> Fed ON RRP Buffer Sink ($361.88B remaining, 85% depleted)
+        w_rrp = self.compute_edge_weight(
+            base_weight=1.05,
+            flow_volume_eur=361.883e9,
+            risk_friction=spread_friction * 0.4,
+            is_domestic_retention=False,
+        )
+        self.substrate.add_relation(
+            source_id="us_prime_mmf_basin",
+            target_id="fed_on_rrp_buffer_sink",
+            relation="rrp_cash_parking",
+            weight=w_rrp,
+            rel_embedding=self.relation_embeddings["rrp_cash_parking"],
+            metadata={"rrp_balance_usd": 361.883e9, "depletion_pct": 85.8, "tier_step": "3->3"},
+        )
+
+        # B) Triparty Repo -> US Treasury TGA -> Fed SOMA QT Burn Chamber (The literal money burn)
+        w_repo_tga = self.compute_edge_weight(
+            base_weight=1.10,
+            flow_volume_eur=984.046e9,
+            risk_friction=spread_friction * 0.6,
+            is_domestic_retention=True,
+        )
+        self.substrate.add_relation(
+            source_id="us_triparty_repo_pool",
+            target_id="us_treasury_tga",
+            relation="tga_debt_issuance_absorption",
+            weight=w_repo_tga,
+            rel_embedding=self.relation_embeddings["tga_debt_issuance_absorption"],
+            metadata={"tga_absorption_usd": 984.046e9, "tier_step": "2->3"},
+        )
+
+        w_qt_burn = self.compute_edge_weight(
+            base_weight=1.20,
+            flow_volume_eur=2156.969e9,
+            risk_friction=spread_friction * 0.8,
+            is_domestic_retention=True,
+        )
+        self.substrate.add_relation(
+            source_id="us_treasury_tga",
+            target_id="fed_soma_qt_burn_chamber",
+            relation="qt_redemption_money_burn",
+            weight=w_qt_burn,
+            rel_embedding=self.relation_embeddings["qt_redemption_money_burn"],
+            metadata={"cumulative_qt_burn_usd": 2156.969e9, "tier_step": "3->3"},
+        )
+
+        # C) Offshore FX Swap Desk -> London Eurodollar Pool -> Offshore Cayman Hedge Pool
+        w_eurodollar = self.compute_edge_weight(
+            base_weight=1.10,
+            flow_volume_eur=668.3e9,
+            risk_friction=spread_friction * 1.2,
+            is_domestic_retention=False,
+        )
+        self.substrate.add_relation(
+            source_id="offshore_fx_swap_desk",
+            target_id="london_eurodollar_pool",
+            relation="eurodollar_syndication",
+            weight=w_eurodollar,
+            rel_embedding=self.relation_embeddings["eurodollar_syndication"],
+            metadata={"uk_eurodollar_holding_usd": 668.3e9, "tier_step": "1->2"},
+        )
+
+        w_cayman = self.compute_edge_weight(
+            base_weight=1.15,
+            flow_volume_eur=285.3e9,
+            risk_friction=spread_friction * 1.4,
+            is_domestic_retention=False,
+        )
+        self.substrate.add_relation(
+            source_id="london_eurodollar_pool",
+            target_id="offshore_cayman_hedge_pool",
+            relation="cayman_shadow_capital_flight",
+            weight=w_cayman,
+            rel_embedding=self.relation_embeddings["cayman_shadow_capital_flight"],
+            metadata={"cayman_holding_usd": 285.3e9, "tier_step": "2->3"},
+        )
+
+        # D) Banque de France -> Fed/ECB Liquidity Swap Line -> Offshore FX Swap Desk
+        w_emergency_swap = self.compute_edge_weight(
+            base_weight=1.30,
+            flow_volume_eur=207e6,
+            risk_friction=spread_friction * 2.0,
+            is_domestic_retention=False,
+        )
+        self.substrate.add_relation(
+            source_id="banque_de_france",
+            target_id="fed_ecb_liquidity_swap_line",
+            relation="emergency_fx_swap_activation",
+            weight=w_emergency_swap,
+            rel_embedding=self.relation_embeddings["emergency_fx_swap_activation"],
+            metadata={"active_swaps_usd": 207e6, "emergency_valve": True, "tier_step": "1->1"},
+        )
+        self.substrate.add_relation(
+            source_id="fed_ecb_liquidity_swap_line",
+            target_id="offshore_fx_swap_desk",
+            relation="central_bank_dollar_injection",
+            weight=w_emergency_swap * 0.9,
+            rel_embedding=self.relation_embeddings["central_bank_dollar_injection"],
+            metadata={"dollar_injection": True, "tier_step": "1->1"},
+        )
+
     def initialize_landmarks(self) -> None:
-        """Builds coarse landmark clusters across the 4 monetary tiers."""
-        self.engine.initialize_landmarks()
+        """Builds coarse landmark clusters strictly aligned with the 4 monetary tiers."""
+        lm = self.engine.landmark_graph
+        sub = self.substrate
+        lm.num_clusters = 4
+        lm.cluster_to_entities.clear()
+        lm.entity_to_cluster.clear()
+
+        # Group entities strictly by monetary tier
+        tier_embeddings = {0: [], 1: [], 2: [], 3: []}
+        for eid, meta in FINANCIAL_ENTITIES.items():
+            tier_int = int(meta["tier"])
+            emb = sub.entities[eid].embedding
+            tier_embeddings[tier_int].append(emb)
+            lm.entity_to_cluster[eid] = tier_int
+            lm.cluster_to_entities[tier_int].add(eid)
+            sub.entities[eid].cluster_id = tier_int
+
+        # Calculate unit-normalized centroid per monetary tier
+        lm.centroids = np.zeros((4, self.node_dim), dtype=np.float32)
+        for t in range(4):
+            embs = np.array(tier_embeddings[t], dtype=np.float32)
+            mean_v = np.mean(embs, axis=0)
+            lm.centroids[t] = mean_v / (np.linalg.norm(mean_v) + 1e-9)
+
+        # Build coarse adjacency from substrate relationships
+        lm.cluster_adjacency.clear()
+        for src_id, targets in sub.adjacency.items():
+            src_cluster = lm.entity_to_cluster.get(src_id)
+            if src_cluster is None:
+                continue
+            for tgt_id in targets.keys():
+                tgt_cluster = lm.entity_to_cluster.get(tgt_id)
+                if tgt_cluster is not None:
+                    lm.cluster_adjacency[src_cluster].add(tgt_cluster)
+                    lm.cluster_adjacency[tgt_cluster].add(src_cluster)
+
         logger.info(
-            f"Initialized Global Landmark Graph with {self.engine.landmark_graph.num_clusters} clusters. "
-            f"Adjacency: {dict(self.engine.landmark_graph.cluster_adjacency)}"
+            f"Initialized Global Landmark Graph with {lm.num_clusters} tier-aligned clusters. "
+            f"Adjacency: {dict(lm.cluster_adjacency)}"
         )
 
     def materialize_liquidity_path(
@@ -749,14 +952,18 @@ class ManifoldPGMBridge:
         tgt_bund = "bund_risk_free_anchor"
         tgt_trade = "foreign_export_economies"
         tgt_mmf = "us_prime_mmf_basin"
+        tgt_cayman = "offshore_cayman_hedge_pool"
+        tgt_burn = "fed_soma_qt_burn_chamber"
 
         res_t2 = self.materialize_liquidity_path(src, tgt_t2)
         res_bund = self.materialize_liquidity_path(src, tgt_bund)
         res_trade = self.materialize_liquidity_path(src, tgt_trade)
         res_mmf = self.materialize_liquidity_path(src, tgt_mmf)
+        res_cayman = self.materialize_liquidity_path(src, tgt_cayman)
+        res_burn = self.materialize_liquidity_path(tgt_mmf, tgt_burn)
 
         all_bridge_entities = set()
-        for res in [res_t2, res_bund, res_trade, res_mmf]:
+        for res in [res_t2, res_bund, res_trade, res_mmf, res_cayman, res_burn]:
             if res.success and len(res.path_nodes) > 2:
                 # Bridge entities are intermediate nodes excluding src and tgt
                 all_bridge_entities.update(res.path_nodes[1:-1])
@@ -769,6 +976,8 @@ class ManifoldPGMBridge:
             "bund_anchor_reachability": res_bund.success,
             "trade_sink_reachability": res_trade.success,
             "transatlantic_mmf_reachability": res_mmf.success,
+            "cayman_capital_flight_reachability": res_cayman.success,
+            "qt_money_burn_reachability": res_burn.success,
             "bridge_entities_shielded": len(all_bridge_entities) > 0,
             "l1_memory_contained": telemetry["active_l1_nodes"] <= self.max_nodes_k,
         }
@@ -806,6 +1015,22 @@ class ManifoldPGMBridge:
                     "total_cost": res_mmf.total_cost,
                     "iterations": res_mmf.iterations,
                     "expanded_nodes": res_mmf.expanded_nodes,
+                },
+                "cayman_offshore_capital_flight": {
+                    "success": res_cayman.success,
+                    "nodes": res_cayman.path_nodes,
+                    "edges": [e.relation for e in res_cayman.path_edges],
+                    "total_cost": res_cayman.total_cost,
+                    "iterations": res_cayman.iterations,
+                    "expanded_nodes": res_cayman.expanded_nodes,
+                },
+                "fed_soma_qt_money_burn": {
+                    "success": res_burn.success,
+                    "nodes": res_burn.path_nodes,
+                    "edges": [e.relation for e in res_burn.path_edges],
+                    "total_cost": res_burn.total_cost,
+                    "iterations": res_burn.iterations,
+                    "expanded_nodes": res_burn.expanded_nodes,
                 },
             },
             "bridge_entities": sorted(list(all_bridge_entities)),
