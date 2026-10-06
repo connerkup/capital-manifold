@@ -1,0 +1,14 @@
+pyproject.toml
+src/capital_manifold.egg-info/PKG-INFO
+src/capital_manifold.egg-info/SOURCES.txt
+src/capital_manifold.egg-info/dependency_links.txt
+src/capital_manifold.egg-info/requires.txt
+src/capital_manifold.egg-info/top_level.txt
+src/capital_manifold/bridge/__init__.py
+src/capital_manifold/bridge/pgm_adapter.py
+src/capital_manifold/core/schema.py
+src/capital_manifold/harvesters/base.py
+src/capital_manifold/harvesters/france.py
+src/capital_manifold/pipeline/run_france.py
+src/capital_manifold/storage/duckdb_store.py
+tests/test_france_harvester.py

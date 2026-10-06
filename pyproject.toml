@@ -1,0 +1,25 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "capital-manifold"
+version = "0.1.0"
+description = "Macro-financial balance-sheet network dynamics and capital manifold analysis."
+requires-python = ">=3.10"
+dependencies = [
+    "duckdb",
+    "pyarrow",
+    "pydantic",
+    "numpy",
+    "pandas",
+    "httpx",
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+pythonpath = ["src"]

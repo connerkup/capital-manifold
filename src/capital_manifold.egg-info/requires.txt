@@ -1,0 +1,6 @@
+duckdb
+pyarrow
+pydantic
+numpy
+pandas
+httpx

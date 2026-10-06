@@ -1,0 +1,11 @@
+Metadata-Version: 2.4
+Name: capital-manifold
+Version: 0.1.0
+Summary: Macro-financial balance-sheet network dynamics and capital manifold analysis.
+Requires-Python: >=3.10
+Requires-Dist: duckdb
+Requires-Dist: pyarrow
+Requires-Dist: pydantic
+Requires-Dist: numpy
+Requires-Dist: pandas
+Requires-Dist: httpx
