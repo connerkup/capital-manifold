@@ -45,6 +45,7 @@ class EntityCategory(str, Enum):
     DARK_FOREST_TRANSATLANTIC = "dark_forest_transatlantic"
     DARK_FOREST_RING2 = "dark_forest_ring2"
     GLOBAL_TRIANGLE = "global_triangle"
+    PLANETARY_MANIFOLD = "planetary_manifold"
 
 
 @dataclass
@@ -167,6 +168,25 @@ class AdversarialSubstrateBuilder:
             "equity_share_retirement_buyback_burn",
             "petrodollar_energy_surplus_accumulation",
             "sovereign_wealth_oat_diversification",
+            # Planetary Monetary Manifold (7 Global Regions)
+            "petro_yuan_crude_invoicing",
+            "cnh_cross_border_liquidity_settlement",
+            "onshore_offshore_cnh_repatriation",
+            "sovereign_fx_reserve_accumulation",
+            "direct_petro_yuan_clearing",
+            "shadow_tanker_crude_export",
+            "discounted_crude_refining_intake",
+            "refined_diesel_european_reexport",
+            "global_product_fuel_distribution",
+            "australian_iron_ore_lng_settlement",
+            "brazilian_agri_resource_settlement",
+            "cross_strait_electronics_demand",
+            "advanced_semiconductor_hardware_shipment",
+            "resource_concession_debt_servicing",
+            "belt_and_road_infrastructure_lending",
+            "gulf_sovereign_euro_debt_placement",
+            "saudi_capital_diversification_oat",
+            "immobilized_euroclear_reserve_claim",
             # Decoy edge types
             "retail_deposit_aggregation",
             "utility_corporate_financing",
@@ -490,6 +510,99 @@ class AdversarialSubstrateBuilder:
             central_bank_refi_access=0.0, regulatory_tier_rank=0.95,
         ))
 
+        # 11. Planetary Monetary Manifold (7 Global Regions) (13 nodes)
+        self._register("pboc_safe_foreign_reserves", EntityCategory.PLANETARY_MANIFOLD, BalanceSheetMetrics(
+            log_total_assets=1.00, leverage_ratio=0.01, cash_reserves_ratio=0.85, svt_dealer_mandate=0.0,
+            target2_direct_participant=0.0, wholesale_repo_volume=0.80, cross_border_liability_ratio=0.80,
+            duration_sensitivity=0.60, state_ownership_pct=1.00, npl_ratio=0.000, deposit_funded_ratio=0.00,
+            interbank_lending_ratio=0.40, trade_finance_exposure=0.20, sovereign_holding_ratio=0.95,
+            central_bank_refi_access=1.0, regulatory_tier_rank=1.0,
+        ))
+        self._register("chinese_state_banks_fx_desk", EntityCategory.PLANETARY_MANIFOLD, BalanceSheetMetrics(
+            log_total_assets=0.99, leverage_ratio=0.08, cash_reserves_ratio=0.15, svt_dealer_mandate=0.0,
+            target2_direct_participant=0.0, wholesale_repo_volume=0.95, cross_border_liability_ratio=0.70,
+            duration_sensitivity=0.40, state_ownership_pct=0.90, npl_ratio=0.012, deposit_funded_ratio=0.65,
+            interbank_lending_ratio=0.30, trade_finance_exposure=0.60, sovereign_holding_ratio=0.45,
+            central_bank_refi_access=1.0, regulatory_tier_rank=0.95,
+        ))
+        self._register("offshore_cnh_hong_kong_hub", EntityCategory.PLANETARY_MANIFOLD, BalanceSheetMetrics(
+            log_total_assets=0.92, leverage_ratio=0.06, cash_reserves_ratio=0.25, svt_dealer_mandate=0.0,
+            target2_direct_participant=0.0, wholesale_repo_volume=0.90, cross_border_liability_ratio=0.95,
+            duration_sensitivity=0.30, state_ownership_pct=0.30, npl_ratio=0.005, deposit_funded_ratio=0.30,
+            interbank_lending_ratio=0.50, trade_finance_exposure=0.50, sovereign_holding_ratio=0.35,
+            central_bank_refi_access=0.0, regulatory_tier_rank=0.85,
+        ))
+        self._register("taiwan_central_bank_tsmc_semiconductor_sink", EntityCategory.PLANETARY_MANIFOLD, BalanceSheetMetrics(
+            log_total_assets=0.90, leverage_ratio=0.35, cash_reserves_ratio=0.45, svt_dealer_mandate=0.0,
+            target2_direct_participant=0.0, wholesale_repo_volume=0.30, cross_border_liability_ratio=0.85,
+            duration_sensitivity=0.10, state_ownership_pct=0.10, npl_ratio=0.000, deposit_funded_ratio=0.00,
+            interbank_lending_ratio=0.05, trade_finance_exposure=0.70, sovereign_holding_ratio=0.40,
+            central_bank_refi_access=0.0, regulatory_tier_rank=0.80,
+        ))
+        self._register("saudi_sama_pif_nexus", EntityCategory.PLANETARY_MANIFOLD, BalanceSheetMetrics(
+            log_total_assets=0.97, leverage_ratio=0.85, cash_reserves_ratio=0.40, svt_dealer_mandate=0.0,
+            target2_direct_participant=0.0, wholesale_repo_volume=0.60, cross_border_liability_ratio=0.90,
+            duration_sensitivity=0.35, state_ownership_pct=1.00, npl_ratio=0.000, deposit_funded_ratio=0.00,
+            interbank_lending_ratio=0.15, trade_finance_exposure=0.40, sovereign_holding_ratio=0.50,
+            central_bank_refi_access=0.0, regulatory_tier_rank=0.95,
+        ))
+        self._register("uae_adia_mubadala_basin", EntityCategory.PLANETARY_MANIFOLD, BalanceSheetMetrics(
+            log_total_assets=0.98, leverage_ratio=0.90, cash_reserves_ratio=0.35, svt_dealer_mandate=0.0,
+            target2_direct_participant=0.0, wholesale_repo_volume=0.70, cross_border_liability_ratio=0.95,
+            duration_sensitivity=0.40, state_ownership_pct=1.00, npl_ratio=0.000, deposit_funded_ratio=0.00,
+            interbank_lending_ratio=0.20, trade_finance_exposure=0.30, sovereign_holding_ratio=0.50,
+            central_bank_refi_access=0.0, regulatory_tier_rank=0.95,
+        ))
+        self._register("petro_yuan_bilateral_settlement_bridge", EntityCategory.PLANETARY_MANIFOLD, BalanceSheetMetrics(
+            log_total_assets=0.88, leverage_ratio=0.05, cash_reserves_ratio=0.30, svt_dealer_mandate=0.0,
+            target2_direct_participant=0.0, wholesale_repo_volume=0.80, cross_border_liability_ratio=0.95,
+            duration_sensitivity=0.20, state_ownership_pct=0.50, npl_ratio=0.000, deposit_funded_ratio=0.00,
+            interbank_lending_ratio=0.40, trade_finance_exposure=0.90, sovereign_holding_ratio=0.20,
+            central_bank_refi_access=0.0, regulatory_tier_rank=0.80,
+        ))
+        self._register("bank_of_russia_cbr_vault", EntityCategory.PLANETARY_MANIFOLD, BalanceSheetMetrics(
+            log_total_assets=0.95, leverage_ratio=0.01, cash_reserves_ratio=0.90, svt_dealer_mandate=0.0,
+            target2_direct_participant=0.0, wholesale_repo_volume=0.10, cross_border_liability_ratio=0.60,
+            duration_sensitivity=0.70, state_ownership_pct=1.00, npl_ratio=0.000, deposit_funded_ratio=0.00,
+            interbank_lending_ratio=0.10, trade_finance_exposure=0.10, sovereign_holding_ratio=0.85,
+            central_bank_refi_access=1.0, regulatory_tier_rank=1.0,
+        ))
+        self._register("shadow_tanker_energy_arbitrage", EntityCategory.PLANETARY_MANIFOLD, BalanceSheetMetrics(
+            log_total_assets=0.87, leverage_ratio=0.15, cash_reserves_ratio=0.10, svt_dealer_mandate=0.0,
+            target2_direct_participant=0.0, wholesale_repo_volume=0.50, cross_border_liability_ratio=0.99,
+            duration_sensitivity=0.15, state_ownership_pct=0.20, npl_ratio=0.020, deposit_funded_ratio=0.00,
+            interbank_lending_ratio=0.05, trade_finance_exposure=0.95, sovereign_holding_ratio=0.05,
+            central_bank_refi_access=0.0, regulatory_tier_rank=0.40,
+        ))
+        self._register("brazil_banco_central_agri_faucet", EntityCategory.PLANETARY_MANIFOLD, BalanceSheetMetrics(
+            log_total_assets=0.92, leverage_ratio=0.02, cash_reserves_ratio=0.60, svt_dealer_mandate=0.0,
+            target2_direct_participant=0.0, wholesale_repo_volume=0.50, cross_border_liability_ratio=0.70,
+            duration_sensitivity=0.50, state_ownership_pct=1.00, npl_ratio=0.000, deposit_funded_ratio=0.00,
+            interbank_lending_ratio=0.20, trade_finance_exposure=0.40, sovereign_holding_ratio=0.75,
+            central_bank_refi_access=1.0, regulatory_tier_rank=1.0,
+        ))
+        self._register("reserve_bank_of_australia_commodity_faucet", EntityCategory.PLANETARY_MANIFOLD, BalanceSheetMetrics(
+            log_total_assets=0.93, leverage_ratio=0.02, cash_reserves_ratio=0.65, svt_dealer_mandate=0.0,
+            target2_direct_participant=0.0, wholesale_repo_volume=0.60, cross_border_liability_ratio=0.80,
+            duration_sensitivity=0.45, state_ownership_pct=1.00, npl_ratio=0.000, deposit_funded_ratio=0.00,
+            interbank_lending_ratio=0.25, trade_finance_exposure=0.50, sovereign_holding_ratio=0.80,
+            central_bank_refi_access=1.0, regulatory_tier_rank=1.0,
+        ))
+        self._register("reserve_bank_of_india_refining_hub", EntityCategory.PLANETARY_MANIFOLD, BalanceSheetMetrics(
+            log_total_assets=0.94, leverage_ratio=0.06, cash_reserves_ratio=0.45, svt_dealer_mandate=0.0,
+            target2_direct_participant=0.0, wholesale_repo_volume=0.70, cross_border_liability_ratio=0.75,
+            duration_sensitivity=0.35, state_ownership_pct=0.60, npl_ratio=0.010, deposit_funded_ratio=0.20,
+            interbank_lending_ratio=0.20, trade_finance_exposure=0.80, sovereign_holding_ratio=0.60,
+            central_bank_refi_access=1.0, regulatory_tier_rank=0.90,
+        ))
+        self._register("africa_critical_minerals_debt_conduit", EntityCategory.PLANETARY_MANIFOLD, BalanceSheetMetrics(
+            log_total_assets=0.82, leverage_ratio=0.20, cash_reserves_ratio=0.05, svt_dealer_mandate=0.0,
+            target2_direct_participant=0.0, wholesale_repo_volume=0.20, cross_border_liability_ratio=0.90,
+            duration_sensitivity=0.25, state_ownership_pct=0.40, npl_ratio=0.050, deposit_funded_ratio=0.00,
+            interbank_lending_ratio=0.00, trade_finance_exposure=0.85, sovereign_holding_ratio=0.10,
+            central_bank_refi_access=0.0, regulatory_tier_rank=0.40,
+        ))
+
     def build_adversarial_substrate(self) -> Tuple[L3LatentSubstrate, Dict[str, BalanceSheetMetrics]]:
         """Constructs L3 substrate with 80+ entities and dynamically synthesized institutional edges."""
         self._define_entities()
@@ -769,7 +882,160 @@ class AdversarialSubstrateBuilder:
             metadata={"oat_diversification_usd": 40.0e9},
         )
 
-        # H) Deceptive Local Commercial Edges for Decoy Nodes
+        # H) Planetary Monetary Manifold (7 Global Macro Regions)
+        # Petro-Yuan Bilateral Energy Clearing
+        sub.add_relation(
+            source_id="saudi_sama_pif_nexus",
+            target_id="petro_yuan_bilateral_settlement_bridge",
+            relation="petro_yuan_crude_invoicing",
+            weight=0.90,
+            rel_embedding=self.relation_embeddings["petro_yuan_crude_invoicing"],
+            metadata={"petro_yuan_crude_usd": 65.0e9},
+        )
+        sub.add_relation(
+            source_id="petro_yuan_bilateral_settlement_bridge",
+            target_id="offshore_cnh_hong_kong_hub",
+            relation="cnh_cross_border_liquidity_settlement",
+            weight=0.85,
+            rel_embedding=self.relation_embeddings["cnh_cross_border_liquidity_settlement"],
+            metadata={"cnh_clearing_usd": 65.0e9},
+        )
+        sub.add_relation(
+            source_id="offshore_cnh_hong_kong_hub",
+            target_id="chinese_state_banks_fx_desk",
+            relation="onshore_offshore_cnh_repatriation",
+            weight=0.85,
+            rel_embedding=self.relation_embeddings["onshore_offshore_cnh_repatriation"],
+            metadata={"cnh_turnover_usd": 250.0e9},
+        )
+        sub.add_relation(
+            source_id="chinese_state_banks_fx_desk",
+            target_id="pboc_safe_foreign_reserves",
+            relation="sovereign_fx_reserve_accumulation",
+            weight=0.80,
+            rel_embedding=self.relation_embeddings["sovereign_fx_reserve_accumulation"],
+            metadata={"pboc_reserves_usd": 3240.0e9},
+        )
+        sub.add_relation(
+            source_id="petro_yuan_bilateral_settlement_bridge",
+            target_id="chinese_state_banks_fx_desk",
+            relation="direct_petro_yuan_clearing",
+            weight=0.90,
+            rel_embedding=self.relation_embeddings["direct_petro_yuan_clearing"],
+        )
+
+        # Shadow Energy Refining Arbitrage
+        sub.add_relation(
+            source_id="bank_of_russia_cbr_vault",
+            target_id="shadow_tanker_energy_arbitrage",
+            relation="shadow_tanker_crude_export",
+            weight=1.15,
+            rel_embedding=self.relation_embeddings["shadow_tanker_crude_export"],
+            metadata={"urals_crude_usd": 140.0e9},
+        )
+        sub.add_relation(
+            source_id="shadow_tanker_energy_arbitrage",
+            target_id="reserve_bank_of_india_refining_hub",
+            relation="discounted_crude_refining_intake",
+            weight=0.90,
+            rel_embedding=self.relation_embeddings["discounted_crude_refining_intake"],
+            metadata={"refining_margin_usd": 55.0e9},
+        )
+        sub.add_relation(
+            source_id="reserve_bank_of_india_refining_hub",
+            target_id="french_economy_importers",
+            relation="refined_diesel_european_reexport",
+            weight=0.95,
+            rel_embedding=self.relation_embeddings["refined_diesel_european_reexport"],
+            metadata={"refined_fuel_usd": 55.0e9},
+        )
+        sub.add_relation(
+            source_id="reserve_bank_of_india_refining_hub",
+            target_id="foreign_export_economies",
+            relation="global_product_fuel_distribution",
+            weight=1.00,
+            rel_embedding=self.relation_embeddings["global_product_fuel_distribution"],
+        )
+
+        # Pacific Hardware & Commodity Loop
+        sub.add_relation(
+            source_id="reserve_bank_of_australia_commodity_faucet",
+            target_id="chinese_state_banks_fx_desk",
+            relation="australian_iron_ore_lng_settlement",
+            weight=0.90,
+            rel_embedding=self.relation_embeddings["australian_iron_ore_lng_settlement"],
+            metadata={"australia_commodity_usd": 180.0e9},
+        )
+        sub.add_relation(
+            source_id="brazil_banco_central_agri_faucet",
+            target_id="chinese_state_banks_fx_desk",
+            relation="brazilian_agri_resource_settlement",
+            weight=0.90,
+            rel_embedding=self.relation_embeddings["brazilian_agri_resource_settlement"],
+            metadata={"brazil_agri_usd": 110.0e9},
+        )
+        sub.add_relation(
+            source_id="chinese_state_banks_fx_desk",
+            target_id="taiwan_central_bank_tsmc_semiconductor_sink",
+            relation="cross_strait_electronics_demand",
+            weight=0.95,
+            rel_embedding=self.relation_embeddings["cross_strait_electronics_demand"],
+            metadata={"cross_strait_trade_usd": 120.0e9},
+        )
+        sub.add_relation(
+            source_id="taiwan_central_bank_tsmc_semiconductor_sink",
+            target_id="apple_bigtech_treasury_vault",
+            relation="advanced_semiconductor_hardware_shipment",
+            weight=0.90,
+            rel_embedding=self.relation_embeddings["advanced_semiconductor_hardware_shipment"],
+            metadata={"semiconductor_hardware_usd": 120.0e9},
+        )
+
+        # African Concessions & Infrastructure Lending
+        sub.add_relation(
+            source_id="africa_critical_minerals_debt_conduit",
+            target_id="chinese_state_banks_fx_desk",
+            relation="resource_concession_debt_servicing",
+            weight=1.05,
+            rel_embedding=self.relation_embeddings["resource_concession_debt_servicing"],
+            metadata={"mineral_debt_service_usd": 45.0e9},
+        )
+        sub.add_relation(
+            source_id="pboc_safe_foreign_reserves",
+            target_id="africa_critical_minerals_debt_conduit",
+            relation="belt_and_road_infrastructure_lending",
+            weight=1.00,
+            rel_embedding=self.relation_embeddings["belt_and_road_infrastructure_lending"],
+            metadata={"belt_and_road_lending_usd": 45.0e9},
+        )
+
+        # UAE Wealth & Frozen CBR Assets
+        sub.add_relation(
+            source_id="uae_adia_mubadala_basin",
+            target_id="svt_dealers_bnp_socgen",
+            relation="gulf_sovereign_euro_debt_placement",
+            weight=1.10,
+            rel_embedding=self.relation_embeddings["gulf_sovereign_euro_debt_placement"],
+            metadata={"uae_placement_usd": 50.0e9},
+        )
+        sub.add_relation(
+            source_id="saudi_sama_pif_nexus",
+            target_id="svt_dealers_bnp_socgen",
+            relation="saudi_capital_diversification_oat",
+            weight=1.15,
+            rel_embedding=self.relation_embeddings["saudi_capital_diversification_oat"],
+            metadata={"saudi_diversification_usd": 40.0e9},
+        )
+        sub.add_relation(
+            source_id="bank_of_russia_cbr_vault",
+            target_id="eurosystem_target2_pool",
+            relation="immobilized_euroclear_reserve_claim",
+            weight=2.50,
+            rel_embedding=self.relation_embeddings["immobilized_euroclear_reserve_claim"],
+            metadata={"frozen_reserves_usd": 300.0e9},
+        )
+
+        # I) Deceptive Local Commercial Edges for Decoy Nodes
         # Regional banks connect to consumer fintechs (retail deposit aggregation)
         reg_banks = [eid for eid, cat in self.entity_categories.items() if cat == EntityCategory.DECOY_REGIONAL_SAVINGS]
         fintech_list = [eid for eid, cat in self.entity_categories.items() if cat == EntityCategory.DECOY_CONSUMER_FINTECH]

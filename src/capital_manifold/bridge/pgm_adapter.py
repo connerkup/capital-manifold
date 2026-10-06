@@ -206,6 +206,98 @@ FINANCIAL_ENTITIES: Dict[str, Dict[str, Any]] = {
         "jurisdiction": "MIDDLE_EAST",
         "description": "Petrodollar accumulation pool recycling $85B+ energy trade surpluses into Western sovereign assets.",
     },
+    # Planetary Monetary Manifold (7 Global Regions)
+    "pboc_safe_foreign_reserves": {
+        "tier": MonetaryTier.GENESIS,
+        "name": "People's Bank of China & SAFE Foreign Exchange Reserves",
+        "sector": "sovereign_fx_vault",
+        "jurisdiction": "CN",
+        "description": "Sovereign foreign exchange reserve vault ($3.24T reserves, $859.4B US Treasuries anchor).",
+    },
+    "chinese_state_banks_fx_desk": {
+        "tier": MonetaryTier.TRANSMISSION,
+        "name": "Chinese Big 4 State Banks FX & Interbank Trading Desks (ICBC/CCB/BoC/ABC)",
+        "sector": "state_commercial_bank",
+        "jurisdiction": "CN",
+        "description": "State commercial bank FX trading conduits clearing cross-border trade and managing onshore liquidity.",
+    },
+    "offshore_cnh_hong_kong_hub": {
+        "tier": MonetaryTier.TRAVERSAL,
+        "name": "Hong Kong Offshore Renminbi (CNH) Clearing Hub",
+        "sector": "offshore_cnh_hub",
+        "jurisdiction": "HK",
+        "description": "Offshore CNH interbank liquidity pool and debt issuance center ($250B daily turnover).",
+    },
+    "taiwan_central_bank_tsmc_semiconductor_sink": {
+        "tier": MonetaryTier.SINK,
+        "name": "Taiwan Central Bank & TSMC Advanced Silicon Capital Sink",
+        "sector": "semiconductor_hardware",
+        "jurisdiction": "TW",
+        "description": "Advanced semiconductor manufacturing hardware revenues ($120B) and foreign reserves ($234.6B TIC).",
+    },
+    "saudi_sama_pif_nexus": {
+        "tier": MonetaryTier.SINK,
+        "name": "Saudi Central Bank SAMA & Public Investment Fund (PIF) Nexus",
+        "sector": "sovereign_wealth_fund",
+        "jurisdiction": "SA",
+        "description": "Saudi sovereign energy surplus and strategic wealth fund ($925B AUM) channeling petro-revenues.",
+    },
+    "uae_adia_mubadala_basin": {
+        "tier": MonetaryTier.SINK,
+        "name": "UAE Sovereign Wealth Basin (ADIA & Mubadala Investment)",
+        "sector": "sovereign_wealth_basin",
+        "jurisdiction": "AE",
+        "description": "Abu Dhabi and UAE global asset accumulation pool ($1.15T AUM) recycling trade surpluses.",
+    },
+    "petro_yuan_bilateral_settlement_bridge": {
+        "tier": MonetaryTier.TRANSMISSION,
+        "name": "Petro-Yuan Bilateral Non-USD Energy Settlement Bridge",
+        "sector": "bilateral_clearing",
+        "jurisdiction": "GLOBAL_OFFSHORE",
+        "description": "Bilateral clearing corridor for crude oil trade settling in CNH/Renminbi bypassing SWIFT/USD.",
+    },
+    "bank_of_russia_cbr_vault": {
+        "tier": MonetaryTier.GENESIS,
+        "name": "Bank of Russia (CBR) Sovereign Vault & Foreign Reserves",
+        "sector": "sanctioned_central_bank",
+        "jurisdiction": "RU",
+        "description": "Sanctioned central bank vault with $300B frozen Western reserves, pivoting to $185B gold and $115B CNY.",
+    },
+    "shadow_tanker_energy_arbitrage": {
+        "tier": MonetaryTier.TRANSMISSION,
+        "name": "Maritime Shadow Tanker Fleet Crude Oil Arbitrage Conduit",
+        "sector": "maritime_energy_arbitrage",
+        "jurisdiction": "GLOBAL_MARITIME",
+        "description": "Non-G7 insured shadow tanker maritime transit carrying $140B Russian crude evading Western price caps.",
+    },
+    "brazil_banco_central_agri_faucet": {
+        "tier": MonetaryTier.GENESIS,
+        "name": "Banco Central do Brasil & Agricultural Export Faucet",
+        "sector": "commodity_central_bank",
+        "jurisdiction": "BR",
+        "description": "Agricultural commodity surplus anchor ($110B soy/iron ore) holding $214.0B in US Treasuries.",
+    },
+    "reserve_bank_of_australia_commodity_faucet": {
+        "tier": MonetaryTier.GENESIS,
+        "name": "Reserve Bank of Australia & Pacific Resources Commodity Faucet",
+        "sector": "commodity_central_bank",
+        "jurisdiction": "AU",
+        "description": "Pacific raw material supplier ($180B iron ore/LNG) powering Asian industrial processors.",
+    },
+    "reserve_bank_of_india_refining_hub": {
+        "tier": MonetaryTier.TRANSMISSION,
+        "name": "Reserve Bank of India & Jamnagar Crude Refining Hub",
+        "sector": "energy_refining_hub",
+        "jurisdiction": "IN",
+        "description": "Refining hub importing discounted Russian crude and re-exporting $55B in refined diesel/jet fuel to Europe.",
+    },
+    "africa_critical_minerals_debt_conduit": {
+        "tier": MonetaryTier.TRANSMISSION,
+        "name": "African Critical Minerals Concession & Debt Servicing Conduit",
+        "sector": "frontier_mineral_conduit",
+        "jurisdiction": "AFRICA",
+        "description": "DRC/Zambia cobalt and copper mining concessions servicing $45B in sovereign loans to Chinese state lenders.",
+    },
 }
 
 
@@ -363,6 +455,25 @@ class ManifoldPGMBridge:
             "petrodollar_energy_surplus_accumulation",
             "sovereign_wealth_oat_diversification",
             "global_enterprise_tech_inflow",
+            # Planetary Monetary Manifold (7 Global Regions)
+            "petro_yuan_crude_invoicing",
+            "cnh_cross_border_liquidity_settlement",
+            "onshore_offshore_cnh_repatriation",
+            "sovereign_fx_reserve_accumulation",
+            "direct_petro_yuan_clearing",
+            "shadow_tanker_crude_export",
+            "discounted_crude_refining_intake",
+            "refined_diesel_european_reexport",
+            "global_product_fuel_distribution",
+            "australian_iron_ore_lng_settlement",
+            "brazilian_agri_resource_settlement",
+            "cross_strait_electronics_demand",
+            "advanced_semiconductor_hardware_shipment",
+            "resource_concession_debt_servicing",
+            "belt_and_road_infrastructure_lending",
+            "gulf_sovereign_euro_debt_placement",
+            "saudi_capital_diversification_oat",
+            "immobilized_euroclear_reserve_claim",
         ]
         for idx, r_name in enumerate(relation_types):
             vec = np.zeros(self.rel_dim, dtype=np.float32)
@@ -421,6 +532,19 @@ class ManifoldPGMBridge:
             "corporate_treasury_vault": 54,
             "corporate_buyback_burn": 58,
             "petrodollar_wealth_basin": 56,
+            # Planetary Monetary Manifold sectors
+            "sovereign_fx_vault": 33,
+            "state_commercial_bank": 39,
+            "offshore_cnh_hub": 47,
+            "semiconductor_hardware": 53,
+            "sovereign_wealth_fund": 56,
+            "sovereign_wealth_basin": 57,
+            "bilateral_clearing": 43,
+            "sanctioned_central_bank": 35,
+            "maritime_energy_arbitrage": 41,
+            "commodity_central_bank": 38,
+            "energy_refining_hub": 51,
+            "frontier_mineral_conduit": 45,
         }
 
         for eid, meta in FINANCIAL_ENTITIES.items():
@@ -441,6 +565,24 @@ class ManifoldPGMBridge:
                 vec[33] += 0.8
             if "EU" in meta["jurisdiction"]:
                 vec[34] += 0.8
+            if "CN" in meta["jurisdiction"]:
+                vec[35] += 0.8
+            if "RU" in meta["jurisdiction"]:
+                vec[36] += 0.8
+            if "SA" in meta["jurisdiction"] or "AE" in meta["jurisdiction"]:
+                vec[37] += 0.8
+            if "AU" in meta["jurisdiction"]:
+                vec[38] += 0.8
+            if "BR" in meta["jurisdiction"]:
+                vec[39] += 0.8
+            if "IN" in meta["jurisdiction"]:
+                vec[40] += 0.8
+            if "TW" in meta["jurisdiction"]:
+                vec[41] += 0.8
+            if "HK" in meta["jurisdiction"]:
+                vec[42] += 0.8
+            if "AFRICA" in meta["jurisdiction"]:
+                vec[43] += 0.8
             if "GLOBAL" in meta["jurisdiction"] or "WORLD" in meta["jurisdiction"]:
                 vec[35] += 0.8
             if "US" in meta["jurisdiction"]:
@@ -519,6 +661,33 @@ class ManifoldPGMBridge:
                 vec[120:128] = np.array([1.8, 0.2, 0.8, 1.6, 0.1, 0.5, 1.4, 1.1], dtype=np.float32)
             elif eid == "gulf_petrodollar_sovereign_wealth_basin":
                 vec[120:128] = np.array([0.3, 0.5, 1.4, 1.2, 0.7, 1.0, 0.9, 0.8], dtype=np.float32)
+            # Planetary Monetary Manifold (7 Global Regions)
+            elif eid == "pboc_safe_foreign_reserves":
+                vec[96:104] = np.array([0.9, 0.8, 1.5, 1.8, 1.2, 0.7, 1.4, 1.1], dtype=np.float32)
+            elif eid == "chinese_state_banks_fx_desk":
+                vec[104:112] = np.array([0.8, 1.4, 1.2, 0.9, 0.8, 1.0, 0.6, 0.7], dtype=np.float32)
+            elif eid == "offshore_cnh_hong_kong_hub":
+                vec[112:120] = np.array([0.7, 1.3, 1.1, 1.5, 0.5, 0.9, 1.0, 0.8], dtype=np.float32)
+            elif eid == "taiwan_central_bank_tsmc_semiconductor_sink":
+                vec[120:128] = np.array([0.4, 0.6, 1.5, 1.7, 0.3, 0.8, 1.3, 1.0], dtype=np.float32)
+            elif eid == "saudi_sama_pif_nexus":
+                vec[120:128] = np.array([0.5, 0.4, 1.8, 1.6, 0.2, 0.9, 1.1, 0.7], dtype=np.float32)
+            elif eid == "uae_adia_mubadala_basin":
+                vec[120:128] = np.array([0.4, 0.5, 1.7, 1.5, 0.3, 0.8, 1.2, 0.9], dtype=np.float32)
+            elif eid == "petro_yuan_bilateral_settlement_bridge":
+                vec[104:112] = np.array([0.6, 1.2, 0.8, 1.4, 0.5, 1.1, 0.7, 0.9], dtype=np.float32)
+            elif eid == "bank_of_russia_cbr_vault":
+                vec[96:104] = np.array([1.8, 0.2, 0.5, 1.4, 1.6, 0.3, 1.2, 0.9], dtype=np.float32)
+            elif eid == "shadow_tanker_energy_arbitrage":
+                vec[104:112] = np.array([1.4, 0.8, 1.1, 0.9, 0.4, 1.3, 0.8, 0.5], dtype=np.float32)
+            elif eid == "brazil_banco_central_agri_faucet":
+                vec[96:104] = np.array([0.3, 0.4, 0.9, 1.3, 1.1, 0.8, 0.7, 0.6], dtype=np.float32)
+            elif eid == "reserve_bank_of_australia_commodity_faucet":
+                vec[96:104] = np.array([0.4, 0.5, 0.8, 1.5, 1.2, 0.9, 0.6, 0.7], dtype=np.float32)
+            elif eid == "reserve_bank_of_india_refining_hub":
+                vec[104:112] = np.array([0.7, 1.1, 1.3, 1.0, 0.6, 0.9, 0.8, 0.5], dtype=np.float32)
+            elif eid == "africa_critical_minerals_debt_conduit":
+                vec[104:112] = np.array([1.2, 0.6, 0.9, 0.7, 0.3, 1.0, 0.5, 0.8], dtype=np.float32)
 
             # Strict L2 normalization to unit sphere
             norm = np.linalg.norm(vec)
@@ -1052,6 +1221,258 @@ class ManifoldPGMBridge:
             metadata={"oat_diversification_usd": 40.0e9, "tier_step": "3->1"},
         )
 
+        # Corridor 8: The Planetary Monetary Manifold (7 Global Macro Regions)
+        # A) Sino-Gulf Petro-Yuan Bilateral Clearing Corridor:
+        w_py_invoice = self.compute_edge_weight(
+            base_weight=0.90,
+            flow_volume_eur=65.0e9,
+            risk_friction=0.15,
+            is_domestic_retention=False,
+        )
+        self.substrate.add_relation(
+            source_id="saudi_sama_pif_nexus",
+            target_id="petro_yuan_bilateral_settlement_bridge",
+            relation="petro_yuan_crude_invoicing",
+            weight=w_py_invoice,
+            rel_embedding=self.relation_embeddings["petro_yuan_crude_invoicing"],
+            metadata={"petro_yuan_crude_usd": 65.0e9, "tier_step": "3->1"},
+        )
+
+        w_cnh_settle = self.compute_edge_weight(
+            base_weight=0.85,
+            flow_volume_eur=65.0e9,
+            risk_friction=0.15,
+            is_domestic_retention=False,
+        )
+        self.substrate.add_relation(
+            source_id="petro_yuan_bilateral_settlement_bridge",
+            target_id="offshore_cnh_hong_kong_hub",
+            relation="cnh_cross_border_liquidity_settlement",
+            weight=w_cnh_settle,
+            rel_embedding=self.relation_embeddings["cnh_cross_border_liquidity_settlement"],
+            metadata={"cnh_clearing_usd": 65.0e9, "tier_step": "1->2"},
+        )
+
+        w_cnh_repatriate = self.compute_edge_weight(
+            base_weight=0.85,
+            flow_volume_eur=250.0e9,
+            risk_friction=0.10,
+            is_domestic_retention=False,
+        )
+        self.substrate.add_relation(
+            source_id="offshore_cnh_hong_kong_hub",
+            target_id="chinese_state_banks_fx_desk",
+            relation="onshore_offshore_cnh_repatriation",
+            weight=w_cnh_repatriate,
+            rel_embedding=self.relation_embeddings["onshore_offshore_cnh_repatriation"],
+            metadata={"cnh_turnover_usd": 250.0e9, "tier_step": "2->1"},
+        )
+
+        w_pboc_accum = self.compute_edge_weight(
+            base_weight=0.80,
+            flow_volume_eur=859.4e9,
+            risk_friction=0.10,
+            is_domestic_retention=True,
+        )
+        self.substrate.add_relation(
+            source_id="chinese_state_banks_fx_desk",
+            target_id="pboc_safe_foreign_reserves",
+            relation="sovereign_fx_reserve_accumulation",
+            weight=w_pboc_accum,
+            rel_embedding=self.relation_embeddings["sovereign_fx_reserve_accumulation"],
+            metadata={"pboc_reserves_usd": 3240.0e9, "tier_step": "1->0"},
+        )
+
+        self.substrate.add_relation(
+            source_id="petro_yuan_bilateral_settlement_bridge",
+            target_id="chinese_state_banks_fx_desk",
+            relation="direct_petro_yuan_clearing",
+            weight=w_cnh_settle * 1.05,
+            rel_embedding=self.relation_embeddings["direct_petro_yuan_clearing"],
+            metadata={"direct_clearing": True, "tier_step": "1->1"},
+        )
+
+        # B) Shadow Energy Refining Loop:
+        w_shadow_export = self.compute_edge_weight(
+            base_weight=1.15,
+            flow_volume_eur=140.0e9,
+            risk_friction=0.40,
+            is_domestic_retention=False,
+        )
+        self.substrate.add_relation(
+            source_id="bank_of_russia_cbr_vault",
+            target_id="shadow_tanker_energy_arbitrage",
+            relation="shadow_tanker_crude_export",
+            weight=w_shadow_export,
+            rel_embedding=self.relation_embeddings["shadow_tanker_crude_export"],
+            metadata={"urals_crude_usd": 140.0e9, "tier_step": "0->1"},
+        )
+
+        w_refining_intake = self.compute_edge_weight(
+            base_weight=0.90,
+            flow_volume_eur=55.0e9,
+            risk_friction=0.20,
+            is_domestic_retention=False,
+        )
+        self.substrate.add_relation(
+            source_id="shadow_tanker_energy_arbitrage",
+            target_id="reserve_bank_of_india_refining_hub",
+            relation="discounted_crude_refining_intake",
+            weight=w_refining_intake,
+            rel_embedding=self.relation_embeddings["discounted_crude_refining_intake"],
+            metadata={"refining_margin_usd": 55.0e9, "tier_step": "1->1"},
+        )
+
+        w_diesel_reexport = self.compute_edge_weight(
+            base_weight=0.95,
+            flow_volume_eur=55.0e9,
+            risk_friction=0.25,
+            is_domestic_retention=False,
+        )
+        self.substrate.add_relation(
+            source_id="reserve_bank_of_india_refining_hub",
+            target_id="french_economy_importers",
+            relation="refined_diesel_european_reexport",
+            weight=w_diesel_reexport,
+            rel_embedding=self.relation_embeddings["refined_diesel_european_reexport"],
+            metadata={"refined_fuel_usd": 55.0e9, "tier_step": "1->3"},
+        )
+
+        self.substrate.add_relation(
+            source_id="reserve_bank_of_india_refining_hub",
+            target_id="foreign_export_economies",
+            relation="global_product_fuel_distribution",
+            weight=w_diesel_reexport * 1.05,
+            rel_embedding=self.relation_embeddings["global_product_fuel_distribution"],
+            metadata={"fuel_distribution": True, "tier_step": "1->3"},
+        )
+
+        # C) Pacific Hardware & Commodity Loop:
+        w_aus_settle = self.compute_edge_weight(
+            base_weight=0.90,
+            flow_volume_eur=180.0e9,
+            risk_friction=0.15,
+            is_domestic_retention=False,
+        )
+        self.substrate.add_relation(
+            source_id="reserve_bank_of_australia_commodity_faucet",
+            target_id="chinese_state_banks_fx_desk",
+            relation="australian_iron_ore_lng_settlement",
+            weight=w_aus_settle,
+            rel_embedding=self.relation_embeddings["australian_iron_ore_lng_settlement"],
+            metadata={"australia_commodity_usd": 180.0e9, "tier_step": "0->1"},
+        )
+
+        w_brazil_settle = self.compute_edge_weight(
+            base_weight=0.90,
+            flow_volume_eur=110.0e9,
+            risk_friction=0.15,
+            is_domestic_retention=False,
+        )
+        self.substrate.add_relation(
+            source_id="brazil_banco_central_agri_faucet",
+            target_id="chinese_state_banks_fx_desk",
+            relation="brazilian_agri_resource_settlement",
+            weight=w_brazil_settle,
+            rel_embedding=self.relation_embeddings["brazilian_agri_resource_settlement"],
+            metadata={"brazil_agri_usd": 110.0e9, "tier_step": "0->1"},
+        )
+
+        w_cross_strait = self.compute_edge_weight(
+            base_weight=0.95,
+            flow_volume_eur=120.0e9,
+            risk_friction=0.20,
+            is_domestic_retention=False,
+        )
+        self.substrate.add_relation(
+            source_id="chinese_state_banks_fx_desk",
+            target_id="taiwan_central_bank_tsmc_semiconductor_sink",
+            relation="cross_strait_electronics_demand",
+            weight=w_cross_strait,
+            rel_embedding=self.relation_embeddings["cross_strait_electronics_demand"],
+            metadata={"cross_strait_trade_usd": 120.0e9, "tier_step": "1->3"},
+        )
+
+        w_tsmc_hardware = self.compute_edge_weight(
+            base_weight=0.90,
+            flow_volume_eur=120.0e9,
+            risk_friction=0.15,
+            is_domestic_retention=False,
+        )
+        self.substrate.add_relation(
+            source_id="taiwan_central_bank_tsmc_semiconductor_sink",
+            target_id="apple_bigtech_treasury_vault",
+            relation="advanced_semiconductor_hardware_shipment",
+            weight=w_tsmc_hardware,
+            rel_embedding=self.relation_embeddings["advanced_semiconductor_hardware_shipment"],
+            metadata={"semiconductor_hardware_usd": 120.0e9, "tier_step": "3->3"},
+        )
+
+        # D) African Critical Minerals & Debt Servicing:
+        w_africa_debt = self.compute_edge_weight(
+            base_weight=1.05,
+            flow_volume_eur=45.0e9,
+            risk_friction=0.30,
+            is_domestic_retention=False,
+        )
+        self.substrate.add_relation(
+            source_id="africa_critical_minerals_debt_conduit",
+            target_id="chinese_state_banks_fx_desk",
+            relation="resource_concession_debt_servicing",
+            weight=w_africa_debt,
+            rel_embedding=self.relation_embeddings["resource_concession_debt_servicing"],
+            metadata={"mineral_debt_service_usd": 45.0e9, "tier_step": "1->1"},
+        )
+
+        self.substrate.add_relation(
+            source_id="pboc_safe_foreign_reserves",
+            target_id="africa_critical_minerals_debt_conduit",
+            relation="belt_and_road_infrastructure_lending",
+            weight=w_africa_debt * 0.95,
+            rel_embedding=self.relation_embeddings["belt_and_road_infrastructure_lending"],
+            metadata={"belt_and_road_lending_usd": 45.0e9, "tier_step": "0->1"},
+        )
+
+        # E) UAE Sovereign Wealth & Immobilized Russian Claim:
+        w_uae_placement = self.compute_edge_weight(
+            base_weight=1.10,
+            flow_volume_eur=50.0e9,
+            risk_friction=spread_friction * 1.1,
+            is_domestic_retention=False,
+        )
+        self.substrate.add_relation(
+            source_id="uae_adia_mubadala_basin",
+            target_id="svt_dealers_bnp_socgen",
+            relation="gulf_sovereign_euro_debt_placement",
+            weight=w_uae_placement,
+            rel_embedding=self.relation_embeddings["gulf_sovereign_euro_debt_placement"],
+            metadata={"uae_placement_usd": 50.0e9, "tier_step": "3->1"},
+        )
+
+        self.substrate.add_relation(
+            source_id="saudi_sama_pif_nexus",
+            target_id="svt_dealers_bnp_socgen",
+            relation="saudi_capital_diversification_oat",
+            weight=w_uae_placement * 1.05,
+            rel_embedding=self.relation_embeddings["saudi_capital_diversification_oat"],
+            metadata={"saudi_diversification_usd": 40.0e9, "tier_step": "3->1"},
+        )
+
+        w_frozen = self.compute_edge_weight(
+            base_weight=2.50,
+            flow_volume_eur=300.0e9,
+            risk_friction=3.5,
+            is_domestic_retention=False,
+        )
+        self.substrate.add_relation(
+            source_id="bank_of_russia_cbr_vault",
+            target_id="eurosystem_target2_pool",
+            relation="immobilized_euroclear_reserve_claim",
+            weight=w_frozen,
+            rel_embedding=self.relation_embeddings["immobilized_euroclear_reserve_claim"],
+            metadata={"frozen_reserves_usd": 300.0e9, "tier_step": "0->2"},
+        )
+
     def initialize_landmarks(self) -> None:
         """Builds coarse landmark clusters strictly aligned with the 4 monetary tiers."""
         lm = self.engine.landmark_graph
@@ -1141,9 +1562,13 @@ class ManifoldPGMBridge:
         res_carry = self.materialize_liquidity_path("japan_mof_boj_carry_faucet", "us_treasury_tga")
         res_buyback = self.materialize_liquidity_path(src, "corporate_share_buyback_burn_chamber")
         res_petro = self.materialize_liquidity_path(src, "gulf_petrodollar_sovereign_wealth_basin")
+        # Planetary Corridors
+        res_petroyuan = self.materialize_liquidity_path("saudi_sama_pif_nexus", "pboc_safe_foreign_reserves")
+        res_shadow_energy = self.materialize_liquidity_path("bank_of_russia_cbr_vault", "french_economy_importers")
+        res_pacific_loop = self.materialize_liquidity_path("reserve_bank_of_australia_commodity_faucet", "corporate_share_buyback_burn_chamber")
 
         all_bridge_entities = set()
-        for res in [res_t2, res_bund, res_trade, res_mmf, res_cayman, res_burn, res_carry, res_buyback, res_petro]:
+        for res in [res_t2, res_bund, res_trade, res_mmf, res_cayman, res_burn, res_carry, res_buyback, res_petro, res_petroyuan, res_shadow_energy, res_pacific_loop]:
             if res.success and len(res.path_nodes) > 2:
                 # Bridge entities are intermediate nodes excluding src and tgt
                 all_bridge_entities.update(res.path_nodes[1:-1])
@@ -1161,6 +1586,9 @@ class ManifoldPGMBridge:
             "transpacific_carry_reachability": res_carry.success,
             "corporate_buyback_reachability": res_buyback.success,
             "petrodollar_reachability": res_petro.success,
+            "petro_yuan_sino_gulf_reachability": res_petroyuan.success,
+            "shadow_energy_refining_reachability": res_shadow_energy.success,
+            "pacific_hardware_commodity_reachability": res_pacific_loop.success,
             "bridge_entities_shielded": len(all_bridge_entities) > 0,
             "l1_memory_contained": telemetry["active_l1_nodes"] <= self.max_nodes_k,
         }
@@ -1238,6 +1666,30 @@ class ManifoldPGMBridge:
                     "total_cost": res_petro.total_cost,
                     "iterations": res_petro.iterations,
                     "expanded_nodes": res_petro.expanded_nodes,
+                },
+                "petro_yuan_sino_gulf": {
+                    "success": res_petroyuan.success,
+                    "nodes": res_petroyuan.path_nodes,
+                    "edges": [e.relation for e in res_petroyuan.path_edges],
+                    "total_cost": res_petroyuan.total_cost,
+                    "iterations": res_petroyuan.iterations,
+                    "expanded_nodes": res_petroyuan.expanded_nodes,
+                },
+                "shadow_energy_refining_loop": {
+                    "success": res_shadow_energy.success,
+                    "nodes": res_shadow_energy.path_nodes,
+                    "edges": [e.relation for e in res_shadow_energy.path_edges],
+                    "total_cost": res_shadow_energy.total_cost,
+                    "iterations": res_shadow_energy.iterations,
+                    "expanded_nodes": res_shadow_energy.expanded_nodes,
+                },
+                "pacific_hardware_commodity_loop": {
+                    "success": res_pacific_loop.success,
+                    "nodes": res_pacific_loop.path_nodes,
+                    "edges": [e.relation for e in res_pacific_loop.path_edges],
+                    "total_cost": res_pacific_loop.total_cost,
+                    "iterations": res_pacific_loop.iterations,
+                    "expanded_nodes": res_pacific_loop.expanded_nodes,
                 },
             },
             "bridge_entities": sorted(list(all_bridge_entities)),
