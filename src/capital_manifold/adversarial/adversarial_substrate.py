@@ -42,6 +42,7 @@ class EntityCategory(str, Enum):
     DECOY_REAL_ESTATE_SCPI = "decoy_real_estate_scpi"
     DECOY_CONSUMER_FINTECH = "decoy_consumer_fintech"
     DECOY_OFFSHORE_SPV = "decoy_offshore_spv"
+    DARK_FOREST_TRANSATLANTIC = "dark_forest_transatlantic"
 
 
 @dataclass
@@ -142,6 +143,12 @@ class AdversarialSubstrateBuilder:
             "fiscal_stimulus_import_demand",
             "trade_deficit_drain",
             "trade_surplus_repatriation",
+            # Dark Forest Ring 1: Transatlantic Dollar Conduit
+            "synthetic_usd_fx_swap",
+            "repo_dollar_financing",
+            "mmf_cash_repo_lending",
+            "repo_liquidity_absorption",
+            "tga_reserve_absorption_drain",
             # Decoy edge types
             "retail_deposit_aggregation",
             "utility_corporate_financing",
@@ -361,6 +368,36 @@ class AdversarialSubstrateBuilder:
                 regulatory_tier_rank=0.10,
             ))
 
+        # 8. Dark Forest Ring 1: Transatlantic Dollar Conduit & Repo Nexus (4 nodes)
+        self._register("offshore_fx_swap_desk", EntityCategory.DARK_FOREST_TRANSATLANTIC, BalanceSheetMetrics(
+            log_total_assets=0.90, leverage_ratio=0.04, cash_reserves_ratio=0.06, svt_dealer_mandate=0.0,
+            target2_direct_participant=1.0, wholesale_repo_volume=0.95, cross_border_liability_ratio=0.95,
+            duration_sensitivity=0.80, state_ownership_pct=0.00, npl_ratio=0.015, deposit_funded_ratio=0.10,
+            interbank_lending_ratio=0.35, trade_finance_exposure=0.30, sovereign_holding_ratio=0.20,
+            central_bank_refi_access=1.0, regulatory_tier_rank=0.90,
+        ))
+        self._register("us_triparty_repo_pool", EntityCategory.DARK_FOREST_TRANSATLANTIC, BalanceSheetMetrics(
+            log_total_assets=0.99, leverage_ratio=0.02, cash_reserves_ratio=0.20, svt_dealer_mandate=0.0,
+            target2_direct_participant=0.0, wholesale_repo_volume=1.00, cross_border_liability_ratio=0.70,
+            duration_sensitivity=0.20, state_ownership_pct=0.00, npl_ratio=0.005, deposit_funded_ratio=0.00,
+            interbank_lending_ratio=0.50, trade_finance_exposure=0.20, sovereign_holding_ratio=0.10,
+            central_bank_refi_access=0.0, regulatory_tier_rank=1.0,
+        ))
+        self._register("us_prime_mmf_basin", EntityCategory.DARK_FOREST_TRANSATLANTIC, BalanceSheetMetrics(
+            log_total_assets=0.97, leverage_ratio=0.95, cash_reserves_ratio=0.30, svt_dealer_mandate=0.0,
+            target2_direct_participant=0.0, wholesale_repo_volume=0.90, cross_border_liability_ratio=0.40,
+            duration_sensitivity=0.10, state_ownership_pct=0.00, npl_ratio=0.005, deposit_funded_ratio=0.00,
+            interbank_lending_ratio=0.00, trade_finance_exposure=0.05, sovereign_holding_ratio=0.15,
+            central_bank_refi_access=0.0, regulatory_tier_rank=0.80,
+        ))
+        self._register("us_treasury_tga", EntityCategory.DARK_FOREST_TRANSATLANTIC, BalanceSheetMetrics(
+            log_total_assets=0.92, leverage_ratio=0.05, cash_reserves_ratio=0.90, svt_dealer_mandate=0.0,
+            target2_direct_participant=0.0, wholesale_repo_volume=0.00, cross_border_liability_ratio=0.20,
+            duration_sensitivity=0.50, state_ownership_pct=1.00, npl_ratio=0.005, deposit_funded_ratio=0.00,
+            interbank_lending_ratio=0.00, trade_finance_exposure=0.00, sovereign_holding_ratio=0.00,
+            central_bank_refi_access=0.0, regulatory_tier_rank=1.0,
+        ))
+
     def build_adversarial_substrate(self) -> Tuple[L3LatentSubstrate, Dict[str, BalanceSheetMetrics]]:
         """Constructs L3 substrate with 80+ entities and dynamically synthesized institutional edges."""
         self._define_entities()
@@ -481,7 +518,50 @@ class AdversarialSubstrateBuilder:
             rel_embedding=self.relation_embeddings["secondary_market_distribution"],
         )
 
-        # E) Deceptive Local Commercial Edges for Decoy Nodes
+        # E) Dark Forest Ring 1: Transatlantic Dollar Conduit & Repo Nexus
+        for svt_id in aft_dealers:
+            sub.add_relation(
+                source_id=svt_id,
+                target_id="offshore_fx_swap_desk",
+                relation="synthetic_usd_fx_swap",
+                weight=1.10,
+                rel_embedding=self.relation_embeddings["synthetic_usd_fx_swap"],
+                metadata={"transatlantic_conduit": True},
+            )
+
+        sub.add_relation(
+            source_id="offshore_fx_swap_desk",
+            target_id="us_triparty_repo_pool",
+            relation="repo_dollar_financing",
+            weight=1.05,
+            rel_embedding=self.relation_embeddings["repo_dollar_financing"],
+            metadata={"sofr_turnover_usd": 3007e9},
+        )
+        sub.add_relation(
+            source_id="us_triparty_repo_pool",
+            target_id="us_prime_mmf_basin",
+            relation="repo_liquidity_absorption",
+            weight=0.95,
+            rel_embedding=self.relation_embeddings["repo_liquidity_absorption"],
+            metadata={"prime_mmf_basin": True},
+        )
+        sub.add_relation(
+            source_id="us_prime_mmf_basin",
+            target_id="us_triparty_repo_pool",
+            relation="mmf_cash_repo_lending",
+            weight=0.95,
+            rel_embedding=self.relation_embeddings["mmf_cash_repo_lending"],
+        )
+        sub.add_relation(
+            source_id="us_treasury_tga",
+            target_id="us_triparty_repo_pool",
+            relation="tga_reserve_absorption_drain",
+            weight=1.35,
+            rel_embedding=self.relation_embeddings["tga_reserve_absorption_drain"],
+            metadata={"tga_closing_usd": 883.335e9, "net_drain_usd": 12.154e9},
+        )
+
+        # F) Deceptive Local Commercial Edges for Decoy Nodes
         # Regional banks connect to consumer fintechs (retail deposit aggregation)
         reg_banks = [eid for eid, cat in self.entity_categories.items() if cat == EntityCategory.DECOY_REGIONAL_SAVINGS]
         fintech_list = [eid for eid, cat in self.entity_categories.items() if cat == EntityCategory.DECOY_CONSUMER_FINTECH]

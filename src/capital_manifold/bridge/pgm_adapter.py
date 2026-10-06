@@ -105,6 +105,35 @@ FINANCIAL_ENTITIES: Dict[str, Dict[str, Any]] = {
         "jurisdiction": "WORLD",
         "description": "Domestic and global institutional bondholders holding French sovereign debt stock.",
     },
+    # Dark Forest Ring 1: Transatlantic Dollar Conduit & Repo Nexus
+    "offshore_fx_swap_desk": {
+        "tier": MonetaryTier.TRANSMISSION,
+        "name": "European G-SIB Offshore Synthetic USD FX Swap Desk (London/NY)",
+        "sector": "synthetic_dollar_desk",
+        "jurisdiction": "GLOBAL_OFFSHORE",
+        "description": "Offshore cross-currency synthetic dollar funding desk executing EUR/USD basis swaps.",
+    },
+    "us_triparty_repo_pool": {
+        "tier": MonetaryTier.TRAVERSAL,
+        "name": "US Triparty Repo SOFR Clearing Basin (DTCC / BNY Mellon)",
+        "sector": "us_repo_clearing",
+        "jurisdiction": "US",
+        "description": "Overnight secured dollar financing pool settling $3.007T/day under SOFR benchmark.",
+    },
+    "us_prime_mmf_basin": {
+        "tier": MonetaryTier.SINK,
+        "name": "US Prime Money Market Funds & Institutional Cash Basin",
+        "sector": "us_dollar_cash_pool",
+        "jurisdiction": "US",
+        "description": "Short-term US dollar institutional cash surplus pool investing in triparty repo and paper.",
+    },
+    "us_treasury_tga": {
+        "tier": MonetaryTier.SINK,
+        "name": "US Treasury General Account (Federal Reserve Cash Vault)",
+        "sector": "us_sovereign_cash_vault",
+        "jurisdiction": "US",
+        "description": "Operating cash balance of the US Treasury ($883.3B) absorbing banking reserves.",
+    },
 }
 
 
@@ -240,6 +269,12 @@ class ManifoldPGMBridge:
             "trade_deficit_drain",
             "trade_surplus_repatriation",
             "global_trade_settlement",
+            # Dark Forest Ring 1: Transatlantic Dollar Conduit
+            "synthetic_usd_fx_swap",
+            "repo_dollar_financing",
+            "mmf_cash_repo_lending",
+            "repo_liquidity_absorption",
+            "tga_reserve_absorption_drain",
         ]
         for idx, r_name in enumerate(relation_types):
             vec = np.zeros(self.rel_dim, dtype=np.float32)
@@ -281,6 +316,11 @@ class ManifoldPGMBridge:
             "safe_haven_anchor": 60,
             "foreign_trade_sink": 62,
             "debt_investor_sink": 63,
+            # Dark Forest Ring 1 sectors
+            "synthetic_dollar_desk": 42,
+            "us_repo_clearing": 50,
+            "us_dollar_cash_pool": 58,
+            "us_sovereign_cash_vault": 61,
         }
 
         for eid, meta in FINANCIAL_ENTITIES.items():
@@ -303,6 +343,10 @@ class ManifoldPGMBridge:
                 vec[34] += 0.8
             if "GLOBAL" in meta["jurisdiction"] or "WORLD" in meta["jurisdiction"]:
                 vec[35] += 0.8
+            if "US" in meta["jurisdiction"]:
+                vec[35] += 1.2
+            if "OFFSHORE" in meta["jurisdiction"]:
+                vec[34] += 0.9
 
             # 3. Balance Sheet Modality Subspace (64..95)
             if tier == MonetaryTier.GENESIS:
@@ -336,6 +380,14 @@ class ManifoldPGMBridge:
                 vec[120:128] = np.array([trade_norm, 0.3, 1.1, 0.9, trade_norm * 0.8, 0.7, 0.6, 0.5], dtype=np.float32)
             elif eid == "sovereign_debt_holders":
                 vec[120:128] = np.array([debt_norm * 0.5, spread_norm * 0.5, 0.8, 0.7, 0.6, 0.5, 0.4, 0.3], dtype=np.float32)
+            elif eid == "offshore_fx_swap_desk":
+                vec[104:112] = np.array([spread_norm * 1.4, pressure_norm * 0.9, 1.2, 0.8, t2_norm * 0.7, 0.5, 0.4, 0.3], dtype=np.float32)
+            elif eid == "us_triparty_repo_pool":
+                vec[112:120] = np.array([0.4, 0.8, 1.6, 1.5, 0.2, 1.1, 0.9, 0.7], dtype=np.float32)
+            elif eid == "us_prime_mmf_basin":
+                vec[120:128] = np.array([0.2, 0.5, 1.4, 1.3, 0.1, 0.9, 1.2, 0.8], dtype=np.float32)
+            elif eid == "us_treasury_tga":
+                vec[120:128] = np.array([0.8, 0.9, 1.1, 1.6, 0.4, 0.7, 1.5, 1.2], dtype=np.float32)
 
             # Strict L2 normalization to unit sphere
             norm = np.linalg.norm(vec)
@@ -580,6 +632,80 @@ class ManifoldPGMBridge:
             },
         )
 
+        # Corridor 5: Transatlantic US Dollar Conduit & Shadow Banking Nexus
+        # A) SVT Primary Dealers -> Offshore FX Swap Desk (synthetic USD funding)
+        # Scaled by OAT haircut friction (spread friction)
+        w_fx_swap = self.compute_edge_weight(
+            base_weight=1.10,
+            flow_volume_eur=t2_eur * 0.4,
+            risk_friction=spread_friction * 1.5,
+            is_domestic_retention=False,
+        )
+        self.substrate.add_relation(
+            source_id="svt_dealers_bnp_socgen",
+            target_id="offshore_fx_swap_desk",
+            relation="synthetic_usd_fx_swap",
+            weight=w_fx_swap,
+            rel_embedding=self.relation_embeddings["synthetic_usd_fx_swap"],
+            metadata={"haircut_bps": stress.oat_bund_spread_bp * 0.5, "tier_step": "1->1"},
+        )
+
+        # B) Offshore FX Swap Desk -> US Triparty Repo Pool ($3.007T SOFR turnover)
+        w_repo_financing = self.compute_edge_weight(
+            base_weight=1.05,
+            flow_volume_eur=3007e9,
+            risk_friction=spread_friction,
+            is_domestic_retention=False,
+        )
+        self.substrate.add_relation(
+            source_id="offshore_fx_swap_desk",
+            target_id="us_triparty_repo_pool",
+            relation="repo_dollar_financing",
+            weight=w_repo_financing,
+            rel_embedding=self.relation_embeddings["repo_dollar_financing"],
+            metadata={"sofr_rate": 3.89, "daily_volume_usd": 3007e9, "tier_step": "1->2"},
+        )
+
+        # C) US Triparty Repo Pool -> US Prime MMF Basin (Collateral allocation / cash absorption)
+        w_mmf_drain = self.compute_edge_weight(
+            base_weight=0.95,
+            flow_volume_eur=2500e9,
+            risk_friction=spread_friction * 0.5,
+            is_domestic_retention=False,
+        )
+        self.substrate.add_relation(
+            source_id="us_triparty_repo_pool",
+            target_id="us_prime_mmf_basin",
+            relation="repo_liquidity_absorption",
+            weight=w_mmf_drain,
+            rel_embedding=self.relation_embeddings["repo_liquidity_absorption"],
+            metadata={"instrument": "prime_mmf_cash_pool", "tier_step": "2->3"},
+        )
+        self.substrate.add_relation(
+            source_id="us_prime_mmf_basin",
+            target_id="us_triparty_repo_pool",
+            relation="mmf_cash_repo_lending",
+            weight=w_mmf_drain,
+            rel_embedding=self.relation_embeddings["mmf_cash_repo_lending"],
+            metadata={"instrument": "mmf_overnight_repo_cash", "tier_step": "3->2"},
+        )
+
+        # D) US Treasury TGA -> US Triparty Repo Pool (Reserve drain friction)
+        w_tga_drain = self.compute_edge_weight(
+            base_weight=1.35,
+            flow_volume_eur=12.154e9,
+            risk_friction=spread_friction * 1.8,
+            is_domestic_retention=True,
+        )
+        self.substrate.add_relation(
+            source_id="us_treasury_tga",
+            target_id="us_triparty_repo_pool",
+            relation="tga_reserve_absorption_drain",
+            weight=w_tga_drain,
+            rel_embedding=self.relation_embeddings["tga_reserve_absorption_drain"],
+            metadata={"tga_closing_usd": 883.335e9, "net_drain_usd": 12.154e9, "tier_step": "3->2"},
+        )
+
     def initialize_landmarks(self) -> None:
         """Builds coarse landmark clusters across the 4 monetary tiers."""
         self.engine.initialize_landmarks()
@@ -608,11 +734,11 @@ class ManifoldPGMBridge:
         return result
 
     def execute_macro_traversal(self) -> Dict[str, Any]:
-        """Executes full macroeconomic traversal from French sovereign debt to Eurosystem sinks.
+        """Executes full macroeconomic traversal from French sovereign debt to Eurosystem and US sinks.
 
         Returns:
             Dictionary containing:
-            - paths: Traversal results to TARGET2, German Bund anchor, and Foreign Trade Sinks
+            - paths: Traversal results to TARGET2, German Bund anchor, Foreign Trade Sinks, and US MMF Basin
             - bridge_entities: Intermediate clearing dealers and settlement hubs
             - buffer_stats: L1/L2 memory telemetry
             - macro_stress: Stress metrics underlying the network state
@@ -622,13 +748,15 @@ class ManifoldPGMBridge:
         tgt_t2 = "eurosystem_target2_pool"
         tgt_bund = "bund_risk_free_anchor"
         tgt_trade = "foreign_export_economies"
+        tgt_mmf = "us_prime_mmf_basin"
 
         res_t2 = self.materialize_liquidity_path(src, tgt_t2)
         res_bund = self.materialize_liquidity_path(src, tgt_bund)
         res_trade = self.materialize_liquidity_path(src, tgt_trade)
+        res_mmf = self.materialize_liquidity_path(src, tgt_mmf)
 
         all_bridge_entities = set()
-        for res in [res_t2, res_bund, res_trade]:
+        for res in [res_t2, res_bund, res_trade, res_mmf]:
             if res.success and len(res.path_nodes) > 2:
                 # Bridge entities are intermediate nodes excluding src and tgt
                 all_bridge_entities.update(res.path_nodes[1:-1])
@@ -640,6 +768,7 @@ class ManifoldPGMBridge:
             "target2_reachability": res_t2.success,
             "bund_anchor_reachability": res_bund.success,
             "trade_sink_reachability": res_trade.success,
+            "transatlantic_mmf_reachability": res_mmf.success,
             "bridge_entities_shielded": len(all_bridge_entities) > 0,
             "l1_memory_contained": telemetry["active_l1_nodes"] <= self.max_nodes_k,
         }
@@ -669,6 +798,14 @@ class ManifoldPGMBridge:
                     "total_cost": res_trade.total_cost,
                     "iterations": res_trade.iterations,
                     "expanded_nodes": res_trade.expanded_nodes,
+                },
+                "transatlantic_dollar_conduit": {
+                    "success": res_mmf.success,
+                    "nodes": res_mmf.path_nodes,
+                    "edges": [e.relation for e in res_mmf.path_edges],
+                    "total_cost": res_mmf.total_cost,
+                    "iterations": res_mmf.iterations,
+                    "expanded_nodes": res_mmf.expanded_nodes,
                 },
             },
             "bridge_entities": sorted(list(all_bridge_entities)),
