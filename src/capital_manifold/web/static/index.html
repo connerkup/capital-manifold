@@ -1,0 +1,983 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Capital Manifold | Planetary Liquidity & Balance-Sheet Graph Engine</title>
+  
+  <!-- CDNs: Tailwind CSS, FontAwesome, Cytoscape.js, Chart.js -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            manifold: {
+              bg: '#080c14',
+              surface: '#0d131f',
+              card: '#111927',
+              border: '#1c2738',
+              cyan: '#00f0ff',
+              emerald: '#10b981',
+              amber: '#f59e0b',
+              purple: '#a855f7',
+              crimson: '#ef4444'
+            }
+          },
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace']
+          }
+        }
+      }
+    }
+  </script>
+  
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/cytoscape/3.28.1/cytoscape.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body class="bg-manifold-bg text-slate-100 min-h-screen flex flex-col font-sans selection:bg-cyan-500 selection:text-black">
+
+  <!-- =========================================================================
+       TOP INSTITUTIONAL HEADER & TELEMETRY STRIP
+       ========================================================================= -->
+  <header class="bg-manifold-surface border-b border-manifold-border px-6 py-3.5 sticky top-0 z-40 backdrop-blur-md bg-opacity-95">
+    <div class="max-w-[1720px] mx-auto flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+      
+      <!-- Brand & Title -->
+      <div class="flex items-center gap-3.5">
+        <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-cyan-500/20 via-blue-600/30 to-purple-600/20 border border-cyan-500/40 flex items-center justify-center text-cyan-400 shadow-[0_0_15px_rgba(0,240,255,0.2)]">
+          <i class="fa-solid fa-network-wired text-lg"></i>
+        </div>
+        <div>
+          <div class="flex items-center gap-2.5">
+            <h1 class="text-lg font-bold tracking-tight text-white flex items-center gap-2">
+              CAPITAL MANIFOLD
+              <span class="text-[10px] font-mono font-semibold px-2 py-0.5 rounded bg-cyan-950/80 text-cyan-400 border border-cyan-800/60 uppercase tracking-widest">PROD v0.1.0</span>
+            </h1>
+            <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs font-mono bg-emerald-950/60 text-emerald-400 border border-emerald-800/60">
+              <span class="live-dot"></span> LIVE
+            </span>
+          </div>
+          <p class="text-xs text-slate-400">Planetary Monetary Manifold & Adversarial Balance-Sheet Engine</p>
+        </div>
+      </div>
+
+      <!-- Quick KPI Strip -->
+      <div class="flex flex-wrap items-center gap-2.5 sm:gap-3 text-xs font-mono">
+        <div class="bg-manifold-card px-3 py-1.5 rounded border border-manifold-border flex items-center gap-2">
+          <span class="text-slate-400">INTEGRITY:</span>
+          <span id="header-score" class="text-emerald-400 font-bold">90.8 / 100</span>
+          <span class="text-[10px] px-1 rounded bg-emerald-950 text-emerald-400 border border-emerald-800">SUPERIOR</span>
+        </div>
+        
+        <div class="bg-manifold-card px-3 py-1.5 rounded border border-manifold-border flex items-center gap-2">
+          <span class="text-slate-400">LEAKAGE:</span>
+          <span id="header-leak" class="text-cyan-400 font-bold">$0.00</span>
+          <span class="text-[10px] text-slate-500">(100% CONSERVED)</span>
+        </div>
+
+        <div class="bg-manifold-card px-3 py-1.5 rounded border border-manifold-border flex items-center gap-2">
+          <span class="text-slate-400">NODES:</span>
+          <span id="header-nodes" class="text-purple-400 font-bold">140</span>
+          <span class="text-slate-500">|</span>
+          <span class="text-slate-400">EDGES:</span>
+          <span id="header-edges" class="text-amber-400 font-bold">317</span>
+        </div>
+
+        <div class="bg-manifold-card px-3 py-1.5 rounded border border-manifold-border flex items-center gap-2">
+          <span class="text-slate-400">FLOWS:</span>
+          <span id="header-flows" class="text-cyan-300 font-bold">115</span>
+          <span class="text-[10px] text-slate-500">DUCKDB</span>
+        </div>
+
+        <button id="btn-quick-refresh" class="px-2.5 py-1.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition flex items-center gap-1.5 text-xs font-sans">
+          <i class="fa-solid fa-arrows-rotate text-xs"></i>
+          <span>Sync</span>
+        </button>
+      </div>
+
+    </div>
+  </header>
+
+  <!-- =========================================================================
+       NAVIGATION TABS BAR
+       ========================================================================= -->
+  <nav class="bg-manifold-surface/80 border-b border-manifold-border px-6 overflow-x-auto">
+    <div class="max-w-[1720px] mx-auto flex items-center gap-1">
+      <button class="nav-tab active" data-tab="tab-graph">
+        <i class="fa-solid fa-circle-nodes text-cyan-400"></i>
+        <span>Planetary Capital Graph</span>
+      </button>
+
+      <button class="nav-tab relative" data-tab="tab-explorer">
+        <i class="fa-solid fa-compass text-amber-400"></i>
+        <span>Flow & Pool Explorer</span>
+        <span class="ml-1 text-[9px] font-mono px-1.5 py-0.2 rounded bg-amber-500/20 text-amber-300 border border-amber-500/40">NEW</span>
+      </button>
+
+      <button class="nav-tab" data-tab="tab-scorecard">
+        <i class="fa-solid fa-shield-halved text-emerald-400"></i>
+        <span>Adversarial Audit Scorecard</span>
+      </button>
+
+      <button class="nav-tab" data-tab="tab-gauntlet">
+        <i class="fa-solid fa-bolt-lightning text-purple-400"></i>
+        <span>Systemic Shock Gauntlet</span>
+      </button>
+
+      <button class="nav-tab" data-tab="tab-private-assets">
+        <i class="fa-solid fa-layer-group text-blue-400"></i>
+        <span>Private Asset Waterfall</span>
+      </button>
+
+      <button class="nav-tab" data-tab="tab-ledger">
+        <i class="fa-solid fa-table-list text-slate-400"></i>
+        <span>DuckDB Flow Ledger</span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- =========================================================================
+       MAIN DASHBOARD CONTENT AREA
+       ========================================================================= -->
+  <main class="flex-1 max-w-[1720px] w-full mx-auto p-4 sm:p-6 space-y-6">
+
+    <!-- =======================================================================
+         TAB 1: PLANETARY CAPITAL FLOW GRAPH
+         ======================================================================= -->
+    <section id="tab-graph" class="tab-panel space-y-4">
+      
+      <!-- Graph Header Toolbar -->
+      <div class="bg-manifold-card border border-manifold-border rounded-lg p-3.5 flex flex-wrap items-center justify-between gap-3 shadow-md">
+        
+        <!-- Left: Tier Filter Pills -->
+        <div class="flex items-center gap-2">
+          <span class="text-xs text-slate-400 font-mono uppercase tracking-wider mr-1">Tiers:</span>
+          <button class="tier-filter-btn px-2.5 py-1 rounded text-xs font-mono bg-cyan-950 text-cyan-400 border border-cyan-800 hover:bg-cyan-900 active-tier" data-tier="all">All (140)</button>
+          <button class="tier-filter-btn px-2.5 py-1 rounded text-xs font-mono bg-slate-800 text-slate-300 border border-slate-700 hover:bg-slate-700" data-tier="0">Tier 0 Genesis (9)</button>
+          <button class="tier-filter-btn px-2.5 py-1 rounded text-xs font-mono bg-slate-800 text-slate-300 border border-slate-700 hover:bg-slate-700" data-tier="1">Tier 1 Dealers (33)</button>
+          <button class="tier-filter-btn px-2.5 py-1 rounded text-xs font-mono bg-slate-800 text-slate-300 border border-slate-700 hover:bg-slate-700" data-tier="2">Tier 2 Traversal (75)</button>
+          <button class="tier-filter-btn px-2.5 py-1 rounded text-xs font-mono bg-slate-800 text-slate-300 border border-slate-700 hover:bg-slate-700" data-tier="3">Tier 3 Sinks (23)</button>
+        </div>
+
+        <!-- Center: Search node on canvas -->
+        <div class="relative w-64">
+          <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-xs text-slate-500"></i>
+          <input id="graph-search-input" type="text" placeholder="Locate entity on graph..." class="w-full bg-slate-900 border border-slate-700 rounded pl-8 pr-3 py-1 text-xs text-slate-200 focus:outline-none focus:border-cyan-400 font-mono">
+        </div>
+
+        <!-- Right: Layout Switcher & Zoom Controls -->
+        <div class="flex items-center gap-2">
+          <div class="flex items-center bg-slate-900 border border-slate-700 rounded p-0.5 text-xs">
+            <button id="layout-hierarchical" class="px-2 py-1 rounded bg-slate-800 text-cyan-400 font-mono hover:bg-slate-700">Tiers Layout</button>
+            <button id="layout-breadthfirst" class="px-2 py-1 rounded text-slate-400 font-mono hover:bg-slate-800">Breadth</button>
+            <button id="layout-concentric" class="px-2 py-1 rounded text-slate-400 font-mono hover:bg-slate-800">Concentric</button>
+            <button id="layout-cose" class="px-2 py-1 rounded text-slate-400 font-mono hover:bg-slate-800">Force CoSE</button>
+          </div>
+
+          <div class="flex items-center gap-1">
+            <button id="btn-zoom-in" class="p-1.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700" title="Zoom In">
+              <i class="fa-solid fa-plus text-xs"></i>
+            </button>
+            <button id="btn-zoom-out" class="p-1.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700" title="Zoom Out">
+              <i class="fa-solid fa-minus text-xs"></i>
+            </button>
+            <button id="btn-fit-graph" class="p-1.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700" title="Fit to Viewport">
+              <i class="fa-solid fa-expand text-xs"></i>
+            </button>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Graph Canvas Container with Tier Columns Overlay -->
+      <div class="relative bg-manifold-card border border-manifold-border rounded-lg overflow-hidden shadow-2xl">
+        
+        <!-- Tier Column Indicator Overlays -->
+        <div class="absolute top-2 left-4 right-4 z-10 grid grid-cols-4 gap-4 pointer-events-none opacity-85">
+          <div class="tier-badge-0 px-3 py-1.5 rounded text-xs font-mono flex items-center justify-between">
+            <span class="font-bold">TIER 0: GENESIS</span>
+            <span class="text-[10px] opacity-75">Sovereign Issuance</span>
+          </div>
+          <div class="tier-badge-1 px-3 py-1.5 rounded text-xs font-mono flex items-center justify-between">
+            <span class="font-bold">TIER 1: TRANSMISSION</span>
+            <span class="text-[10px] opacity-75">Primary SVTs & Central Banks</span>
+          </div>
+          <div class="tier-badge-2 px-3 py-1.5 rounded text-xs font-mono flex items-center justify-between">
+            <span class="font-bold">TIER 2: TRAVERSAL</span>
+            <span class="text-[10px] opacity-75">Interbank Clearing & Trade</span>
+          </div>
+          <div class="tier-badge-3 px-3 py-1.5 rounded text-xs font-mono flex items-center justify-between">
+            <span class="font-bold">TIER 3: SINKS</span>
+            <span class="text-[10px] opacity-75">Safe-Haven Anchors & Burns</span>
+          </div>
+        </div>
+
+        <!-- Cytoscape DOM Canvas -->
+        <div id="cy-container"></div>
+
+        <!-- Canvas Legend & Shortcuts Bar -->
+        <div class="border-t border-manifold-border bg-slate-950/80 px-4 py-2 flex flex-wrap items-center justify-between text-[11px] text-slate-400 font-mono">
+          <div class="flex items-center gap-4">
+            <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-cyan-400"></span> Genesis Faucet</span>
+            <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-purple-400"></span> Primary SVT / CB</span>
+            <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-amber-400"></span> Interbank Pool</span>
+            <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-emerald-400"></span> Collateral Sink / Burn</span>
+            <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-red-400"></span> Adversarial Decoy</span>
+            <span class="flex items-center gap-1.5"><span class="w-4 h-0.5 bg-emerald-400"></span> Active Bypass Edge</span>
+          </div>
+          <div>
+            <span>Click any node to inspect balance sheet & connected corridors</span>
+          </div>
+        </div>
+
+      </div>
+
+    </section>
+
+    <!-- =======================================================================
+         TAB 2: FLOW & POOL EXPLORER (DEDICATED EXPLORER MODE)
+         ======================================================================= -->
+    <section id="tab-explorer" class="tab-panel hidden space-y-6">
+      
+      <!-- Explorer Banner -->
+      <div class="bg-gradient-to-r from-blue-950/40 via-cyan-950/30 to-slate-900 border border-cyan-800/40 rounded-lg p-5">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="px-2 py-0.5 rounded bg-cyan-900/60 text-cyan-300 font-mono text-xs border border-cyan-700/60 font-semibold">PLANETARY LIQUIDITY EXPLORER</span>
+              <span class="text-xs text-slate-400">Etherscan & Palantir style balance-sheet navigation</span>
+            </div>
+            <h2 class="text-xl font-bold text-white mt-1">Multi-Tier Capital Pools, Corridors & Circuit Navigation</h2>
+            <p class="text-sm text-slate-300 mt-0.5">Explore how trillions of sovereign debt, interbank repo, cross-border currency swaps, and private equity transit across 140 pools.</p>
+          </div>
+          <div class="flex items-center gap-3">
+            <button id="btn-scroll-path-finder" class="px-3.5 py-2 rounded bg-cyan-600 hover:bg-cyan-500 text-black font-semibold text-xs flex items-center gap-2 shadow-lg shadow-cyan-900/40">
+              <i class="fa-solid fa-route"></i> Dual-Frontier A* Path Finder
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section: Featured Institutional Circuits (One-Click Exploration) -->
+      <div class="space-y-3">
+        <div class="flex items-center justify-between">
+          <h3 class="text-sm font-semibold text-slate-200 uppercase tracking-wider font-mono flex items-center gap-2">
+            <i class="fa-solid fa-bolt text-amber-400"></i>
+            Curated Institutional Circuits (1-Click Graph Highlighting)
+          </h3>
+          <span class="text-xs text-slate-400 font-mono">7 Curated Scenarios</span>
+        </div>
+
+        <div id="featured-circuits-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3.5">
+          <!-- Populated by app.js -->
+          <div class="p-4 bg-manifold-card border border-manifold-border rounded-lg animate-pulse text-xs text-slate-400">Loading featured circuits...</div>
+        </div>
+      </div>
+
+      <!-- Section: Dual-Frontier A* Path Finder -->
+      <div id="path-finder-section" class="bg-manifold-card border border-manifold-border rounded-lg p-5 space-y-4">
+        <div class="flex items-center justify-between border-b border-manifold-border pb-3">
+          <div>
+            <h3 class="text-sm font-bold text-white font-mono flex items-center gap-2">
+              <i class="fa-solid fa-location-crosshairs text-cyan-400"></i>
+              Dual-Frontier A* Capital Path Discovery
+            </h3>
+            <p class="text-xs text-slate-400 mt-0.5">Trace the lowest-impedance clearing corridor between any two balance sheets without heuristic hallucination.</p>
+          </div>
+          <span class="text-xs font-mono text-cyan-400 bg-cyan-950 px-2 py-0.5 rounded border border-cyan-800">PGM Dual-Frontier</span>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+          <div>
+            <label class="block text-xs font-mono text-slate-400 mb-1.5">Origin Capital Pool (Source):</label>
+            <select id="path-source-select" class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-cyan-400 font-mono">
+              <option value="">Loading source pools...</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="block text-xs font-mono text-slate-400 mb-1.5">Destination Capital Pool (Target):</label>
+            <select id="path-target-select" class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-cyan-400 font-mono">
+              <option value="">Loading target pools...</option>
+            </select>
+          </div>
+
+          <div>
+            <button id="btn-run-path-discovery" class="w-full px-4 py-2.5 rounded bg-cyan-600 hover:bg-cyan-500 text-black font-semibold text-xs transition flex items-center justify-center gap-2">
+              <i class="fa-solid fa-play"></i> Trace Capital Path
+            </button>
+          </div>
+        </div>
+
+        <!-- Path Results Display Container -->
+        <div id="path-discovery-results" class="hidden pt-3 border-t border-manifold-border space-y-3">
+          <!-- Populated by app.js -->
+        </div>
+      </div>
+
+      <!-- Section: Capital Pools Browser Grid -->
+      <div class="space-y-4">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div>
+            <h3 class="text-sm font-semibold text-slate-200 uppercase tracking-wider font-mono flex items-center gap-2">
+              <i class="fa-solid fa-cubes text-purple-400"></i>
+              Capital Pool Registry (<span id="pool-count-label">140</span> Pools)
+            </h3>
+            <p class="text-xs text-slate-400">Search and filter every balance sheet, clearing pool, and monetary sink.</p>
+          </div>
+
+          <div class="flex items-center gap-3">
+            <div class="relative w-64">
+              <i class="fa-solid fa-filter absolute left-3 top-2.5 text-xs text-slate-500"></i>
+              <input id="pool-filter-input" type="text" placeholder="Filter pools by name or ID..." class="w-full bg-slate-900 border border-slate-700 rounded pl-8 pr-3 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-cyan-400 font-mono">
+            </div>
+
+            <select id="pool-tier-select" class="bg-slate-900 border border-slate-700 rounded px-3 py-1.5 text-xs text-slate-200 font-mono focus:outline-none focus:border-cyan-400">
+              <option value="">All Tiers</option>
+              <option value="0">Tier 0: Sovereign Genesis</option>
+              <option value="1">Tier 1: Transmission</option>
+              <option value="2">Tier 2: Traversal</option>
+              <option value="3">Tier 3: Sinks</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Pools Grid Cards -->
+        <div id="pools-cards-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+          <!-- Populated by app.js -->
+          <div class="p-4 bg-manifold-card border border-manifold-border rounded-lg text-xs text-slate-400">Loading pool registry...</div>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- =======================================================================
+         TAB 3: ADVERSARIAL AUDIT SCORECARD
+         ======================================================================= -->
+    <section id="tab-scorecard" class="tab-panel hidden space-y-6">
+      
+      <!-- Top Audit Score Header Banner -->
+      <div class="bg-manifold-card border border-manifold-border rounded-lg p-6 relative overflow-hidden shadow-lg">
+        <div class="absolute -right-10 -bottom-10 w-60 h-60 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none"></div>
+
+        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="px-2 py-0.5 rounded bg-emerald-950 text-emerald-400 border border-emerald-800 font-mono text-xs font-semibold">FORMAL ADVERSARIAL AUDIT</span>
+              <span class="text-xs text-slate-400 font-mono">Autonomous Stress Test</span>
+            </div>
+            <h2 class="text-2xl font-bold text-white mt-1">Multi-Dimensional Accounting & Topology Audit Scorecard</h2>
+            <p class="text-sm text-slate-300 mt-1 max-w-3xl">Comprehensive mathematical verification across Flow Conservation, Dimensional Units, Temporal Cadence, Graph Articulation Points, and Macro Dark Matter Benchmarking.</p>
+          </div>
+
+          <div class="flex items-center gap-6 bg-slate-900/90 border border-slate-800 rounded-lg p-4">
+            <div class="text-center">
+              <div class="text-3xl font-extrabold font-mono text-emerald-400" id="audit-overall-score">90.8</div>
+              <div class="text-[10px] font-mono text-slate-400 uppercase tracking-widest mt-0.5">Integrity / 100.0</div>
+            </div>
+            <div class="h-10 w-px bg-slate-800"></div>
+            <div class="text-center">
+              <div class="text-xl font-bold font-mono text-cyan-400" id="audit-leak-sum">$0.00</div>
+              <div class="text-[10px] font-mono text-slate-400 uppercase tracking-widest mt-0.5">Total Leakage</div>
+            </div>
+            <div class="h-10 w-px bg-slate-800"></div>
+            <div class="text-center">
+              <div class="text-xl font-bold font-mono text-purple-400" id="audit-coverage-ratio">100.0%</div>
+              <div class="text-[10px] font-mono text-slate-400 uppercase tracking-widest mt-0.5">At-Risk Coverage</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 5 Pillars Telemetry Grid -->
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+        
+        <!-- Pillar 1: Conservation -->
+        <div class="bg-manifold-card border border-manifold-border rounded-lg p-4 telemetry-card border-glow-emerald">
+          <div class="flex items-center justify-between">
+            <span class="text-[11px] font-mono text-slate-400 uppercase">Pillar 1</span>
+            <span class="text-xs font-mono font-bold text-emerald-400">20.0 / 20</span>
+          </div>
+          <div class="text-sm font-bold text-white mt-1">Accounting Conservation</div>
+          <p class="text-xs text-slate-400 mt-1">Kirchhoff nodal balance: Inflows == Outflows across all intermediate conduits.</p>
+          <div class="mt-3 pt-2.5 border-t border-slate-800 flex items-center justify-between text-xs font-mono">
+            <span class="text-slate-400">Conduit Leaks:</span>
+            <span class="text-emerald-400 font-bold">0 Leaks ($0.00)</span>
+          </div>
+        </div>
+
+        <!-- Pillar 2: Dimensional Integrity -->
+        <div class="bg-manifold-card border border-manifold-border rounded-lg p-4 telemetry-card border-glow-emerald">
+          <div class="flex items-center justify-between">
+            <span class="text-[11px] font-mono text-slate-400 uppercase">Pillar 2</span>
+            <span class="text-xs font-mono font-bold text-emerald-400">20.0 / 20</span>
+          </div>
+          <div class="text-sm font-bold text-white mt-1">Dimensional Integrity</div>
+          <p class="text-xs text-slate-400 mt-1">Strict currency scaling, positive nominal flow invariants, and spread metric segregation.</p>
+          <div class="mt-3 pt-2.5 border-t border-slate-800 flex items-center justify-between text-xs font-mono">
+            <span class="text-slate-400">Unit Errors:</span>
+            <span class="text-emerald-400 font-bold">0 Unit Errors</span>
+          </div>
+        </div>
+
+        <!-- Pillar 3: Temporal Cadence -->
+        <div class="bg-manifold-card border border-manifold-border rounded-lg p-4 telemetry-card border-glow-amber">
+          <div class="flex items-center justify-between">
+            <span class="text-[11px] font-mono text-slate-400 uppercase">Pillar 3</span>
+            <span class="text-xs font-mono font-bold text-amber-400">13.3 / 20</span>
+          </div>
+          <div class="text-sm font-bold text-white mt-1">Temporal Cadence</div>
+          <p class="text-xs text-slate-400 mt-1">Detects stock vs. flow confusion (daily SOFR repo mixed with static national debt).</p>
+          <div class="mt-3 pt-2.5 border-t border-slate-800 flex items-center justify-between text-xs font-mono">
+            <span class="text-slate-400">Stock/Flow Flags:</span>
+            <span class="text-amber-400 font-bold">11 Static Stocks</span>
+          </div>
+        </div>
+
+        <!-- Pillar 4: Topology Integrity -->
+        <div class="bg-manifold-card border border-manifold-border rounded-lg p-4 telemetry-card border-glow-emerald">
+          <div class="flex items-center justify-between">
+            <span class="text-[11px] font-mono text-slate-400 uppercase">Pillar 4</span>
+            <span class="text-xs font-mono font-bold text-emerald-400">19.0 / 20</span>
+          </div>
+          <div class="text-sm font-bold text-white mt-1">Graph Topology</div>
+          <p class="text-xs text-slate-400 mt-1">Zero dangling edges, articulation point analysis, legitimate monetary burns.</p>
+          <div class="mt-3 pt-2.5 border-t border-slate-800 flex items-center justify-between text-xs font-mono">
+            <span class="text-slate-400">Triparty Repo SPOF:</span>
+            <span class="text-purple-400 font-bold">Bypass Modeled</span>
+          </div>
+        </div>
+
+        <!-- Pillar 5: Macro Dark Matter -->
+        <div class="bg-manifold-card border border-manifold-border rounded-lg p-4 telemetry-card border-glow-cyan">
+          <div class="flex items-center justify-between">
+            <span class="text-[11px] font-mono text-slate-400 uppercase">Pillar 5</span>
+            <span class="text-xs font-mono font-bold text-cyan-400">18.5 / 20</span>
+          </div>
+          <div class="text-sm font-bold text-white mt-1">Macro Dark Matter</div>
+          <p class="text-xs text-slate-400 mt-1">Benchmarking against $600T OTC derivatives and offshore shadow banking.</p>
+          <div class="mt-3 pt-2.5 border-t border-slate-800 flex items-center justify-between text-xs font-mono">
+            <span class="text-slate-400">Unmodeled Dark Matter:</span>
+            <span class="text-cyan-400 font-bold">$575 Trillion</span>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Radar Chart & High-Risk Anomalies Split -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        
+        <!-- Pillar Footprint Radar -->
+        <div class="bg-manifold-card border border-manifold-border rounded-lg p-5 space-y-3">
+          <h3 class="text-sm font-bold text-white font-mono uppercase flex items-center gap-2">
+            <i class="fa-solid fa-chart-radar text-cyan-400"></i>
+            Audit Pillar Integrity Footprint
+          </h3>
+          <div class="h-64 flex items-center justify-center">
+            <canvas id="audit-radar-chart"></canvas>
+          </div>
+        </div>
+
+        <!-- High-Risk Anomalies List -->
+        <div class="lg:col-span-2 bg-manifold-card border border-manifold-border rounded-lg p-5 space-y-4">
+          <div class="flex items-center justify-between border-b border-manifold-border pb-2.5">
+            <h3 class="text-sm font-bold text-white font-mono uppercase flex items-center gap-2">
+              <i class="fa-solid fa-triangle-exclamation text-amber-400"></i>
+              High-Risk Anomalies Detected (<span id="anomaly-count">3</span>)
+            </h3>
+            <span class="text-xs font-mono text-slate-400">Adversarial Substrate Verification</span>
+          </div>
+
+          <div id="anomalies-list" class="space-y-3">
+            <!-- Populated by app.js -->
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Remediation Recommendations Table -->
+      <div class="bg-manifold-card border border-manifold-border rounded-lg p-5 space-y-3">
+        <h3 class="text-sm font-bold text-white font-mono uppercase flex items-center gap-2">
+          <i class="fa-solid fa-clipboard-check text-emerald-400"></i>
+          Remediation Protocols (Actionable Financial Engineering Playbooks)
+        </h3>
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-xs font-mono">
+            <thead class="bg-slate-900/80 text-slate-400 uppercase text-[11px] border-b border-manifold-border">
+              <tr>
+                <th class="py-2.5 px-4">ID</th>
+                <th class="py-2.5 px-4">Pillar Area</th>
+                <th class="py-2.5 px-4">Remediation Action</th>
+                <th class="py-2.5 px-4">Implementation & Mathematical Protocol</th>
+              </tr>
+            </thead>
+            <tbody id="remediation-table-body" class="divide-y divide-slate-800/60">
+              <!-- Populated by app.js -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- =======================================================================
+         TAB 4: SYSTEMIC SHOCK GAUNTLET CONTROL ROOM
+         ======================================================================= -->
+    <section id="tab-gauntlet" class="tab-panel hidden space-y-6">
+      
+      <!-- Gauntlet Header Banner -->
+      <div class="bg-manifold-card border border-manifold-border rounded-lg p-5 flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="px-2 py-0.5 rounded bg-purple-950 text-purple-300 font-mono text-xs border border-purple-800 font-semibold">STRESS GAUNTLET SIMULATOR</span>
+            <span class="text-xs text-slate-400 font-mono">Real-Time Routing & Impedance Failover</span>
+          </div>
+          <h2 class="text-xl font-bold text-white mt-1">Systemic Shock Gauntlet Control Room</h2>
+          <p class="text-xs text-slate-300 mt-0.5">Stress testing the planetary monetary manifold under severe sovereign, transatlantic repo, and maritime blockade shocks.</p>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <span class="text-xs font-mono text-slate-400">Overall Resilience Score:</span>
+          <span id="gauntlet-resilience-badge" class="px-2.5 py-1 rounded bg-purple-900/60 text-purple-300 border border-purple-700 font-mono font-bold text-sm">93.9 / 100</span>
+        </div>
+      </div>
+
+      <!-- Interactive Regime Trigger Cards -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        
+        <!-- Regime 1 Card -->
+        <div class="bg-manifold-card border border-manifold-border hover:border-cyan-500/60 rounded-lg p-5 transition flex flex-col justify-between space-y-4">
+          <div class="space-y-2">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-mono px-2 py-0.5 rounded bg-cyan-950 text-cyan-400 border border-cyan-800">REGIME 1</span>
+              <span class="text-xs font-mono text-slate-400">+250 bp OAT</span>
+            </div>
+            <h3 class="text-base font-bold text-white">French Sovereign Debt Spread Blowout</h3>
+            <p class="text-xs text-slate-400">OAT-Bund spread blows out to +250 bp, TARGET2 liabilities expand to -€350B, and primary SVTs freeze by 75%.</p>
+          </div>
+          <div class="pt-3 border-t border-slate-800/80 space-y-2">
+            <div class="flex items-center justify-between text-xs font-mono text-slate-400">
+              <span>Bypass Conduit:</span>
+              <span class="text-cyan-300 font-bold">Natixis Syndicate</span>
+            </div>
+            <button class="btn-trigger-regime w-full py-2 rounded bg-cyan-950 hover:bg-cyan-900 text-cyan-300 border border-cyan-800 font-mono text-xs font-bold transition flex items-center justify-center gap-2" data-regime="1">
+              <i class="fa-solid fa-play"></i> Trigger Regime 1
+            </button>
+          </div>
+        </div>
+
+        <!-- Regime 2 Card -->
+        <div class="bg-manifold-card border border-manifold-border hover:border-amber-500/60 rounded-lg p-5 transition flex flex-col justify-between space-y-4">
+          <div class="space-y-2">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-mono px-2 py-0.5 rounded bg-amber-950 text-amber-400 border border-amber-800">REGIME 2</span>
+              <span class="text-xs font-mono text-slate-400">RRP $0 & Repo Freeze</span>
+            </div>
+            <h3 class="text-base font-bold text-white">Transatlantic Dollar Liquidity Freeze</h3>
+            <p class="text-xs text-slate-400">Fed ON RRP buffer completely exhausted to $0.00, TGA spikes to $1.20T, and US Triparty Repo ($3T/day) collapses.</p>
+          </div>
+          <div class="pt-3 border-t border-slate-800/80 space-y-2">
+            <div class="flex items-center justify-between text-xs font-mono text-slate-400">
+              <span>Bypass Conduit:</span>
+              <span class="text-amber-300 font-bold">FICC Sponsored Repo</span>
+            </div>
+            <button class="btn-trigger-regime w-full py-2 rounded bg-amber-950 hover:bg-amber-900 text-amber-300 border border-amber-800 font-mono text-xs font-bold transition flex items-center justify-center gap-2" data-regime="2">
+              <i class="fa-solid fa-play"></i> Trigger Regime 2
+            </button>
+          </div>
+        </div>
+
+        <!-- Regime 3 Card -->
+        <div class="bg-manifold-card border border-manifold-border hover:border-crimson-500/60 rounded-lg p-5 transition flex flex-col justify-between space-y-4">
+          <div class="space-y-2">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-mono px-2 py-0.5 rounded bg-red-950 text-red-400 border border-red-800">REGIME 3</span>
+              <span class="text-xs font-mono text-slate-400">Compound Super-Crisis</span>
+            </div>
+            <h3 class="text-base font-bold text-white">Planetary Compound Super-Crisis</h3>
+            <p class="text-xs text-slate-400">Simultaneous OAT crisis, repo freeze, and naval blockade interdicting Russian crude shadow tankers ($140B halted).</p>
+          </div>
+          <div class="pt-3 border-t border-slate-800/80 space-y-2">
+            <div class="flex items-center justify-between text-xs font-mono text-slate-400">
+              <span>Anti-Hallucination:</span>
+              <span class="text-red-300 font-bold">Zero Hallucinations Verified</span>
+            </div>
+            <button class="btn-trigger-regime w-full py-2 rounded bg-red-950 hover:bg-red-900 text-red-300 border border-red-800 font-mono text-xs font-bold transition flex items-center justify-center gap-2" data-regime="3">
+              <i class="fa-solid fa-play"></i> Trigger Regime 3
+            </button>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Real-Time Simulation Result Display Panel -->
+      <div id="sim-results-panel" class="bg-manifold-card border border-manifold-border rounded-lg p-5 space-y-5">
+        
+        <!-- Telemetry Summary Row -->
+        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 border-b border-manifold-border pb-4">
+          <div>
+            <div class="flex items-center gap-2">
+              <span id="sim-active-regime-pill" class="text-xs font-mono px-2 py-0.5 rounded bg-cyan-950 text-cyan-400 border border-cyan-800 font-bold">REGIME-01-OAT-CRISIS</span>
+              <span id="sim-hallucination-badge" class="text-xs font-mono px-2 py-0.5 rounded bg-emerald-950 text-emerald-400 border border-emerald-800">[ZERO HALLUCINATIONS VERIFIED]</span>
+            </div>
+            <h3 id="sim-active-regime-title" class="text-lg font-bold text-white mt-1">French Sovereign Debt Spread Blowout</h3>
+            <p id="sim-active-regime-desc" class="text-xs text-slate-400 mt-0.5 max-w-3xl">Widening of OAT-Bund spread to +250 bp triggering dynamic failover to CA-CIB / Natixis secondary dealer syndicate.</p>
+          </div>
+
+          <div class="flex flex-wrap items-center gap-3 text-xs font-mono">
+            <div class="bg-slate-900 px-3 py-2 rounded border border-slate-800">
+              <div class="text-slate-400">BYPASS ACTIVATION:</div>
+              <div id="sim-bypass-pct" class="text-emerald-400 font-bold text-sm">100.0%</div>
+            </div>
+            <div class="bg-slate-900 px-3 py-2 rounded border border-slate-800">
+              <div class="text-slate-400">AVG COST INFLATION:</div>
+              <div id="sim-cost-delta" class="text-amber-400 font-bold text-sm">+20.33%</div>
+            </div>
+            <div class="bg-slate-900 px-3 py-2 rounded border border-slate-800">
+              <div class="text-slate-400">EXEC LATENCY:</div>
+              <div id="sim-latency" class="text-cyan-400 font-bold text-sm">63.05 ms</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Comparative Routing Corridors Cards -->
+        <div class="space-y-3">
+          <div class="flex items-center justify-between">
+            <h4 class="text-xs font-bold font-mono uppercase text-slate-300 flex items-center gap-2">
+              <i class="fa-solid fa-code-compare text-cyan-400"></i>
+              Comparative Corridor Telemetry (Baseline vs Shocked Routing)
+            </h4>
+            <button id="btn-highlight-sim-bypasses" class="text-xs font-mono px-2.5 py-1 rounded bg-slate-800 text-cyan-400 hover:bg-slate-700 border border-slate-700 flex items-center gap-1.5">
+              <i class="fa-solid fa-eye"></i> Highlight Active Bypasses on Graph
+            </button>
+          </div>
+
+          <div id="sim-routes-container" class="space-y-3">
+            <!-- Populated by app.js -->
+          </div>
+        </div>
+
+        <!-- Congestion & Bottlenecks Split -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
+          
+          <!-- Systemic Bottlenecks -->
+          <div class="bg-slate-900/90 border border-slate-800 rounded-lg p-4 space-y-2.5">
+            <h4 class="text-xs font-bold font-mono uppercase text-slate-300 flex items-center gap-2">
+              <i class="fa-solid fa-triangle-exclamation text-amber-400"></i>
+              Critical Congestion Bottlenecks
+            </h4>
+            <div id="sim-bottlenecks-list" class="space-y-2">
+              <!-- Populated by app.js -->
+            </div>
+          </div>
+
+          <!-- Active Bypass Corridors -->
+          <div class="bg-slate-900/90 border border-slate-800 rounded-lg p-4 space-y-2.5">
+            <h4 class="text-xs font-bold font-mono uppercase text-slate-300 flex items-center gap-2">
+              <i class="fa-solid fa-shield text-emerald-400"></i>
+              Active Dynamic Bypass Corridors
+            </h4>
+            <div id="sim-bypasses-list" class="space-y-2">
+              <!-- Populated by app.js -->
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+    </section>
+
+    <!-- =======================================================================
+         TAB 5: PRIVATE ASSET DOWNSTREAM WATERFALL
+         ======================================================================= -->
+    <section id="tab-private-assets" class="tab-panel hidden space-y-6">
+      
+      <!-- Private Assets Header -->
+      <div class="bg-manifold-card border border-manifold-border rounded-lg p-5 flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="px-2 py-0.5 rounded bg-blue-950 text-blue-300 font-mono text-xs border border-blue-800 font-semibold">DESK MASTER HIERARCHY</span>
+            <span class="text-xs text-slate-400 font-mono">Private Portfolios & Macro Transmission</span>
+          </div>
+          <h2 class="text-xl font-bold text-white mt-1">Private Asset Downstream Liquidity Waterfall</h2>
+          <p class="text-xs text-slate-300 mt-0.5">Tracking macro yield distributions flowing from US Prime MMF and Commercial Banking into Apex Sovereign Principal, operating OpCos, and scientific compute fleets.</p>
+        </div>
+
+        <div class="text-right">
+          <div class="text-xs font-mono text-slate-400 uppercase">Total Private Commitments:</div>
+          <div id="priv-total-commitments" class="text-xl font-bold font-mono text-cyan-400">$7,460,000.00</div>
+        </div>
+      </div>
+
+      <!-- Aggregate Private KPI Tiles -->
+      <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+        <div class="bg-manifold-card border border-manifold-border rounded p-3 text-center">
+          <div class="text-[10px] font-mono text-slate-400 uppercase">MMF Liquid Yield</div>
+          <div class="text-sm font-bold font-mono text-emerald-400 mt-0.5">$450k / yr</div>
+          <div class="text-[10px] text-slate-500">T-Bill pass-through</div>
+        </div>
+        <div class="bg-manifold-card border border-manifold-border rounded p-3 text-center">
+          <div class="text-[10px] font-mono text-slate-400 uppercase">OpCo Credit Facility</div>
+          <div class="text-sm font-bold font-mono text-cyan-400 mt-0.5">$1.85M</div>
+          <div class="text-[10px] text-slate-500">LaunchFizz revolving</div>
+        </div>
+        <div class="bg-manifold-card border border-manifold-border rounded p-3 text-center">
+          <div class="text-[10px] font-mono text-slate-400 uppercase">Reinsurance PML</div>
+          <div class="text-sm font-bold font-mono text-purple-400 mt-0.5">$25.00M</div>
+          <div class="text-[10px] text-slate-500">Delphi underwriting</div>
+        </div>
+        <div class="bg-manifold-card border border-manifold-border rounded p-3 text-center">
+          <div class="text-[10px] font-mono text-slate-400 uppercase">T-Bill Escrow Pledge</div>
+          <div class="text-sm font-bold font-mono text-amber-400 mt-0.5">$2.50M</div>
+          <div class="text-[10px] text-slate-500">Vesper collateral</div>
+        </div>
+        <div class="bg-manifold-card border border-manifold-border rounded p-3 text-center">
+          <div class="text-[10px] font-mono text-slate-400 uppercase">Scientific Silicon</div>
+          <div class="text-sm font-bold font-mono text-blue-400 mt-0.5">$480k</div>
+          <div class="text-[10px] text-slate-500">TWE / Jarvis / API</div>
+        </div>
+        <div class="bg-manifold-card border border-manifold-border rounded p-3 text-center">
+          <div class="text-[10px] font-mono text-slate-400 uppercase">Real Estate Cushion</div>
+          <div class="text-sm font-bold font-mono text-emerald-400 mt-0.5">$530k</div>
+          <div class="text-[10px] text-slate-500">Valle Rd equity</div>
+        </div>
+      </div>
+
+      <!-- Private Asset Entity Cards Grid -->
+      <div id="private-entities-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <!-- Populated by app.js -->
+      </div>
+
+      <!-- Macro Liquidity Linkages Table -->
+      <div class="bg-manifold-card border border-manifold-border rounded-lg p-5 space-y-3">
+        <h3 class="text-sm font-bold text-white font-mono uppercase flex items-center gap-2">
+          <i class="fa-solid fa-arrows-split-up-and-left text-cyan-400"></i>
+          Macro Planetary Liquidity Inflow & Outflow Conduits
+        </h3>
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-xs font-mono">
+            <thead class="bg-slate-900/80 text-slate-400 uppercase text-[11px] border-b border-manifold-border">
+              <tr>
+                <th class="py-2.5 px-4">Conduit Corridor</th>
+                <th class="py-2.5 px-4">Financial Instrument</th>
+                <th class="py-2.5 px-4">Annual Volume (USD)</th>
+                <th class="py-2.5 px-4">Transmission Direction</th>
+              </tr>
+            </thead>
+            <tbody id="macro-links-table-body" class="divide-y divide-slate-800/60">
+              <!-- Populated by app.js -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- =======================================================================
+         TAB 6: DUCKDB FLOW LEDGER EXPLORER
+         ======================================================================= -->
+    <section id="tab-ledger" class="tab-panel hidden space-y-4">
+      
+      <!-- Ledger Filter Bar -->
+      <div class="bg-manifold-card border border-manifold-border rounded-lg p-4 flex flex-wrap items-center justify-between gap-4">
+        <div class="flex flex-wrap items-center gap-3">
+          
+          <!-- Search Input -->
+          <div class="relative w-64">
+            <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-xs text-slate-500"></i>
+            <input id="ledger-search-input" type="text" placeholder="Search instrument, entity, source..." class="w-full bg-slate-900 border border-slate-700 rounded pl-8 pr-3 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-cyan-400 font-mono">
+          </div>
+
+          <!-- Currency Filter -->
+          <select id="ledger-currency-filter" class="bg-slate-900 border border-slate-700 rounded px-3 py-1.5 text-xs text-slate-200 font-mono focus:outline-none focus:border-cyan-400">
+            <option value="">All Currencies</option>
+            <option value="USD">USD</option>
+            <option value="EUR">EUR</option>
+            <option value="JPY">JPY</option>
+            <option value="CNH">CNH</option>
+            <option value="RUB">RUB</option>
+            <option value="INR">INR</option>
+          </select>
+
+          <!-- Flow Type Filter -->
+          <select id="ledger-type-filter" class="bg-slate-900 border border-slate-700 rounded px-3 py-1.5 text-xs text-slate-200 font-mono focus:outline-none focus:border-cyan-400">
+            <option value="">All Flow Types</option>
+            <option value="TRADE_SETTLEMENT">Trade Settlement</option>
+            <option value="POOL_CONCENTRATION">Pool Concentration</option>
+            <option value="INTERBANK_TRANSFER">Interbank Transfer</option>
+            <option value="REPO_COLLATERAL">Repo Collateral</option>
+            <option value="QT_BURN">QT Burn</option>
+            <option value="YIELD_SPREAD_IMPEDANCE">Yield Spread Impedance</option>
+          </select>
+        </div>
+
+        <div class="flex items-center gap-3 text-xs font-mono text-slate-400">
+          <span>Showing <strong id="ledger-showing-count" class="text-cyan-400">0</strong> of <strong id="ledger-total-count" class="text-white">0</strong> events</span>
+          <div class="flex items-center gap-1">
+            <button id="btn-ledger-prev" class="px-2.5 py-1 rounded bg-slate-800 text-slate-300 hover:bg-slate-700 border border-slate-700 disabled:opacity-40" disabled>
+              <i class="fa-solid fa-chevron-left text-xs"></i>
+            </button>
+            <button id="btn-ledger-next" class="px-2.5 py-1 rounded bg-slate-800 text-slate-300 hover:bg-slate-700 border border-slate-700 disabled:opacity-40">
+              <i class="fa-solid fa-chevron-right text-xs"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Ledger Table -->
+      <div class="bg-manifold-card border border-manifold-border rounded-lg overflow-hidden shadow-lg">
+        <div class="overflow-x-auto max-h-[640px]">
+          <table class="w-full text-left text-xs font-mono">
+            <thead class="bg-slate-900/95 text-slate-400 uppercase text-[11px] border-b border-manifold-border sticky top-0 z-20 backdrop-blur">
+              <tr>
+                <th class="py-3 px-4">Event ID / Period</th>
+                <th class="py-3 px-4">Source Counterparty</th>
+                <th class="py-3 px-4">Target Counterparty</th>
+                <th class="py-3 px-4">Financial Instrument</th>
+                <th class="py-3 px-4 text-right">Nominal Amount</th>
+                <th class="py-3 px-4 text-right">USD Normalized</th>
+                <th class="py-3 px-4 text-right">Annualized Rate</th>
+                <th class="py-3 px-4 text-center">Type</th>
+                <th class="py-3 px-4 text-center">Provenance</th>
+              </tr>
+            </thead>
+            <tbody id="ledger-table-body" class="divide-y divide-slate-800/60">
+              <!-- Populated by app.js -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- =========================================================================
+       NODE INSPECTION SLIDE-OVER DRAWER (MODAL)
+       ========================================================================= -->
+  <div id="node-drawer-backdrop" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden transition-opacity"></div>
+  
+  <aside id="node-drawer" class="fixed top-0 right-0 bottom-0 w-full max-w-lg drawer-glass z-50 transform translate-x-full transition-transform duration-300 ease-in-out p-6 overflow-y-auto flex flex-col justify-between shadow-2xl">
+    <div class="space-y-5">
+      
+      <!-- Drawer Header -->
+      <div class="flex items-start justify-between border-b border-manifold-border pb-4">
+        <div>
+          <div class="flex items-center gap-2">
+            <span id="drawer-tier-badge" class="tier-badge-0 px-2 py-0.5 rounded text-[10px] font-mono font-bold">TIER 0</span>
+            <span id="drawer-jurisdiction-badge" class="px-2 py-0.5 rounded bg-slate-800 text-slate-300 text-[10px] font-mono">FR</span>
+            <span id="drawer-decoy-badge" class="hidden px-2 py-0.5 rounded bg-red-950 text-red-400 border border-red-800 text-[10px] font-mono font-bold">DECOY DISTRACTOR</span>
+          </div>
+          <h3 id="drawer-node-name" class="text-lg font-bold text-white mt-1">French Republic Trésor</h3>
+          <p id="drawer-node-id" class="text-xs font-mono text-cyan-400">french_republic_tresor</p>
+        </div>
+        <button id="btn-close-drawer" class="p-2 rounded hover:bg-slate-800 text-slate-400 hover:text-white">
+          <i class="fa-solid fa-xmark text-lg"></i>
+        </button>
+      </div>
+
+      <!-- Description & Sector -->
+      <div class="space-y-1">
+        <div class="text-[11px] font-mono text-slate-400 uppercase">Sector & Mandate:</div>
+        <div id="drawer-sector" class="text-xs font-mono text-purple-300 font-semibold">sovereign_issuer</div>
+        <p id="drawer-description" class="text-xs text-slate-300 pt-1 leading-relaxed">Sovereign debt issuer executing OAT auctions and managing French public debt.</p>
+      </div>
+
+      <!-- Live Conservation & Balance Flow Balance -->
+      <div class="bg-slate-900 border border-slate-800 rounded-lg p-3.5 space-y-2">
+        <div class="flex items-center justify-between text-xs font-mono">
+          <span class="text-slate-400">Conservation Status:</span>
+          <span id="drawer-conservation-status" class="text-emerald-400 font-bold">strictly_conserved</span>
+        </div>
+        <div class="grid grid-cols-3 gap-2 text-center pt-2 border-t border-slate-800 font-mono text-xs">
+          <div>
+            <div class="text-[10px] text-slate-500 uppercase">Total Inflow</div>
+            <div id="drawer-inflow-val" class="font-bold text-emerald-400">$0.00</div>
+          </div>
+          <div>
+            <div class="text-[10px] text-slate-500 uppercase">Total Outflow</div>
+            <div id="drawer-outflow-val" class="font-bold text-amber-400">$0.00</div>
+          </div>
+          <div>
+            <div class="text-[10px] text-slate-500 uppercase">Net Flow</div>
+            <div id="drawer-net-val" class="font-bold text-cyan-400">$0.00</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Balance Sheet Fundamentals Radar or List -->
+      <div class="space-y-2">
+        <div class="text-xs font-mono uppercase text-slate-400 font-semibold">Balance Sheet Fundamentals (Harmonic Substrate):</div>
+        <div id="drawer-metrics-container" class="space-y-1.5 max-h-48 overflow-y-auto pr-1">
+          <!-- Populated by app.js -->
+        </div>
+      </div>
+
+      <!-- Upstream & Downstream Neighbors -->
+      <div class="grid grid-cols-2 gap-3 text-xs font-mono">
+        <div class="bg-slate-900 border border-slate-800 rounded p-3 space-y-1.5">
+          <div class="text-[11px] text-slate-400 uppercase font-semibold flex items-center gap-1">
+            <i class="fa-solid fa-arrow-down-long text-emerald-400"></i> Upstream Sources:
+          </div>
+          <div id="drawer-upstream-list" class="space-y-1 text-slate-300 text-[11px]">None</div>
+        </div>
+        <div class="bg-slate-900 border border-slate-800 rounded p-3 space-y-1.5">
+          <div class="text-[11px] text-slate-400 uppercase font-semibold flex items-center gap-1">
+            <i class="fa-solid fa-arrow-up-long text-amber-400"></i> Downstream Sinks:
+          </div>
+          <div id="drawer-downstream-list" class="space-y-1 text-slate-300 text-[11px]">None</div>
+        </div>
+      </div>
+
+      <!-- Connected Flow Ledger Events -->
+      <div class="space-y-2">
+        <div class="text-xs font-mono uppercase text-slate-400 font-semibold">Associated DuckDB Flow Events:</div>
+        <div id="drawer-flows-list" class="space-y-2 max-h-48 overflow-y-auto pr-1 text-xs">
+          <!-- Populated by app.js -->
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Drawer Footer Actions -->
+    <div class="pt-4 border-t border-manifold-border flex items-center justify-between gap-3">
+      <button id="btn-drawer-focus-canvas" class="flex-1 py-2 rounded bg-cyan-600 hover:bg-cyan-500 text-black font-semibold text-xs font-mono transition flex items-center justify-center gap-2">
+        <i class="fa-solid fa-crosshairs"></i> Pan to Node on Canvas
+      </button>
+      <button id="btn-drawer-close" class="py-2 px-4 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-mono transition">
+        Close
+      </button>
+    </div>
+  </aside>
+
+  <!-- =========================================================================
+       FOOTER
+       ========================================================================= -->
+  <footer class="bg-manifold-surface border-t border-manifold-border px-6 py-3 text-xs text-slate-500 font-mono flex flex-col sm:flex-row items-center justify-between gap-2 mt-auto">
+    <div>
+      <span>Capital Manifold &copy; 2026</span>
+      <span class="mx-2">&bull;</span>
+      <span>Autonomous Macro-Financial Balance-Sheet Dynamics</span>
+    </div>
+    <div class="flex items-center gap-4">
+      <span class="text-slate-400">DuckDB Parquet Substrate</span>
+      <span>&bull;</span>
+      <span class="text-slate-400">PGM Dual-Frontier A*</span>
+      <span>&bull;</span>
+      <span class="text-emerald-400">Zero Hallucinations Verified</span>
+    </div>
+  </footer>
+
+  <!-- Application Logic -->
+  <script src="/static/app.js"></script>
+</body>
+</html>
