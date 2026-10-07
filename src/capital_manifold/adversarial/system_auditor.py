@@ -762,6 +762,11 @@ class GraphTopologyAuditor:
             "bund_risk_free_anchor",                # Safe-haven capital anchor
             "sovereign_debt_holders",               # Final debt stock holders
             "offshore_cayman_hedge_pool",           # Offshore collateral basin
+            "norway_gpfg_global_equity_sink",       # Global sovereign equity sink ($1.75T AUM)
+            "korea_national_pension_service_nps",   # Sovereign pension fund sink ($850B AUM)
+            "uk_dmo_gilt_debt_market",              # Sovereign gilt debt sink (£2.6T market)
+            "russia_offshore_shadow_capital_basin", # Offshore shadow capital basin ($180B)
+            "us_corporate_and_household_borrowers", # Real economy trade borrowing sink ($350B)
         }
 
         legitimate_burn_sinks = [s for s in absorbing_sinks if s in legitimate_burn_set]

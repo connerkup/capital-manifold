@@ -261,7 +261,7 @@ FINANCIAL_ENTITIES: Dict[str, Dict[str, Any]] = {
         "name": "Bank of Russia (CBR) Sovereign Vault & Foreign Reserves",
         "sector": "sanctioned_central_bank",
         "jurisdiction": "RU",
-        "description": "Sanctioned central bank vault with $300B frozen Western reserves, pivoting to $185B gold and $115B CNY.",
+        "description": "Sanctioned central bank vault with $600B total balance sheet ($300B frozen Western reserves, $185B physical gold vault in Moscow, and $115B Yuan/bilateral reserves).",
     },
     "shadow_tanker_energy_arbitrage": {
         "tier": MonetaryTier.TRANSMISSION,
@@ -368,6 +368,156 @@ FINANCIAL_ENTITIES: Dict[str, Dict[str, Any]] = {
         "sector": "custodial_escrow",
         "jurisdiction": "US",
         "description": "Custodial depository holding pledged Treasury collateral for international holders and TIC foreign accounts.",
+    },
+    # Expanded Planetary Monetary Manifold (8 Dark Forest Regions)
+    # 1. Norway: Norges Bank Investment Management (GPFG $1.75T Sovereign Wealth Fund)
+    "norway_norges_bank_gpfg_faucet": {
+        "tier": MonetaryTier.GENESIS,
+        "name": "Norges Bank Investment Management (GPFG Sovereign Faucet)",
+        "sector": "sovereign_wealth_faucet",
+        "jurisdiction": "NO",
+        "description": "Genesis sovereign wealth faucet managing Norway's Government Pension Fund Global ($1.75T AUM) channeling North Sea oil capital.",
+    },
+    "norway_gpfg_global_equity_sink": {
+        "tier": MonetaryTier.SINK,
+        "name": "Norway GPFG Global Equity & Asset Sink",
+        "sector": "global_equity_sink",
+        "jurisdiction": "GLOBAL",
+        "description": "Planetary sovereign capital sink absorbing $1.75T in global public equities, fixed income, and renewable infrastructure across 9,000+ companies.",
+    },
+    # 2. Switzerland: Swiss National Bank (SNB $950B) & UBS Group Consolidated ($1.7T G-SIB)
+    "swiss_national_bank_snb_vault": {
+        "tier": MonetaryTier.GENESIS,
+        "name": "Swiss National Bank (SNB) Sovereign FX Vault",
+        "sector": "sovereign_fx_vault",
+        "jurisdiction": "CH",
+        "description": "Central bank sovereign reserve vault holding $950B in FX reserves, physical gold, and US equity portfolios ($150B+ tech shares).",
+    },
+    "ubs_group_consolidated_gsib": {
+        "tier": MonetaryTier.TRANSMISSION,
+        "name": "UBS Group Consolidated (Global Systemically Important Bank)",
+        "sector": "global_systemic_bank",
+        "jurisdiction": "CH_GLOBAL",
+        "description": "Consolidated Swiss G-SIB balance sheet ($1.7T assets post-Credit Suisse integration) transmitting cross-border wealth, collateral, and FX.",
+    },
+    # 3. Singapore: Monetary Authority of Singapore (MAS $400B) & GIC / Temasek ($1.05T)
+    "singapore_mas_reserve_faucet": {
+        "tier": MonetaryTier.GENESIS,
+        "name": "Monetary Authority of Singapore (MAS) Reserve Faucet",
+        "sector": "central_bank",
+        "jurisdiction": "SG",
+        "description": "Central bank sovereign reserve faucet managing Singapore's $400B foreign exchange reserves and exchange-rate policy basket.",
+    },
+    "singapore_gic_temasek_sovereign_basin": {
+        "tier": MonetaryTier.TRAVERSAL,
+        "name": "Singapore GIC & Temasek Sovereign Investment Basin",
+        "sector": "sovereign_wealth_basin",
+        "jurisdiction": "SG_GLOBAL",
+        "description": "Sovereign investment traversal basin deploying $1.05T AUM across global public equities, private equity, infrastructure, and real estate.",
+    },
+    # 4. South Korea: Bank of Korea (BOK $420B) & National Pension Service (NPS $850B)
+    "bank_of_korea_bok_vault": {
+        "tier": MonetaryTier.GENESIS,
+        "name": "Bank of Korea (BOK) Sovereign Reserve Vault",
+        "sector": "central_bank",
+        "jurisdiction": "KR",
+        "description": "South Korean central bank vault holding $420B in FX reserves, managing domestic won liquidity and foreign reserve portfolios.",
+    },
+    "korea_national_pension_service_nps": {
+        "tier": MonetaryTier.SINK,
+        "name": "Korea National Pension Service (NPS) Global Capital Sink",
+        "sector": "pension_fund_sink",
+        "jurisdiction": "KR",
+        "description": "World's third-largest public pension fund ($850B AUM) acting as major global institutional capital sink absorbing foreign equities and sovereign debt.",
+    },
+    # 5. United Kingdom: Bank of England (BoE) & UK Debt Management Office (£2.6T Gilt)
+    "bank_of_england_boe_vault": {
+        "tier": MonetaryTier.GENESIS,
+        "name": "Bank of England (BoE) Reserve Vault",
+        "sector": "central_bank",
+        "jurisdiction": "UK",
+        "description": "UK central bank issuing sterling base money, managing quantitative easing gilt portfolios, and holding official foreign currency reserves.",
+    },
+    "uk_dmo_gilt_debt_market": {
+        "tier": MonetaryTier.SINK,
+        "name": "UK Debt Management Office (DMO) Gilt Debt Benchmark Market",
+        "sector": "sovereign_market",
+        "jurisdiction": "UK",
+        "description": "Secondary benchmark market for £2.6T in UK sovereign Gilts, absorbing domestic pension liabilities and global sterling reserves.",
+    },
+    # 6. Canada: Bank of Canada & Maple 8 Pension Consortium ($1.5T)
+    "bank_of_canada_boc_vault": {
+        "tier": MonetaryTier.GENESIS,
+        "name": "Bank of Canada (BoC) Sovereign Vault",
+        "sector": "central_bank",
+        "jurisdiction": "CA",
+        "description": "Canadian central bank managing Canadian dollar monetary base, settlement balances (Lynx RTGS), and public debt operations.",
+    },
+    "canada_maple_pension_consortium": {
+        "tier": MonetaryTier.TRAVERSAL,
+        "name": "Canadian Maple 8 Pension Consortium (CPPIB / CDPQ / OTPP)",
+        "sector": "pension_consortium_traversal",
+        "jurisdiction": "CA_GLOBAL",
+        "description": "Consortium of Canada's Maple 8 public pension giants managing $1.5T AUM traversing global infrastructure, private equity, and foreign real estate.",
+    },
+    # 7. Mexico: Banco de México (Banxico) & USMCA Nearshoring ($500B trade)
+    "banco_de_mexico_banxico_faucet": {
+        "tier": MonetaryTier.GENESIS,
+        "name": "Banco de México (Banxico) Reserve & Monetary Faucet",
+        "sector": "central_bank",
+        "jurisdiction": "MX",
+        "description": "Mexican central bank managing $220B in FX reserves, setting interbank benchmark rates, and stabilizing MXN trade flows.",
+    },
+    "usmca_nearshoring_trade_conduit": {
+        "tier": MonetaryTier.TRAVERSAL,
+        "name": "USMCA Nearshoring Bilateral Trade Capital Conduit",
+        "sector": "trade_corridor_conduit",
+        "jurisdiction": "MX_US",
+        "description": "Bilateral trade and cross-border manufacturing capital conduit settling $500B+ annual USMCA supply chain flows between Mexico and the US.",
+    },
+    # 8. Multilateral Institutions: IMF SDR Pool ($935B) & BIS Basel Desk ($450B)
+    "imf_special_drawing_rights_sdr_pool": {
+        "tier": MonetaryTier.GENESIS,
+        "name": "IMF Special Drawing Rights (SDR) International Reserve Pool",
+        "sector": "multilateral_monetary_pool",
+        "jurisdiction": "GLOBAL_MULTILATERAL",
+        "description": "International reserve asset basket ($935B / 660B SDRs) allocated by the IMF to supplement member countries' official foreign exchange reserves.",
+    },
+    "bis_basel_banking_department": {
+        "tier": MonetaryTier.TRANSMISSION,
+        "name": "Bank for International Settlements (BIS) Basel Central Banking Desk",
+        "sector": "central_bank_creditor",
+        "jurisdiction": "GLOBAL_MULTILATERAL",
+        "description": "Bank for central banks ($450B balance sheet) providing currency deposits, gold intermediation, and repo facilities to 63 member central banks.",
+    },
+    # Upgraded Russia & Eurasian Architecture
+    "russia_national_wealth_fund_nwf": {
+        "tier": MonetaryTier.GENESIS,
+        "name": "Russia National Wealth Fund (NWF MinFin Sovereign Oil Buffer)",
+        "sector": "sovereign_wealth_fund",
+        "jurisdiction": "RU",
+        "description": "Sovereign fiscal buffer ($155.0B AUM) accumulating oil and gas export surplus revenues to finance fiscal deficits and state infrastructure.",
+    },
+    "russian_state_banking_credit_nexus": {
+        "tier": MonetaryTier.TRANSMISSION,
+        "name": "Russian State Banking Credit Nexus (Sberbank & VTB Consolidated)",
+        "sector": "state_commercial_bank",
+        "jurisdiction": "RU",
+        "description": "Dominant domestic commercial banking credit creation engine ($920.0B total assets) providing ruble credit to state corporate conglomerates.",
+    },
+    "gazprombank_energy_settlement_hub": {
+        "tier": MonetaryTier.TRAVERSAL,
+        "name": "Gazprombank Specialized Energy Settlement Hub",
+        "sector": "bilateral_clearing",
+        "jurisdiction": "RU_GLOBAL",
+        "description": "Specialized sovereign energy clearing conduit ($95.0B annual turnover) executing 'Ruble for Gas' conversion mechanism for pipeline exports.",
+    },
+    "russia_offshore_shadow_capital_basin": {
+        "tier": MonetaryTier.SINK,
+        "name": "Russian Offshore Shadow Capital Basin (Rupee Trap / UAE Dirham Hoard)",
+        "sector": "offshore_hedge_pool",
+        "jurisdiction": "GLOBAL_OFFSHORE",
+        "description": "Offshore capital sink ($180.0B cumulative) accumulating trapped non-convertible Indian Rupee vostro balances, UAE dirham receivables, and unrecorded flight capital.",
     },
 }
 
@@ -558,6 +708,32 @@ class ManifoldPGMBridge:
             "imf_errors_and_omissions_absorption",
             "syndicate_sponsored_repo_conduit",
             "fx_swap_sponsored_repo_conduit",
+            # Expanded Planetary Monetary Manifold & Eurasian Relations
+            "gpfg_sovereign_wealth_allocation",
+            "snb_gsib_reserve_transmission",
+            "swiss_treasuries_custodial_placement",
+            "swiss_wealth_bond_allocation",
+            "snb_equity_reserve_allocation",
+            "mas_official_reserve_transfer",
+            "gic_us_treasury_allocation",
+            "temasek_global_portfolio_allocation",
+            "bok_us_treasury_allocation",
+            "bok_nps_fx_swap_facility",
+            "uk_gilt_benchmark_issuance",
+            "boc_maple_pension_liquidity",
+            "maple_global_alternative_allocation",
+            "maple_treasury_custody_allocation",
+            "banxico_nearshoring_trade_facility",
+            "usmca_supply_chain_trade_settlement",
+            "usmca_reserve_accumulation",
+            "imf_sdr_multilateral_allocation",
+            "bis_central_bank_reserve_placement",
+            "bis_treasury_collateral_management",
+            "imf_general_sdr_allocation",
+            "nwf_sovereign_oil_buffer_injection",
+            "russian_state_credit_creation",
+            "gazprombank_energy_pipeline_clearing",
+            "cbr_yuan_bilateral_reserve_holding",
         ]
         for idx, r_name in enumerate(relation_types):
             vec = np.zeros(self.rel_dim, dtype=np.float32)
@@ -634,6 +810,14 @@ class ManifoldPGMBridge:
             "central_bank_liquidity_backstop": 44,
             "primary_dealer_syndicate": 40,
             "macro_dark_matter": 48,
+            # Expanded Planetary sectors
+            "sovereign_wealth_faucet": 36,
+            "global_equity_sink": 60,
+            "global_systemic_bank": 40,
+            "pension_fund_sink": 62,
+            "pension_consortium_traversal": 48,
+            "trade_corridor_conduit": 50,
+            "multilateral_monetary_pool": 34,
         }
 
         for eid, meta in FINANCIAL_ENTITIES.items():
@@ -687,6 +871,20 @@ class ManifoldPGMBridge:
                 vec[35] += 0.9
             if "MIDDLE_EAST" in meta["jurisdiction"]:
                 vec[34] += 0.9
+            if "NO" in meta["jurisdiction"]:
+                vec[44] += 0.8
+            if "CH" in meta["jurisdiction"]:
+                vec[45] += 0.8
+            if "SG" in meta["jurisdiction"]:
+                vec[46] += 0.8
+            if "KR" in meta["jurisdiction"]:
+                vec[47] += 0.8
+            if "CA" in meta["jurisdiction"]:
+                vec[48] += 0.8
+            if "MX" in meta["jurisdiction"]:
+                vec[49] += 0.8
+            if "MULTILATERAL" in meta["jurisdiction"]:
+                vec[50] += 0.8
 
             # 3. Balance Sheet Modality Subspace (64..95)
             if tier == MonetaryTier.GENESIS:
@@ -1752,6 +1950,290 @@ class ManifoldPGMBridge:
             weight=w_imf_eo,
             rel_embedding=self.relation_embeddings["imf_errors_and_omissions_absorption"],
             metadata={"dark_matter_usd": 175.0e9, "tier_step": "3->2"},
+        )
+
+        # ---------------------------------------------------------------------
+        # CORRIDOR 10: Expanded Planetary Monetary Manifold & Dark Forest Regions
+        # ---------------------------------------------------------------------
+        # 1. Norway Sovereign Wealth Faucet -> Global Equity Sink
+        w_norway = self.compute_edge_weight(
+            base_weight=0.85,
+            flow_volume_eur=1750.0e9,
+            risk_friction=0.08,
+            is_domestic_retention=False,
+            velocity_turnover_days=365.0,
+        )
+        self.substrate.add_relation(
+            source_id="norway_norges_bank_gpfg_faucet",
+            target_id="norway_gpfg_global_equity_sink",
+            relation="gpfg_sovereign_wealth_allocation",
+            weight=w_norway,
+            rel_embedding=self.relation_embeddings["gpfg_sovereign_wealth_allocation"],
+            metadata={"aum_usd": 1750.0e9, "tier_step": "0->3"},
+        )
+
+        # 2. Switzerland: SNB -> UBS G-SIB & Sinks
+        w_snb = self.compute_edge_weight(
+            base_weight=0.90,
+            flow_volume_eur=500.0e9,
+            risk_friction=0.05,
+            is_domestic_retention=False,
+            velocity_turnover_days=30.0,
+        )
+        self.substrate.add_relation(
+            source_id="swiss_national_bank_snb_vault",
+            target_id="ubs_group_consolidated_gsib",
+            relation="snb_gsib_reserve_transmission",
+            weight=w_snb,
+            rel_embedding=self.relation_embeddings["snb_gsib_reserve_transmission"],
+            metadata={"reserve_transmission_usd": 500.0e9, "tier_step": "0->1"},
+        )
+        self.substrate.add_relation(
+            source_id="swiss_national_bank_snb_vault",
+            target_id="norway_gpfg_global_equity_sink",
+            relation="snb_equity_reserve_allocation",
+            weight=w_snb * 1.05,
+            rel_embedding=self.relation_embeddings["snb_equity_reserve_allocation"],
+            metadata={"foreign_equity_usd": 450.0e9, "tier_step": "0->3"},
+        )
+        self.substrate.add_relation(
+            source_id="ubs_group_consolidated_gsib",
+            target_id="us_treasuries_custody",
+            relation="swiss_treasuries_custodial_placement",
+            weight=w_snb * 1.02,
+            rel_embedding=self.relation_embeddings["swiss_treasuries_custodial_placement"],
+            metadata={"treasuries_custody_usd": 350.0e9, "tier_step": "1->3"},
+        )
+        self.substrate.add_relation(
+            source_id="ubs_group_consolidated_gsib",
+            target_id="sovereign_debt_holders",
+            relation="swiss_wealth_bond_allocation",
+            weight=w_snb * 1.04,
+            rel_embedding=self.relation_embeddings["swiss_wealth_bond_allocation"],
+            metadata={"wealth_bonds_usd": 150.0e9, "tier_step": "1->3"},
+        )
+
+        # 3. Singapore: MAS -> GIC/Temasek -> Sinks
+        w_mas = self.compute_edge_weight(
+            base_weight=0.88,
+            flow_volume_eur=400.0e9,
+            risk_friction=0.06,
+            is_domestic_retention=False,
+            velocity_turnover_days=180.0,
+        )
+        self.substrate.add_relation(
+            source_id="singapore_mas_reserve_faucet",
+            target_id="singapore_gic_temasek_sovereign_basin",
+            relation="mas_official_reserve_transfer",
+            weight=w_mas,
+            rel_embedding=self.relation_embeddings["mas_official_reserve_transfer"],
+            metadata={"mas_transfer_usd": 400.0e9, "tier_step": "0->2"},
+        )
+        self.substrate.add_relation(
+            source_id="singapore_gic_temasek_sovereign_basin",
+            target_id="us_treasuries_custody",
+            relation="gic_us_treasury_allocation",
+            weight=w_mas * 1.02,
+            rel_embedding=self.relation_embeddings["gic_us_treasury_allocation"],
+            metadata={"gic_treasuries_usd": 250.0e9, "tier_step": "2->3"},
+        )
+        self.substrate.add_relation(
+            source_id="singapore_gic_temasek_sovereign_basin",
+            target_id="sovereign_debt_holders",
+            relation="temasek_global_portfolio_allocation",
+            weight=w_mas * 1.04,
+            rel_embedding=self.relation_embeddings["temasek_global_portfolio_allocation"],
+            metadata={"temasek_portfolio_usd": 150.0e9, "tier_step": "2->3"},
+        )
+
+        # 4. South Korea: BOK -> US Treasuries & NPS Pension Sink
+        w_bok = self.compute_edge_weight(
+            base_weight=0.92,
+            flow_volume_eur=420.0e9,
+            risk_friction=0.10,
+            is_domestic_retention=False,
+            velocity_turnover_days=90.0,
+        )
+        self.substrate.add_relation(
+            source_id="bank_of_korea_bok_vault",
+            target_id="us_treasuries_custody",
+            relation="bok_us_treasury_allocation",
+            weight=w_bok,
+            rel_embedding=self.relation_embeddings["bok_us_treasury_allocation"],
+            metadata={"bok_treasuries_usd": 120.0e9, "tier_step": "0->3"},
+        )
+        self.substrate.add_relation(
+            source_id="bank_of_korea_bok_vault",
+            target_id="korea_national_pension_service_nps",
+            relation="bok_nps_fx_swap_facility",
+            weight=w_bok * 0.95,
+            rel_embedding=self.relation_embeddings["bok_nps_fx_swap_facility"],
+            metadata={"bok_nps_swap_usd": 300.0e9, "tier_step": "0->3"},
+        )
+
+        # 5. United Kingdom: BoE -> UK DMO Gilt Debt Market
+        w_boe = self.compute_edge_weight(
+            base_weight=0.95,
+            flow_volume_eur=3354.0e9,
+            risk_friction=0.12,
+            is_domestic_retention=True,
+            velocity_turnover_days=30.0,
+        )
+        self.substrate.add_relation(
+            source_id="bank_of_england_boe_vault",
+            target_id="uk_dmo_gilt_debt_market",
+            relation="uk_gilt_benchmark_issuance",
+            weight=w_boe,
+            rel_embedding=self.relation_embeddings["uk_gilt_benchmark_issuance"],
+            metadata={"gilt_issuance_gbp": 2600.0e9, "tier_step": "0->3"},
+        )
+
+        # 6. Canada: BoC -> Maple Pension Consortium -> Sinks
+        w_boc = self.compute_edge_weight(
+            base_weight=0.88,
+            flow_volume_eur=1500.0e9,
+            risk_friction=0.08,
+            is_domestic_retention=False,
+            velocity_turnover_days=180.0,
+        )
+        self.substrate.add_relation(
+            source_id="bank_of_canada_boc_vault",
+            target_id="canada_maple_pension_consortium",
+            relation="boc_maple_pension_liquidity",
+            weight=w_boc,
+            rel_embedding=self.relation_embeddings["boc_maple_pension_liquidity"],
+            metadata={"boc_liquidity_usd": 1500.0e9, "tier_step": "0->2"},
+        )
+        self.substrate.add_relation(
+            source_id="canada_maple_pension_consortium",
+            target_id="norway_gpfg_global_equity_sink",
+            relation="maple_global_alternative_allocation",
+            weight=w_boc * 1.02,
+            rel_embedding=self.relation_embeddings["maple_global_alternative_allocation"],
+            metadata={"maple_alternatives_usd": 900.0e9, "tier_step": "2->3"},
+        )
+        self.substrate.add_relation(
+            source_id="canada_maple_pension_consortium",
+            target_id="us_treasuries_custody",
+            relation="maple_treasury_custody_allocation",
+            weight=w_boc * 1.04,
+            rel_embedding=self.relation_embeddings["maple_treasury_custody_allocation"],
+            metadata={"maple_treasuries_usd": 600.0e9, "tier_step": "2->3"},
+        )
+
+        # 7. Mexico: Banxico -> USMCA Nearshoring -> US Borrowers & Treasuries
+        w_banxico = self.compute_edge_weight(
+            base_weight=0.92,
+            flow_volume_eur=500.0e9,
+            risk_friction=0.15,
+            is_domestic_retention=False,
+            velocity_turnover_days=45.0,
+        )
+        self.substrate.add_relation(
+            source_id="banco_de_mexico_banxico_faucet",
+            target_id="usmca_nearshoring_trade_conduit",
+            relation="banxico_nearshoring_trade_facility",
+            weight=w_banxico,
+            rel_embedding=self.relation_embeddings["banxico_nearshoring_trade_facility"],
+            metadata={"banxico_trade_facility_usd": 500.0e9, "tier_step": "0->2"},
+        )
+        self.substrate.add_relation(
+            source_id="usmca_nearshoring_trade_conduit",
+            target_id="us_corporate_and_household_borrowers",
+            relation="usmca_supply_chain_trade_settlement",
+            weight=w_banxico * 1.02,
+            rel_embedding=self.relation_embeddings["usmca_supply_chain_trade_settlement"],
+            metadata={"usmca_trade_usd": 350.0e9, "tier_step": "2->3"},
+        )
+        self.substrate.add_relation(
+            source_id="usmca_nearshoring_trade_conduit",
+            target_id="us_treasuries_custody",
+            relation="usmca_reserve_accumulation",
+            weight=w_banxico * 1.05,
+            rel_embedding=self.relation_embeddings["usmca_reserve_accumulation"],
+            metadata={"usmca_reserves_usd": 150.0e9, "tier_step": "2->3"},
+        )
+
+        # 8. Multilateral Institutions: IMF SDR Pool & BIS Basel Central Banking Desk
+        w_imf = self.compute_edge_weight(
+            base_weight=0.85,
+            flow_volume_eur=935.0e9,
+            risk_friction=0.05,
+            is_domestic_retention=False,
+            velocity_turnover_days=365.0,
+        )
+        self.substrate.add_relation(
+            source_id="imf_special_drawing_rights_sdr_pool",
+            target_id="bis_basel_banking_department",
+            relation="imf_sdr_multilateral_allocation",
+            weight=w_imf,
+            rel_embedding=self.relation_embeddings["imf_sdr_multilateral_allocation"],
+            metadata={"imf_bis_sdr_usd": 450.0e9, "tier_step": "0->1"},
+        )
+        self.substrate.add_relation(
+            source_id="imf_special_drawing_rights_sdr_pool",
+            target_id="sovereign_debt_holders",
+            relation="imf_general_sdr_allocation",
+            weight=w_imf * 1.03,
+            rel_embedding=self.relation_embeddings["imf_general_sdr_allocation"],
+            metadata={"imf_general_sdr_usd": 485.0e9, "tier_step": "0->3"},
+        )
+        self.substrate.add_relation(
+            source_id="bis_basel_banking_department",
+            target_id="bundesbank",
+            relation="bis_central_bank_reserve_placement",
+            weight=w_imf * 1.02,
+            rel_embedding=self.relation_embeddings["bis_central_bank_reserve_placement"],
+            metadata={"bis_bundesbank_usd": 250.0e9, "tier_step": "1->3"},
+        )
+        self.substrate.add_relation(
+            source_id="bis_basel_banking_department",
+            target_id="us_treasuries_custody",
+            relation="bis_treasury_collateral_management",
+            weight=w_imf * 1.04,
+            rel_embedding=self.relation_embeddings["bis_treasury_collateral_management"],
+            metadata={"bis_treasuries_usd": 200.0e9, "tier_step": "1->3"},
+        )
+
+        # 9. Upgraded Eurasian Macro Architecture
+        w_eurasia = self.compute_edge_weight(
+            base_weight=1.05,
+            flow_volume_eur=600.0e9,
+            risk_friction=0.35,
+            is_domestic_retention=False,
+            velocity_turnover_days=180.0,
+        )
+        self.substrate.add_relation(
+            source_id="bank_of_russia_cbr_vault",
+            target_id="chinese_state_banks_fx_desk",
+            relation="cbr_yuan_bilateral_reserve_holding",
+            weight=w_eurasia,
+            rel_embedding=self.relation_embeddings["cbr_yuan_bilateral_reserve_holding"],
+            metadata={"cbr_yuan_usd": 115.0e9, "tier_step": "0->1"},
+        )
+        self.substrate.add_relation(
+            source_id="russia_national_wealth_fund_nwf",
+            target_id="russian_state_banking_credit_nexus",
+            relation="nwf_sovereign_oil_buffer_injection",
+            weight=w_eurasia * 0.95,
+            rel_embedding=self.relation_embeddings["nwf_sovereign_oil_buffer_injection"],
+            metadata={"nwf_buffer_usd": 155.0e9, "tier_step": "0->1"},
+        )
+        self.substrate.add_relation(
+            source_id="russian_state_banking_credit_nexus",
+            target_id="sovereign_debt_holders",
+            relation="russian_state_credit_creation",
+            weight=w_eurasia * 1.02,
+            rel_embedding=self.relation_embeddings["russian_state_credit_creation"],
+            metadata={"state_credit_usd": 920.0e9, "tier_step": "1->3"},
+        )
+        self.substrate.add_relation(
+            source_id="gazprombank_energy_settlement_hub",
+            target_id="russia_offshore_shadow_capital_basin",
+            relation="gazprombank_energy_pipeline_clearing",
+            weight=w_eurasia * 1.08,
+            rel_embedding=self.relation_embeddings["gazprombank_energy_pipeline_clearing"],
+            metadata={"gazprom_clearing_usd": 95.0e9, "tier_step": "2->3"},
         )
 
     def initialize_landmarks(self) -> None:

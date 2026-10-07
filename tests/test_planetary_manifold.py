@@ -54,9 +54,9 @@ def bridge() -> ManifoldPGMBridge:
 
 
 def test_planetary_macro_harvester_ingestion(harvester: PlanetaryMacroHarvester):
-    """Verifies statutory flow ingestion across all 7 planetary macro jurisdictions."""
+    """Verifies statutory flow ingestion across all planetary macro jurisdictions (8 dark forest + Eurasia)."""
     events = harvester.harvest()
-    assert len(events) == 18
+    assert len(events) == 48
 
     # 1. China & East Asia
     ev_china = next(e for e in events if "planetary_tic_pboc" in e.event_id)
@@ -106,11 +106,40 @@ def test_planetary_macro_harvester_ingestion(harvester: PlanetaryMacroHarvester)
     ev_afr = next(e for e in events if "africa_minerals" in e.event_id)
     assert ev_afr.nominal_amount == AFRICA_MINERALS_DEBT_CONDUIT_USD
 
+    # 7. Dark Forest Regions Ingestion Assertions
+    ev_norway = next(e for e in events if "norway_gpfg_global_allocation" in e.event_id)
+    assert ev_norway.nominal_amount == 1750.0e9
+
+    ev_snb = next(e for e in events if "snb_gsib_reserve_transmission" in e.event_id)
+    assert ev_snb.nominal_amount == 500.0e9
+
+    ev_mas = next(e for e in events if "mas_official_reserve_transfer" in e.event_id)
+    assert ev_mas.nominal_amount == 400.0e9
+
+    ev_bok = next(e for e in events if "bok_nps_fx_swap" in e.event_id)
+    assert ev_bok.nominal_amount == 300.0e9
+
+    ev_gilt = next(e for e in events if "uk_dmo_gilt_issuance" in e.event_id)
+    assert ev_gilt.nominal_amount == 2600.0e9
+
+    ev_maple = next(e for e in events if "boc_maple_pension_liquidity" in e.event_id)
+    assert ev_maple.nominal_amount == 1500.0e9
+
+    ev_mx = next(e for e in events if "banxico_nearshoring_facility" in e.event_id)
+    assert ev_mx.nominal_amount == 500.0e9
+
+    ev_sdr = next(e for e in events if "imf_sdr_bis_allocation" in e.event_id)
+    assert ev_sdr.nominal_amount == 450.0e9
+
+    ev_nwf = next(e for e in events if "nwf_oil_buffer_injection" in e.event_id)
+    assert ev_nwf.nominal_amount == 155.0e9
+
 
 def test_planetary_node_and_edge_registration(bridge: ManifoldPGMBridge):
-    """Verifies that all 13 Planetary Manifold nodes and transmission relations exist with valid embeddings."""
+    """Verifies that all Planetary Manifold and Dark Forest nodes and transmission relations exist with valid embeddings."""
     sub = bridge.substrate
     planetary_nodes = [
+        # Original 13 planetary nodes
         "pboc_safe_foreign_reserves",
         "chinese_state_banks_fx_desk",
         "offshore_cnh_hong_kong_hub",
@@ -124,6 +153,28 @@ def test_planetary_node_and_edge_registration(bridge: ManifoldPGMBridge):
         "reserve_bank_of_australia_commodity_faucet",
         "reserve_bank_of_india_refining_hub",
         "africa_critical_minerals_debt_conduit",
+        # 16 Dark Forest entities
+        "norway_norges_bank_gpfg_faucet",
+        "norway_gpfg_global_equity_sink",
+        "swiss_national_bank_snb_vault",
+        "ubs_group_consolidated_gsib",
+        "singapore_mas_reserve_faucet",
+        "singapore_gic_temasek_sovereign_basin",
+        "bank_of_korea_bok_vault",
+        "korea_national_pension_service_nps",
+        "bank_of_england_boe_vault",
+        "uk_dmo_gilt_debt_market",
+        "bank_of_canada_boc_vault",
+        "canada_maple_pension_consortium",
+        "banco_de_mexico_banxico_faucet",
+        "usmca_nearshoring_trade_conduit",
+        "imf_special_drawing_rights_sdr_pool",
+        "bis_basel_banking_department",
+        # 4 Eurasian upgrade entities
+        "russia_national_wealth_fund_nwf",
+        "russian_state_banking_credit_nexus",
+        "gazprombank_energy_settlement_hub",
+        "russia_offshore_shadow_capital_basin",
     ]
 
     for nid in planetary_nodes:

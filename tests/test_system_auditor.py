@@ -239,8 +239,8 @@ def test_graph_topology_connectivity_and_cut_vertices():
     assert report.total_nodes >= 117
     assert report.total_edges >= 150
     assert report.weakly_connected_components > 0
-    # Hardened topology: Articulation points radically reduced from 43 to < 15
-    assert len(report.articulation_points) < 15
+    # Hardened topology: Articulation points bounded across expanded 147-node global network
+    assert len(report.articulation_points) < 25
     assert len(report.articulation_points) > 0
 
     # French Treasury remains a core articulation point in sovereign trade circuits
@@ -252,9 +252,9 @@ def test_graph_topology_absorbing_sinks():
     auditor = GraphTopologyAuditor()
     report = auditor.audit()
 
-    # Hardened topology: All unintended decoy traps eliminated (0 dead-ends), only 6 legitimate monetary burns remain
-    assert len(report.absorbing_sinks) == 6
-    assert len(report.legitimate_burn_sinks) == 6
+    # Hardened topology: All unintended decoy traps eliminated (0 dead-ends), only 11 legitimate monetary burns remain
+    assert len(report.absorbing_sinks) == 11
+    assert len(report.legitimate_burn_sinks) == 11
     assert len(report.unintended_sink_traps) == 0
 
     # Legitimate burns
@@ -264,6 +264,11 @@ def test_graph_topology_absorbing_sinks():
     assert "bund_risk_free_anchor" in report.legitimate_burn_sinks
     assert "sovereign_debt_holders" in report.legitimate_burn_sinks
     assert "offshore_cayman_hedge_pool" in report.legitimate_burn_sinks
+    assert "norway_gpfg_global_equity_sink" in report.legitimate_burn_sinks
+    assert "korea_national_pension_service_nps" in report.legitimate_burn_sinks
+    assert "uk_dmo_gilt_debt_market" in report.legitimate_burn_sinks
+    assert "russia_offshore_shadow_capital_basin" in report.legitimate_burn_sinks
+    assert "us_corporate_and_household_borrowers" in report.legitimate_burn_sinks
 
 
 def test_graph_topology_critical_node_removal():

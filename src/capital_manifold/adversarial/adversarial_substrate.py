@@ -223,6 +223,32 @@ class AdversarialSubstrateBuilder:
             "property_mortgage_syndication",
             "fintech_loan_brokering",
             "offshore_subordinated_transfer",
+            # Expanded Planetary Monetary Manifold & Eurasian Relations
+            "gpfg_sovereign_wealth_allocation",
+            "snb_gsib_reserve_transmission",
+            "swiss_treasuries_custodial_placement",
+            "swiss_wealth_bond_allocation",
+            "snb_equity_reserve_allocation",
+            "mas_official_reserve_transfer",
+            "gic_us_treasury_allocation",
+            "temasek_global_portfolio_allocation",
+            "bok_us_treasury_allocation",
+            "bok_nps_fx_swap_facility",
+            "uk_gilt_benchmark_issuance",
+            "boc_maple_pension_liquidity",
+            "maple_global_alternative_allocation",
+            "maple_treasury_custody_allocation",
+            "banxico_nearshoring_trade_facility",
+            "usmca_supply_chain_trade_settlement",
+            "usmca_reserve_accumulation",
+            "imf_sdr_multilateral_allocation",
+            "bis_central_bank_reserve_placement",
+            "bis_treasury_collateral_management",
+            "imf_general_sdr_allocation",
+            "nwf_sovereign_oil_buffer_injection",
+            "russian_state_credit_creation",
+            "gazprombank_energy_pipeline_clearing",
+            "cbr_yuan_bilateral_reserve_holding",
         ]
         for idx, r_name in enumerate(rel_types):
             vec = np.zeros(self.rel_dim, dtype=np.float32)
@@ -682,6 +708,156 @@ class AdversarialSubstrateBuilder:
             interbank_lending_ratio=0.10, trade_finance_exposure=0.90, sovereign_holding_ratio=0.50,
             central_bank_refi_access=0.0, regulatory_tier_rank=0.50,
         ))
+        # 12. Expanded Planetary Monetary Manifold (8 Dark Forest Regions) & Eurasian Upgrades
+        # Norway
+        self._register("norway_norges_bank_gpfg_faucet", EntityCategory.PLANETARY_MANIFOLD, BalanceSheetMetrics(
+            log_total_assets=0.99, leverage_ratio=0.01, cash_reserves_ratio=0.30, svt_dealer_mandate=0.0,
+            target2_direct_participant=0.0, wholesale_repo_volume=0.40, cross_border_liability_ratio=0.95,
+            duration_sensitivity=0.45, state_ownership_pct=1.00, npl_ratio=0.000, deposit_funded_ratio=0.00,
+            interbank_lending_ratio=0.10, trade_finance_exposure=0.10, sovereign_holding_ratio=0.70,
+            central_bank_refi_access=1.0, regulatory_tier_rank=1.00,
+        ))
+        self._register("norway_gpfg_global_equity_sink", EntityCategory.PLANETARY_MANIFOLD, BalanceSheetMetrics(
+            log_total_assets=0.99, leverage_ratio=0.00, cash_reserves_ratio=0.05, svt_dealer_mandate=0.0,
+            target2_direct_participant=0.0, wholesale_repo_volume=0.10, cross_border_liability_ratio=0.98,
+            duration_sensitivity=0.50, state_ownership_pct=1.00, npl_ratio=0.000, deposit_funded_ratio=0.00,
+            interbank_lending_ratio=0.05, trade_finance_exposure=0.05, sovereign_holding_ratio=0.60,
+            central_bank_refi_access=0.0, regulatory_tier_rank=0.95,
+        ))
+        # Switzerland
+        self._register("swiss_national_bank_snb_vault", EntityCategory.PLANETARY_MANIFOLD, BalanceSheetMetrics(
+            log_total_assets=0.97, leverage_ratio=0.01, cash_reserves_ratio=0.85, svt_dealer_mandate=0.0,
+            target2_direct_participant=0.0, wholesale_repo_volume=0.70, cross_border_liability_ratio=0.90,
+            duration_sensitivity=0.40, state_ownership_pct=0.55, npl_ratio=0.000, deposit_funded_ratio=0.00,
+            interbank_lending_ratio=0.30, trade_finance_exposure=0.10, sovereign_holding_ratio=0.85,
+            central_bank_refi_access=1.0, regulatory_tier_rank=1.00,
+        ))
+        self._register("ubs_group_consolidated_gsib", EntityCategory.PLANETARY_MANIFOLD, BalanceSheetMetrics(
+            log_total_assets=0.98, leverage_ratio=0.06, cash_reserves_ratio=0.20, svt_dealer_mandate=0.8,
+            target2_direct_participant=1.0, wholesale_repo_volume=0.95, cross_border_liability_ratio=0.85,
+            duration_sensitivity=0.35, state_ownership_pct=0.00, npl_ratio=0.008, deposit_funded_ratio=0.55,
+            interbank_lending_ratio=0.70, trade_finance_exposure=0.45, sovereign_holding_ratio=0.65,
+            central_bank_refi_access=1.0, regulatory_tier_rank=0.98,
+        ))
+        # Singapore
+        self._register("singapore_mas_reserve_faucet", EntityCategory.PLANETARY_MANIFOLD, BalanceSheetMetrics(
+            log_total_assets=0.93, leverage_ratio=0.01, cash_reserves_ratio=0.90, svt_dealer_mandate=0.0,
+            target2_direct_participant=0.0, wholesale_repo_volume=0.60, cross_border_liability_ratio=0.85,
+            duration_sensitivity=0.30, state_ownership_pct=1.00, npl_ratio=0.000, deposit_funded_ratio=0.00,
+            interbank_lending_ratio=0.25, trade_finance_exposure=0.30, sovereign_holding_ratio=0.90,
+            central_bank_refi_access=1.0, regulatory_tier_rank=1.00,
+        ))
+        self._register("singapore_gic_temasek_sovereign_basin", EntityCategory.PLANETARY_MANIFOLD, BalanceSheetMetrics(
+            log_total_assets=0.97, leverage_ratio=0.80, cash_reserves_ratio=0.25, svt_dealer_mandate=0.0,
+            target2_direct_participant=0.0, wholesale_repo_volume=0.50, cross_border_liability_ratio=0.90,
+            duration_sensitivity=0.40, state_ownership_pct=1.00, npl_ratio=0.000, deposit_funded_ratio=0.00,
+            interbank_lending_ratio=0.15, trade_finance_exposure=0.35, sovereign_holding_ratio=0.55,
+            central_bank_refi_access=0.0, regulatory_tier_rank=0.95,
+        ))
+        # South Korea
+        self._register("bank_of_korea_bok_vault", EntityCategory.PLANETARY_MANIFOLD, BalanceSheetMetrics(
+            log_total_assets=0.93, leverage_ratio=0.01, cash_reserves_ratio=0.85, svt_dealer_mandate=0.0,
+            target2_direct_participant=0.0, wholesale_repo_volume=0.55, cross_border_liability_ratio=0.80,
+            duration_sensitivity=0.45, state_ownership_pct=1.00, npl_ratio=0.000, deposit_funded_ratio=0.00,
+            interbank_lending_ratio=0.20, trade_finance_exposure=0.35, sovereign_holding_ratio=0.85,
+            central_bank_refi_access=1.0, regulatory_tier_rank=1.00,
+        ))
+        self._register("korea_national_pension_service_nps", EntityCategory.PLANETARY_MANIFOLD, BalanceSheetMetrics(
+            log_total_assets=0.96, leverage_ratio=0.00, cash_reserves_ratio=0.10, svt_dealer_mandate=0.0,
+            target2_direct_participant=0.0, wholesale_repo_volume=0.20, cross_border_liability_ratio=0.85,
+            duration_sensitivity=0.60, state_ownership_pct=1.00, npl_ratio=0.000, deposit_funded_ratio=0.00,
+            interbank_lending_ratio=0.05, trade_finance_exposure=0.05, sovereign_holding_ratio=0.75,
+            central_bank_refi_access=0.0, regulatory_tier_rank=0.95,
+        ))
+        # United Kingdom
+        self._register("bank_of_england_boe_vault", EntityCategory.PLANETARY_MANIFOLD, BalanceSheetMetrics(
+            log_total_assets=0.97, leverage_ratio=0.01, cash_reserves_ratio=0.90, svt_dealer_mandate=0.0,
+            target2_direct_participant=0.0, wholesale_repo_volume=0.80, cross_border_liability_ratio=0.75,
+            duration_sensitivity=0.50, state_ownership_pct=1.00, npl_ratio=0.000, deposit_funded_ratio=0.00,
+            interbank_lending_ratio=0.50, trade_finance_exposure=0.10, sovereign_holding_ratio=0.95,
+            central_bank_refi_access=1.0, regulatory_tier_rank=1.00,
+        ))
+        self._register("uk_dmo_gilt_debt_market", EntityCategory.PLANETARY_MANIFOLD, BalanceSheetMetrics(
+            log_total_assets=0.98, leverage_ratio=0.00, cash_reserves_ratio=0.05, svt_dealer_mandate=0.0,
+            target2_direct_participant=0.0, wholesale_repo_volume=0.90, cross_border_liability_ratio=0.70,
+            duration_sensitivity=0.85, state_ownership_pct=1.00, npl_ratio=0.000, deposit_funded_ratio=0.00,
+            interbank_lending_ratio=0.00, trade_finance_exposure=0.00, sovereign_holding_ratio=1.00,
+            central_bank_refi_access=0.0, regulatory_tier_rank=0.90,
+        ))
+        # Canada
+        self._register("bank_of_canada_boc_vault", EntityCategory.PLANETARY_MANIFOLD, BalanceSheetMetrics(
+            log_total_assets=0.94, leverage_ratio=0.01, cash_reserves_ratio=0.85, svt_dealer_mandate=0.0,
+            target2_direct_participant=0.0, wholesale_repo_volume=0.70, cross_border_liability_ratio=0.65,
+            duration_sensitivity=0.40, state_ownership_pct=1.00, npl_ratio=0.000, deposit_funded_ratio=0.00,
+            interbank_lending_ratio=0.45, trade_finance_exposure=0.15, sovereign_holding_ratio=0.90,
+            central_bank_refi_access=1.0, regulatory_tier_rank=1.00,
+        ))
+        self._register("canada_maple_pension_consortium", EntityCategory.PLANETARY_MANIFOLD, BalanceSheetMetrics(
+            log_total_assets=0.98, leverage_ratio=0.15, cash_reserves_ratio=0.15, svt_dealer_mandate=0.0,
+            target2_direct_participant=0.0, wholesale_repo_volume=0.40, cross_border_liability_ratio=0.85,
+            duration_sensitivity=0.55, state_ownership_pct=0.90, npl_ratio=0.000, deposit_funded_ratio=0.00,
+            interbank_lending_ratio=0.10, trade_finance_exposure=0.20, sovereign_holding_ratio=0.50,
+            central_bank_refi_access=0.0, regulatory_tier_rank=0.95,
+        ))
+        # Mexico
+        self._register("banco_de_mexico_banxico_faucet", EntityCategory.PLANETARY_MANIFOLD, BalanceSheetMetrics(
+            log_total_assets=0.91, leverage_ratio=0.02, cash_reserves_ratio=0.75, svt_dealer_mandate=0.0,
+            target2_direct_participant=0.0, wholesale_repo_volume=0.45, cross_border_liability_ratio=0.70,
+            duration_sensitivity=0.35, state_ownership_pct=1.00, npl_ratio=0.000, deposit_funded_ratio=0.00,
+            interbank_lending_ratio=0.20, trade_finance_exposure=0.40, sovereign_holding_ratio=0.80,
+            central_bank_refi_access=1.0, regulatory_tier_rank=1.00,
+        ))
+        self._register("usmca_nearshoring_trade_conduit", EntityCategory.PLANETARY_MANIFOLD, BalanceSheetMetrics(
+            log_total_assets=0.94, leverage_ratio=0.10, cash_reserves_ratio=0.15, svt_dealer_mandate=0.0,
+            target2_direct_participant=0.0, wholesale_repo_volume=0.60, cross_border_liability_ratio=0.90,
+            duration_sensitivity=0.15, state_ownership_pct=0.20, npl_ratio=0.010, deposit_funded_ratio=0.00,
+            interbank_lending_ratio=0.30, trade_finance_exposure=0.95, sovereign_holding_ratio=0.25,
+            central_bank_refi_access=0.0, regulatory_tier_rank=0.75,
+        ))
+        # Multilateral Institutions
+        self._register("imf_special_drawing_rights_sdr_pool", EntityCategory.PLANETARY_MANIFOLD, BalanceSheetMetrics(
+            log_total_assets=0.97, leverage_ratio=0.00, cash_reserves_ratio=0.95, svt_dealer_mandate=0.0,
+            target2_direct_participant=0.0, wholesale_repo_volume=0.10, cross_border_liability_ratio=0.99,
+            duration_sensitivity=0.10, state_ownership_pct=1.00, npl_ratio=0.000, deposit_funded_ratio=0.00,
+            interbank_lending_ratio=0.80, trade_finance_exposure=0.10, sovereign_holding_ratio=0.95,
+            central_bank_refi_access=1.0, regulatory_tier_rank=1.00,
+        ))
+        self._register("bis_basel_banking_department", EntityCategory.PLANETARY_MANIFOLD, BalanceSheetMetrics(
+            log_total_assets=0.94, leverage_ratio=0.02, cash_reserves_ratio=0.60, svt_dealer_mandate=0.0,
+            target2_direct_participant=0.0, wholesale_repo_volume=0.90, cross_border_liability_ratio=0.95,
+            duration_sensitivity=0.20, state_ownership_pct=1.00, npl_ratio=0.000, deposit_funded_ratio=0.40,
+            interbank_lending_ratio=0.90, trade_finance_exposure=0.20, sovereign_holding_ratio=0.85,
+            central_bank_refi_access=1.0, regulatory_tier_rank=1.00,
+        ))
+        # Upgraded Eurasian Entities
+        self._register("russia_national_wealth_fund_nwf", EntityCategory.PLANETARY_MANIFOLD, BalanceSheetMetrics(
+            log_total_assets=0.89, leverage_ratio=0.00, cash_reserves_ratio=0.65, svt_dealer_mandate=0.0,
+            target2_direct_participant=0.0, wholesale_repo_volume=0.30, cross_border_liability_ratio=0.50,
+            duration_sensitivity=0.30, state_ownership_pct=1.00, npl_ratio=0.000, deposit_funded_ratio=0.00,
+            interbank_lending_ratio=0.20, trade_finance_exposure=0.20, sovereign_holding_ratio=0.70,
+            central_bank_refi_access=0.0, regulatory_tier_rank=0.95,
+        ))
+        self._register("russian_state_banking_credit_nexus", EntityCategory.PLANETARY_MANIFOLD, BalanceSheetMetrics(
+            log_total_assets=0.97, leverage_ratio=0.09, cash_reserves_ratio=0.15, svt_dealer_mandate=0.0,
+            target2_direct_participant=0.0, wholesale_repo_volume=0.75, cross_border_liability_ratio=0.40,
+            duration_sensitivity=0.45, state_ownership_pct=0.75, npl_ratio=0.025, deposit_funded_ratio=0.65,
+            interbank_lending_ratio=0.40, trade_finance_exposure=0.50, sovereign_holding_ratio=0.60,
+            central_bank_refi_access=1.0, regulatory_tier_rank=0.90,
+        ))
+        self._register("gazprombank_energy_settlement_hub", EntityCategory.PLANETARY_MANIFOLD, BalanceSheetMetrics(
+            log_total_assets=0.90, leverage_ratio=0.07, cash_reserves_ratio=0.25, svt_dealer_mandate=0.0,
+            target2_direct_participant=0.0, wholesale_repo_volume=0.65, cross_border_liability_ratio=0.85,
+            duration_sensitivity=0.25, state_ownership_pct=0.60, npl_ratio=0.015, deposit_funded_ratio=0.35,
+            interbank_lending_ratio=0.35, trade_finance_exposure=0.90, sovereign_holding_ratio=0.40,
+            central_bank_refi_access=1.0, regulatory_tier_rank=0.85,
+        ))
+        self._register("russia_offshore_shadow_capital_basin", EntityCategory.PLANETARY_MANIFOLD, BalanceSheetMetrics(
+            log_total_assets=0.91, leverage_ratio=0.10, cash_reserves_ratio=0.40, svt_dealer_mandate=0.0,
+            target2_direct_participant=0.0, wholesale_repo_volume=0.20, cross_border_liability_ratio=0.99,
+            duration_sensitivity=0.15, state_ownership_pct=0.30, npl_ratio=0.000, deposit_funded_ratio=0.00,
+            interbank_lending_ratio=0.10, trade_finance_exposure=0.85, sovereign_holding_ratio=0.20,
+            central_bank_refi_access=0.0, regulatory_tier_rank=0.40,
+        ))
 
     def build_adversarial_substrate(self) -> Tuple[L3LatentSubstrate, Dict[str, BalanceSheetMetrics]]:
         """Constructs L3 substrate with 80+ entities and dynamically synthesized institutional edges."""
@@ -1113,6 +1289,217 @@ class AdversarialSubstrateBuilder:
             weight=2.50,
             rel_embedding=self.relation_embeddings["immobilized_euroclear_reserve_claim"],
             metadata={"frozen_reserves_usd": 300.0e9},
+        )
+
+        # Expanded Planetary Monetary Manifold & Dark Forest Regions (16 entities + 4 Eurasian)
+        # 1. Norway
+        sub.add_relation(
+            source_id="norway_norges_bank_gpfg_faucet",
+            target_id="norway_gpfg_global_equity_sink",
+            relation="gpfg_sovereign_wealth_allocation",
+            weight=0.85,
+            rel_embedding=self.relation_embeddings["gpfg_sovereign_wealth_allocation"],
+            metadata={"aum_usd": 1750.0e9},
+        )
+        # 2. Switzerland
+        sub.add_relation(
+            source_id="swiss_national_bank_snb_vault",
+            target_id="ubs_group_consolidated_gsib",
+            relation="snb_gsib_reserve_transmission",
+            weight=0.90,
+            rel_embedding=self.relation_embeddings["snb_gsib_reserve_transmission"],
+            metadata={"reserve_transmission_usd": 500.0e9},
+        )
+        sub.add_relation(
+            source_id="swiss_national_bank_snb_vault",
+            target_id="norway_gpfg_global_equity_sink",
+            relation="snb_equity_reserve_allocation",
+            weight=0.95,
+            rel_embedding=self.relation_embeddings["snb_equity_reserve_allocation"],
+            metadata={"foreign_equity_usd": 450.0e9},
+        )
+        sub.add_relation(
+            source_id="ubs_group_consolidated_gsib",
+            target_id="us_treasuries_custody",
+            relation="swiss_treasuries_custodial_placement",
+            weight=0.92,
+            rel_embedding=self.relation_embeddings["swiss_treasuries_custodial_placement"],
+            metadata={"treasuries_custody_usd": 350.0e9},
+        )
+        sub.add_relation(
+            source_id="ubs_group_consolidated_gsib",
+            target_id="sovereign_debt_holders",
+            relation="swiss_wealth_bond_allocation",
+            weight=0.94,
+            rel_embedding=self.relation_embeddings["swiss_wealth_bond_allocation"],
+            metadata={"wealth_bonds_usd": 150.0e9},
+        )
+        # 3. Singapore
+        sub.add_relation(
+            source_id="singapore_mas_reserve_faucet",
+            target_id="singapore_gic_temasek_sovereign_basin",
+            relation="mas_official_reserve_transfer",
+            weight=0.88,
+            rel_embedding=self.relation_embeddings["mas_official_reserve_transfer"],
+            metadata={"mas_transfer_usd": 400.0e9},
+        )
+        sub.add_relation(
+            source_id="singapore_gic_temasek_sovereign_basin",
+            target_id="us_treasuries_custody",
+            relation="gic_us_treasury_allocation",
+            weight=0.90,
+            rel_embedding=self.relation_embeddings["gic_us_treasury_allocation"],
+            metadata={"gic_treasuries_usd": 250.0e9},
+        )
+        sub.add_relation(
+            source_id="singapore_gic_temasek_sovereign_basin",
+            target_id="sovereign_debt_holders",
+            relation="temasek_global_portfolio_allocation",
+            weight=0.92,
+            rel_embedding=self.relation_embeddings["temasek_global_portfolio_allocation"],
+            metadata={"temasek_portfolio_usd": 150.0e9},
+        )
+        # 4. South Korea
+        sub.add_relation(
+            source_id="bank_of_korea_bok_vault",
+            target_id="us_treasuries_custody",
+            relation="bok_us_treasury_allocation",
+            weight=0.92,
+            rel_embedding=self.relation_embeddings["bok_us_treasury_allocation"],
+            metadata={"bok_treasuries_usd": 120.0e9},
+        )
+        sub.add_relation(
+            source_id="bank_of_korea_bok_vault",
+            target_id="korea_national_pension_service_nps",
+            relation="bok_nps_fx_swap_facility",
+            weight=0.88,
+            rel_embedding=self.relation_embeddings["bok_nps_fx_swap_facility"],
+            metadata={"bok_nps_swap_usd": 300.0e9},
+        )
+        # 5. United Kingdom
+        sub.add_relation(
+            source_id="bank_of_england_boe_vault",
+            target_id="uk_dmo_gilt_debt_market",
+            relation="uk_gilt_benchmark_issuance",
+            weight=0.95,
+            rel_embedding=self.relation_embeddings["uk_gilt_benchmark_issuance"],
+            metadata={"gilt_issuance_gbp": 2600.0e9},
+        )
+        # 6. Canada
+        sub.add_relation(
+            source_id="bank_of_canada_boc_vault",
+            target_id="canada_maple_pension_consortium",
+            relation="boc_maple_pension_liquidity",
+            weight=0.88,
+            rel_embedding=self.relation_embeddings["boc_maple_pension_liquidity"],
+            metadata={"boc_liquidity_usd": 1500.0e9},
+        )
+        sub.add_relation(
+            source_id="canada_maple_pension_consortium",
+            target_id="norway_gpfg_global_equity_sink",
+            relation="maple_global_alternative_allocation",
+            weight=0.90,
+            rel_embedding=self.relation_embeddings["maple_global_alternative_allocation"],
+            metadata={"maple_alternatives_usd": 900.0e9},
+        )
+        sub.add_relation(
+            source_id="canada_maple_pension_consortium",
+            target_id="us_treasuries_custody",
+            relation="maple_treasury_custody_allocation",
+            weight=0.92,
+            rel_embedding=self.relation_embeddings["maple_treasury_custody_allocation"],
+            metadata={"maple_treasuries_usd": 600.0e9},
+        )
+        # 7. Mexico
+        sub.add_relation(
+            source_id="banco_de_mexico_banxico_faucet",
+            target_id="usmca_nearshoring_trade_conduit",
+            relation="banxico_nearshoring_trade_facility",
+            weight=0.92,
+            rel_embedding=self.relation_embeddings["banxico_nearshoring_trade_facility"],
+            metadata={"banxico_trade_facility_usd": 500.0e9},
+        )
+        sub.add_relation(
+            source_id="usmca_nearshoring_trade_conduit",
+            target_id="us_corporate_and_household_borrowers",
+            relation="usmca_supply_chain_trade_settlement",
+            weight=0.94,
+            rel_embedding=self.relation_embeddings["usmca_supply_chain_trade_settlement"],
+            metadata={"usmca_trade_usd": 350.0e9},
+        )
+        sub.add_relation(
+            source_id="usmca_nearshoring_trade_conduit",
+            target_id="us_treasuries_custody",
+            relation="usmca_reserve_accumulation",
+            weight=0.96,
+            rel_embedding=self.relation_embeddings["usmca_reserve_accumulation"],
+            metadata={"usmca_reserves_usd": 150.0e9},
+        )
+        # 8. Multilateral Institutions
+        sub.add_relation(
+            source_id="imf_special_drawing_rights_sdr_pool",
+            target_id="bis_basel_banking_department",
+            relation="imf_sdr_multilateral_allocation",
+            weight=0.85,
+            rel_embedding=self.relation_embeddings["imf_sdr_multilateral_allocation"],
+            metadata={"imf_bis_sdr_usd": 450.0e9},
+        )
+        sub.add_relation(
+            source_id="imf_special_drawing_rights_sdr_pool",
+            target_id="sovereign_debt_holders",
+            relation="imf_general_sdr_allocation",
+            weight=0.88,
+            rel_embedding=self.relation_embeddings["imf_general_sdr_allocation"],
+            metadata={"imf_general_sdr_usd": 485.0e9},
+        )
+        sub.add_relation(
+            source_id="bis_basel_banking_department",
+            target_id="bundesbank",
+            relation="bis_central_bank_reserve_placement",
+            weight=0.86,
+            rel_embedding=self.relation_embeddings["bis_central_bank_reserve_placement"],
+            metadata={"bis_bundesbank_usd": 250.0e9},
+        )
+        sub.add_relation(
+            source_id="bis_basel_banking_department",
+            target_id="us_treasuries_custody",
+            relation="bis_treasury_collateral_management",
+            weight=0.88,
+            rel_embedding=self.relation_embeddings["bis_treasury_collateral_management"],
+            metadata={"bis_treasuries_usd": 200.0e9},
+        )
+        # 9. Eurasian Upgrades
+        sub.add_relation(
+            source_id="bank_of_russia_cbr_vault",
+            target_id="chinese_state_banks_fx_desk",
+            relation="cbr_yuan_bilateral_reserve_holding",
+            weight=1.05,
+            rel_embedding=self.relation_embeddings["cbr_yuan_bilateral_reserve_holding"],
+            metadata={"cbr_yuan_usd": 115.0e9},
+        )
+        sub.add_relation(
+            source_id="russia_national_wealth_fund_nwf",
+            target_id="russian_state_banking_credit_nexus",
+            relation="nwf_sovereign_oil_buffer_injection",
+            weight=0.95,
+            rel_embedding=self.relation_embeddings["nwf_sovereign_oil_buffer_injection"],
+            metadata={"nwf_buffer_usd": 155.0e9},
+        )
+        sub.add_relation(
+            source_id="russian_state_banking_credit_nexus",
+            target_id="sovereign_debt_holders",
+            relation="russian_state_credit_creation",
+            weight=1.02,
+            rel_embedding=self.relation_embeddings["russian_state_credit_creation"],
+            metadata={"state_credit_usd": 920.0e9},
+        )
+        sub.add_relation(
+            source_id="gazprombank_energy_settlement_hub",
+            target_id="russia_offshore_shadow_capital_basin",
+            relation="gazprombank_energy_pipeline_clearing",
+            weight=1.08,
+            rel_embedding=self.relation_embeddings["gazprombank_energy_pipeline_clearing"],
+            metadata={"gazprom_clearing_usd": 95.0e9},
         )
 
         # I) Deceptive Local Commercial Edges for Decoy Nodes
