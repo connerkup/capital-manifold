@@ -56,7 +56,7 @@ def bridge() -> ManifoldPGMBridge:
 def test_planetary_macro_harvester_ingestion(harvester: PlanetaryMacroHarvester):
     """Verifies statutory flow ingestion across all 7 planetary macro jurisdictions."""
     events = harvester.harvest()
-    assert len(events) == 14
+    assert len(events) == 18
 
     # 1. China & East Asia
     ev_china = next(e for e in events if "planetary_tic_pboc" in e.event_id)
@@ -81,7 +81,7 @@ def test_planetary_macro_harvester_ingestion(harvester: PlanetaryMacroHarvester)
     # 3. Russia & Euroclear
     ev_frozen = next(e for e in events if "euroclear_frozen" in e.event_id)
     assert ev_frozen.nominal_amount == EUROCLEAR_FROZEN_RUSSIAN_ASSETS_USD
-    assert ev_frozen.flow_type == FlowType.RISK_FRICTION
+    assert ev_frozen.flow_type == FlowType.POOL_CONCENTRATION
 
     ev_gold = next(e for e in events if "cbr_gold_vault" in e.event_id)
     assert ev_gold.nominal_amount == CBR_PHYSICAL_GOLD_VAULT_USD

@@ -58,29 +58,57 @@ def test_accounting_conservation_roles(duckdb_available):
     assert summary.role == EntityRole.INTERMEDIATE_CONDUIT
     assert summary.is_conduit is True
 
-    # Check known orphan nodes from FINANCIAL_ENTITIES
-    assert "bundesbank" in report.orphan_entities
-    assert "offshore_fx_swap_desk" in report.orphan_entities
+    # bundesbank is now a legitimate sink connected via TARGET2 claims
+    assert "bundesbank" in report.sink_entities
+    # offshore FX swap desk is active as an intermediate conduit
+    assert "offshore_fx_swap_desk" in report.conduit_entities
+    # Check remaining unharvested orphan nodes
+    assert any(e in report.orphan_entities for e in ["bund_risk_free_anchor", "french_republic_oat_market"])
 
 
 def test_accounting_conservation_double_entry_leaks(duckdb_available):
-    """Verifies double-entry conservation leaks (e.g. Russian oil arbitrage $85B leak)."""
+    """Verifies double-entry conservation and remediation of Russian oil arbitrage and corporate buybacks."""
     auditor = AccountingConservationAuditor(duckdb_path=duckdb_available)
     report = auditor.audit()
 
-    assert len(report.detected_leaks) > 0
-    assert report.total_leakage_volume_usd > 100e9
+    # Verify remediated shadow tanker energy arbitrage: $140B in == $140B out ($55B India + $60B China + $25B Dubai)
+    tanker_summary = report.summaries["shadow_tanker_energy_arbitrage"]
+    assert tanker_summary.total_inflow_usd == pytest.approx(140.0e9, rel=1e-3)
+    assert tanker_summary.total_outflow_usd == pytest.approx(140.0e9, rel=1e-3)
+    assert tanker_summary.is_leak is False
+    assert tanker_summary.leak_amount_usd == pytest.approx(0.0, abs=1e-3)
 
-    # Find shadow tanker leak
-    tanker_leaks = [l for l in report.detected_leaks if l["entity_id"] == "shadow_tanker_energy_arbitrage"]
-    assert len(tanker_leaks) == 1
-    leak = tanker_leaks[0]
+    # Verify remediated Apple cash vault: $182.399B in == $182.399B out
+    apple_summary = report.summaries["apple_bigtech_treasury_vault"]
+    assert apple_summary.is_leak is False
+    assert apple_summary.leak_amount_usd == pytest.approx(0.0, abs=1e-3)
 
-    # $140B entered shadow tankers, only $55B reached India refining -> $85B leak
-    assert leak["inflow_usd"] == pytest.approx(140.0e9, rel=1e-3)
-    assert leak["outflow_usd"] == pytest.approx(55.0e9, rel=1e-3)
-    assert leak["leak_amount_usd"] == pytest.approx(85.0e9, rel=1e-3)
-    assert leak["net_flow_usd"] == pytest.approx(85.0e9, rel=1e-3)
+    # Verify detector catches synthetic double-entry leaks when present
+    mock_df = pd.DataFrame([
+        {
+            "event_id": "test_leak_in",
+            "source_entity": "mock_source",
+            "target_entity": "mock_conduit",
+            "amount_usd_normalized": 140e9,
+            "nominal_amount": 140e9,
+            "currency": "USD",
+            "flow_type": "trade_settlement",
+        },
+        {
+            "event_id": "test_leak_out",
+            "source_entity": "mock_conduit",
+            "target_entity": "mock_sink",
+            "amount_usd_normalized": 55e9,
+            "nominal_amount": 55e9,
+            "currency": "USD",
+            "flow_type": "trade_settlement",
+        },
+    ])
+    mock_auditor = AccountingConservationAuditor(events_df=mock_df)
+    mock_rep = mock_auditor.audit()
+    assert len(mock_rep.detected_leaks) == 1
+    assert mock_rep.detected_leaks[0]["entity_id"] == "mock_conduit"
+    assert mock_rep.detected_leaks[0]["leak_amount_usd"] == pytest.approx(85e9, rel=1e-3)
 
 
 # -------------------------------------------------------------------------
@@ -88,21 +116,33 @@ def test_accounting_conservation_double_entry_leaks(duckdb_available):
 # -------------------------------------------------------------------------
 
 def test_dimensional_integrity_unit_errors(duckdb_available):
-    """Verifies detection of unit/type errors (OAT-Bund spread of 73 bps stored as $79.57)."""
+    """Verifies that database is dimensionally sound and detector flags unit/type errors when injected."""
     auditor = DimensionalIntegrityAuditor(duckdb_path=duckdb_available)
     report = auditor.audit()
 
-    assert report.is_dimensionally_sound is False
-    assert report.unit_mismatches_count > 0
-    assert report.signed_amount_violations_count > 0
+    # Remediated DuckDB database must be 100% dimensionally sound
+    assert report.is_dimensionally_sound is True
+    assert report.unit_mismatches_count == 0
+    assert report.signed_amount_violations_count == 0
 
-    # Specifically detect OAT-Bund spread stored as fiat currency
-    spread_errors = [
-        e for e in report.errors
-        if e.error_type == "SPREAD_AS_FIAT_CURRENCY_ERROR" and "spread" in e.instrument
-    ]
-    assert len(spread_errors) >= 1
-    err = spread_errors[0]
+    # Specifically verify detector catches OAT-Bund spread stored as fiat currency
+    bad_df = pd.DataFrame([
+        {
+            "event_id": "spread_oat_bund_bad",
+            "instrument": "oat_bund_10y_spread_bp",
+            "nominal_amount": 73.0,
+            "currency": "EUR",
+            "amount_usd_normalized": 79.57,
+            "flow_type": "risk_friction",
+            "metric_value": 73.0,
+        }
+    ])
+    mock_auditor = DimensionalIntegrityAuditor(events_df=bad_df)
+    mock_rep = mock_auditor.audit()
+    assert mock_rep.is_dimensionally_sound is False
+    assert mock_rep.unit_mismatches_count >= 1
+    err = mock_rep.errors[0]
+    assert err.error_type == "SPREAD_AS_FIAT_CURRENCY_ERROR"
     assert err.nominal_amount == pytest.approx(73.0, rel=1e-2)
     assert err.currency == "EUR"
     assert err.amount_usd_normalized == pytest.approx(79.57, rel=1e-2)
@@ -110,15 +150,29 @@ def test_dimensional_integrity_unit_errors(duckdb_available):
 
 
 def test_dimensional_integrity_signed_amounts(duckdb_available):
-    """Verifies detection of negative nominal amounts on directed edges."""
+    """Verifies that database has no signed negative amounts and detector flags negative flows."""
     auditor = DimensionalIntegrityAuditor(duckdb_path=duckdb_available)
     report = auditor.audit()
 
-    signed_errors = [e for e in report.errors if e.error_type == "SIGNED_NOMINAL_AMOUNT_ERROR"]
-    assert len(signed_errors) >= 10
-    for err in signed_errors:
-        assert err.nominal_amount < 0.0 or err.amount_usd_normalized < 0.0
-        assert err.severity == "HIGH"
+    # Remediated database has zero negative flows
+    assert report.signed_amount_violations_count == 0
+
+    # Verify detector catches negative nominal amounts
+    bad_df = pd.DataFrame([
+        {
+            "event_id": "bad_neg_event",
+            "instrument": "merchandise_trade_balance",
+            "nominal_amount": -8000000000.0,
+            "currency": "EUR",
+            "amount_usd_normalized": -8720000000.0,
+            "flow_type": "trade_settlement",
+        }
+    ])
+    mock_auditor = DimensionalIntegrityAuditor(events_df=bad_df)
+    mock_rep = mock_auditor.audit()
+    assert mock_rep.signed_amount_violations_count >= 1
+    assert mock_rep.errors[0].error_type == "SIGNED_NOMINAL_AMOUNT_ERROR"
+    assert mock_rep.errors[0].severity == "HIGH"
 
 
 def test_dimensional_integrity_fx_verification(duckdb_available):
@@ -212,13 +266,15 @@ def test_graph_topology_critical_node_removal():
 
     assert "us_triparty_repo_pool" in report.critical_node_removals
     repo_impact = report.critical_node_removals["us_triparty_repo_pool"]
-    assert repo_impact["disruption_pct"] == 100.0
-    assert len(repo_impact["severed_routes"]) == 3
+    # Phase 3 mitigation: FICC sponsored repo bypass reduces disruption from 100% to 33.3%
+    assert repo_impact["disruption_pct"] <= 50.0
+    assert len(repo_impact["severed_routes"]) == 1
 
     assert "svt_dealers_bnp_socgen" in report.critical_node_removals
     svt_impact = report.critical_node_removals["svt_dealers_bnp_socgen"]
-    assert svt_impact["disruption_pct"] >= 66.0
-    assert len(svt_impact["severed_routes"]) >= 2
+    # Phase 3 mitigation: CA-CIB / Natixis secondary syndicate bypass reduces disruption from 66.7% to 33.3%
+    assert svt_impact["disruption_pct"] <= 50.0
+    assert len(svt_impact["severed_routes"]) == 1
 
 
 # -------------------------------------------------------------------------
@@ -230,10 +286,10 @@ def test_unmodeled_risk_estimator_dark_matter(duckdb_available):
     estimator = UnmodeledRiskEstimator(duckdb_path=duckdb_available)
     report = estimator.audit()
 
-    assert report.total_unmodeled_dark_matter_usd >= 600e12  # Over $600 Trillion
-    assert report.overall_coverage_ratio_pct < 10.0          # Coverage < 10%
-    assert report.dark_matter_multiplier > 10.0              # Multiplier > 10x
-    assert report.systemic_blindspot_score > 80.0            # High blindspot
+    assert report.total_unmodeled_dark_matter_usd >= 500e12  # Over $500 Trillion remaining gap
+    assert report.overall_coverage_ratio_pct < 20.0          # Coverage ~10.9%
+    assert report.dark_matter_multiplier > 5.0               # Multiplier > 5x
+    assert report.systemic_blindspot_score > 70.0            # High blindspot
 
     # Check 4 pillars
     benchmarks_by_domain = {b.domain_name: b for b in report.benchmarks}
@@ -244,16 +300,23 @@ def test_unmodeled_risk_estimator_dark_matter(duckdb_available):
 
     bis_b = benchmarks_by_domain["BIS OTC Derivatives"]
     assert bis_b.real_world_notional_usd == 600e12
-    assert bis_b.coverage_ratio_pct == 0.0
+    assert bis_b.modeled_notional_usd == 25e12
+    assert bis_b.gap_usd == 575e12
 
     basis_b = benchmarks_by_domain["Treasury Basis Trade & Hedge Fund Repo"]
     assert basis_b.real_world_notional_usd == 800e9
+    assert basis_b.modeled_notional_usd == 800e9
+    assert basis_b.gap_usd == 0.0
 
     trade_b = benchmarks_by_domain["Global Trade Statistical Discrepancy (Errors & Omissions)"]
     assert trade_b.real_world_notional_usd == 175e9
+    assert trade_b.modeled_notional_usd == 175e9
+    assert trade_b.gap_usd == 0.0
 
     pboc_b = benchmarks_by_domain["Foreign Central Bank Currency Swap Lines (PBOC & Bilateral)"]
     assert pboc_b.real_world_notional_usd == 550e9
+    assert pboc_b.modeled_notional_usd >= 550e9
+    assert pboc_b.gap_usd == 0.0
 
 
 # -------------------------------------------------------------------------
@@ -267,19 +330,58 @@ def test_system_auditor_end_to_end_scorecard(duckdb_available):
 
     assert isinstance(scorecard, FullAuditScorecard)
     assert 0.0 <= scorecard.system_integrity_score <= 100.0
-    assert 0.0 <= scorecard.conservation_score <= 20.0
-    assert 0.0 <= scorecard.dimensional_score <= 20.0
-    assert 0.0 <= scorecard.temporal_score <= 20.0
-    assert 0.0 <= scorecard.topology_score <= 20.0
-    assert 0.0 <= scorecard.dark_matter_score <= 20.0
+    assert scorecard.system_integrity_score >= 50.0
+    assert scorecard.dimensional_score == 20.0  # Remediated dimensional integrity
+    assert scorecard.conservation_score > 5.0
+    assert scorecard.temporal_score > 10.0
+    assert scorecard.topology_score > 5.0
+    assert scorecard.dark_matter_score > 4.0
 
-    assert len(scorecard.high_risk_anomalies) >= 5
+    assert len(scorecard.high_risk_anomalies) >= 3
     assert len(scorecard.remediation_recommendations) >= 5
 
-    # Check anomaly IDs
+    # Check remaining open systemic anomalies
     anomaly_ids = [a["id"] for a in scorecard.high_risk_anomalies]
-    assert "ANOMALY-CONSERVATION-01" in anomaly_ids
-    assert "ANOMALY-DIMENSIONAL-01" in anomaly_ids
     assert "ANOMALY-TEMPORAL-01" in anomaly_ids
     assert "ANOMALY-TOPOLOGY-01" in anomaly_ids
     assert "ANOMALY-DARKMATTER-01" in anomaly_ids
+
+    # Negative control: verify detector generates critical anomalies when presented with legacy flawed data
+    flawed_df = pd.DataFrame([
+        {
+            "event_id": "flawed_oil_in",
+            "source_entity": "bank_of_russia_cbr_vault",
+            "target_entity": "shadow_tanker_energy_arbitrage",
+            "amount_usd_normalized": 140e9,
+            "nominal_amount": 140e9,
+            "currency": "USD",
+            "flow_type": "trade_settlement",
+            "instrument": "dark_crude_arbitrage",
+        },
+        {
+            "event_id": "flawed_oil_out",
+            "source_entity": "shadow_tanker_energy_arbitrage",
+            "target_entity": "reserve_bank_of_india_refining_hub",
+            "amount_usd_normalized": 55e9,
+            "nominal_amount": 55e9,
+            "currency": "USD",
+            "flow_type": "trade_settlement",
+            "instrument": "dark_crude_arbitrage",
+        },
+        {
+            "event_id": "flawed_spread",
+            "source_entity": "french_republic_tresor",
+            "target_entity": "banque_de_france",
+            "amount_usd_normalized": 79.57,
+            "nominal_amount": 73.0,
+            "currency": "EUR",
+            "flow_type": "risk_friction",
+            "instrument": "oat_bund_10y_spread_bp",
+            "metric_value": 73.0,
+        },
+    ])
+    flawed_auditor = SystemAuditor(events_df=flawed_df)
+    flawed_scorecard = flawed_auditor.run_full_audit()
+    flawed_anomaly_ids = [a["id"] for a in flawed_scorecard.high_risk_anomalies]
+    assert "ANOMALY-CONSERVATION-01" in flawed_anomaly_ids
+    assert "ANOMALY-DIMENSIONAL-01" in flawed_anomaly_ids

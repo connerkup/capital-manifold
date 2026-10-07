@@ -187,6 +187,21 @@ class AdversarialSubstrateBuilder:
             "gulf_sovereign_euro_debt_placement",
             "saudi_capital_diversification_oat",
             "immobilized_euroclear_reserve_claim",
+            # Phase 3 Topology Resilience & Dark Matter Relations
+            "sponsored_repo_clearing_injection",
+            "sponsored_dvp_repo_settlement",
+            "srf_backstop_liquidity_injection",
+            "oat_secondary_syndication_auction",
+            "syndicate_reserve_clearing",
+            "syndicate_usd_fx_swap",
+            "basis_trade_leverage_absorption",
+            "otc_derivatives_collateral_drain",
+            "pboc_bilateral_swap_activation",
+            "imf_errors_and_omissions_absorption",
+            "retail_mortgage_amortization_recirculation",
+            "instant_credit_repayment_recirculation",
+            "social_housing_rent_recirculation",
+            "fx_swap_sponsored_repo_conduit",
             # Decoy edge types
             "retail_deposit_aggregation",
             "utility_corporate_financing",
@@ -601,6 +616,56 @@ class AdversarialSubstrateBuilder:
             duration_sensitivity=0.25, state_ownership_pct=0.40, npl_ratio=0.050, deposit_funded_ratio=0.00,
             interbank_lending_ratio=0.00, trade_finance_exposure=0.85, sovereign_holding_ratio=0.10,
             central_bank_refi_access=0.0, regulatory_tier_rank=0.40,
+        ))
+        # Phase 3 Topology Resilience & Dark Matter Entities
+        self._register("ficc_sponsored_repo_clearing", EntityCategory.PLANETARY_MANIFOLD, BalanceSheetMetrics(
+            log_total_assets=0.98, leverage_ratio=0.01, cash_reserves_ratio=0.20, svt_dealer_mandate=0.0,
+            target2_direct_participant=0.0, wholesale_repo_volume=0.99, cross_border_liability_ratio=0.85,
+            duration_sensitivity=0.10, state_ownership_pct=0.00, npl_ratio=0.000, deposit_funded_ratio=0.00,
+            interbank_lending_ratio=0.95, trade_finance_exposure=0.10, sovereign_holding_ratio=0.95,
+            central_bank_refi_access=1.0, regulatory_tier_rank=0.98,
+        ))
+        self._register("fed_standing_repo_facility", EntityCategory.PLANETARY_MANIFOLD, BalanceSheetMetrics(
+            log_total_assets=0.96, leverage_ratio=0.00, cash_reserves_ratio=0.95, svt_dealer_mandate=0.0,
+            target2_direct_participant=0.0, wholesale_repo_volume=0.95, cross_border_liability_ratio=0.50,
+            duration_sensitivity=0.05, state_ownership_pct=1.00, npl_ratio=0.000, deposit_funded_ratio=0.00,
+            interbank_lending_ratio=0.90, trade_finance_exposure=0.00, sovereign_holding_ratio=1.00,
+            central_bank_refi_access=1.0, regulatory_tier_rank=1.00,
+        ))
+        self._register("ca_cib_natixis_dealer_syndicate", EntityCategory.PLANETARY_MANIFOLD, BalanceSheetMetrics(
+            log_total_assets=0.95, leverage_ratio=0.05, cash_reserves_ratio=0.35, svt_dealer_mandate=0.9,
+            target2_direct_participant=1.0, wholesale_repo_volume=0.88, cross_border_liability_ratio=0.75,
+            duration_sensitivity=0.45, state_ownership_pct=0.05, npl_ratio=0.012, deposit_funded_ratio=0.45,
+            interbank_lending_ratio=0.60, trade_finance_exposure=0.55, sovereign_holding_ratio=0.80,
+            central_bank_refi_access=1.0, regulatory_tier_rank=0.95,
+        ))
+        self._register("bis_otc_derivatives_pool", EntityCategory.PLANETARY_MANIFOLD, BalanceSheetMetrics(
+            log_total_assets=1.00, leverage_ratio=0.15, cash_reserves_ratio=0.10, svt_dealer_mandate=0.0,
+            target2_direct_participant=0.0, wholesale_repo_volume=0.95, cross_border_liability_ratio=0.95,
+            duration_sensitivity=0.90, state_ownership_pct=0.00, npl_ratio=0.000, deposit_funded_ratio=0.00,
+            interbank_lending_ratio=0.85, trade_finance_exposure=0.70, sovereign_holding_ratio=0.60,
+            central_bank_refi_access=0.0, regulatory_tier_rank=0.80,
+        ))
+        self._register("dtcc_treasury_basis_trade_clearing", EntityCategory.PLANETARY_MANIFOLD, BalanceSheetMetrics(
+            log_total_assets=0.95, leverage_ratio=0.25, cash_reserves_ratio=0.05, svt_dealer_mandate=0.0,
+            target2_direct_participant=0.0, wholesale_repo_volume=0.98, cross_border_liability_ratio=0.60,
+            duration_sensitivity=0.85, state_ownership_pct=0.00, npl_ratio=0.001, deposit_funded_ratio=0.00,
+            interbank_lending_ratio=0.90, trade_finance_exposure=0.10, sovereign_holding_ratio=0.95,
+            central_bank_refi_access=0.0, regulatory_tier_rank=0.75,
+        ))
+        self._register("pboc_bilateral_swap_network", EntityCategory.PLANETARY_MANIFOLD, BalanceSheetMetrics(
+            log_total_assets=0.94, leverage_ratio=0.01, cash_reserves_ratio=0.70, svt_dealer_mandate=0.0,
+            target2_direct_participant=0.0, wholesale_repo_volume=0.40, cross_border_liability_ratio=0.85,
+            duration_sensitivity=0.20, state_ownership_pct=1.00, npl_ratio=0.000, deposit_funded_ratio=0.00,
+            interbank_lending_ratio=0.75, trade_finance_exposure=0.90, sovereign_holding_ratio=0.80,
+            central_bank_refi_access=1.0, regulatory_tier_rank=0.95,
+        ))
+        self._register("imf_errors_and_omissions_pool", EntityCategory.PLANETARY_MANIFOLD, BalanceSheetMetrics(
+            log_total_assets=0.88, leverage_ratio=0.00, cash_reserves_ratio=0.50, svt_dealer_mandate=0.0,
+            target2_direct_participant=0.0, wholesale_repo_volume=0.10, cross_border_liability_ratio=0.99,
+            duration_sensitivity=0.10, state_ownership_pct=0.50, npl_ratio=0.000, deposit_funded_ratio=0.00,
+            interbank_lending_ratio=0.10, trade_finance_exposure=0.90, sovereign_holding_ratio=0.50,
+            central_bank_refi_access=0.0, regulatory_tier_rank=0.50,
         ))
 
     def build_adversarial_substrate(self) -> Tuple[L3LatentSubstrate, Dict[str, BalanceSheetMetrics]]:
@@ -1082,6 +1147,130 @@ class AdversarialSubstrateBuilder:
                 relation="offshore_subordinated_transfer",
                 weight=0.30,
                 rel_embedding=self.relation_embeddings["offshore_subordinated_transfer"],
+            )
+
+        # ---------------------------------------------------------------------
+        # Phase 3 Topology Resilience & Dark Matter Architecture
+        # ---------------------------------------------------------------------
+        # DTCC FICC Sponsored Repo & Fed SRF Backstop (Mitigating us_triparty_repo_pool SPOF)
+        sub.add_relation(
+            source_id="japan_institutional_carry_desk",
+            target_id="ficc_sponsored_repo_clearing",
+            relation="sponsored_repo_clearing_injection",
+            weight=1.05,
+            rel_embedding=self.relation_embeddings["sponsored_repo_clearing_injection"],
+        )
+        sub.add_relation(
+            source_id="offshore_fx_swap_desk",
+            target_id="ficc_sponsored_repo_clearing",
+            relation="fx_swap_sponsored_repo_conduit",
+            weight=1.08,
+            rel_embedding=self.relation_embeddings["fx_swap_sponsored_repo_conduit"],
+        )
+        sub.add_relation(
+            source_id="ficc_sponsored_repo_clearing",
+            target_id="us_treasuries_custody",
+            relation="sponsored_dvp_repo_settlement",
+            weight=0.98,
+            rel_embedding=self.relation_embeddings["sponsored_dvp_repo_settlement"],
+        )
+        sub.add_relation(
+            source_id="ficc_sponsored_repo_clearing",
+            target_id="us_treasury_tga",
+            relation="sponsored_dvp_repo_settlement",
+            weight=1.02,
+            rel_embedding=self.relation_embeddings["sponsored_dvp_repo_settlement"],
+        )
+        sub.add_relation(
+            source_id="fed_standing_repo_facility",
+            target_id="us_treasury_tga",
+            relation="srf_backstop_liquidity_injection",
+            weight=1.15,
+            rel_embedding=self.relation_embeddings["srf_backstop_liquidity_injection"],
+        )
+
+        # Crédit Agricole CIB & Natixis Dealer Syndicate Bypass (Mitigating svt_dealers_bnp_socgen SPOF)
+        sub.add_relation(
+            source_id="french_republic_tresor",
+            target_id="ca_cib_natixis_dealer_syndicate",
+            relation="oat_secondary_syndication_auction",
+            weight=1.25,
+            rel_embedding=self.relation_embeddings["oat_secondary_syndication_auction"],
+        )
+        sub.add_relation(
+            source_id="ca_cib_natixis_dealer_syndicate",
+            target_id="banque_de_france",
+            relation="syndicate_reserve_clearing",
+            weight=1.18,
+            rel_embedding=self.relation_embeddings["syndicate_reserve_clearing"],
+        )
+        sub.add_relation(
+            source_id="ca_cib_natixis_dealer_syndicate",
+            target_id="offshore_fx_swap_desk",
+            relation="syndicate_usd_fx_swap",
+            weight=1.20,
+            rel_embedding=self.relation_embeddings["syndicate_usd_fx_swap"],
+        )
+
+        # Dark Matter Entities
+        sub.add_relation(
+            source_id="dtcc_treasury_basis_trade_clearing",
+            target_id="us_treasuries_custody",
+            relation="basis_trade_leverage_absorption",
+            weight=1.00,
+            rel_embedding=self.relation_embeddings["basis_trade_leverage_absorption"],
+        )
+        sub.add_relation(
+            source_id="bis_otc_derivatives_pool",
+            target_id="offshore_fx_swap_desk",
+            relation="otc_derivatives_collateral_drain",
+            weight=1.05,
+            rel_embedding=self.relation_embeddings["otc_derivatives_collateral_drain"],
+        )
+        sub.add_relation(
+            source_id="pboc_safe_foreign_reserves",
+            target_id="pboc_bilateral_swap_network",
+            relation="pboc_bilateral_swap_activation",
+            weight=1.08,
+            rel_embedding=self.relation_embeddings["pboc_bilateral_swap_activation"],
+        )
+        sub.add_relation(
+            source_id="imf_errors_and_omissions_pool",
+            target_id="us_triparty_repo_pool",
+            relation="imf_errors_and_omissions_absorption",
+            weight=1.10,
+            rel_embedding=self.relation_embeddings["imf_errors_and_omissions_absorption"],
+        )
+
+        # Decoy Sink Trap Mitigation: Retag fintechs/housing as pass-through and recirculate repayments
+        for decoy_id in ["pretto_digital_mortgage", "floa_bank_instant_credit", "paris_habitat_hlm"]:
+            if decoy_id in sub.entities:
+                sub.entities[decoy_id].metadata["is_pass_through"] = True
+                sub.entities[decoy_id].metadata["absorbing_sink"] = False
+
+        if "pretto_digital_mortgage" in sub.entities and "caisse_epargne_idf" in sub.entities:
+            sub.add_relation(
+                source_id="pretto_digital_mortgage",
+                target_id="caisse_epargne_idf",
+                relation="retail_mortgage_amortization_recirculation",
+                weight=0.85,
+                rel_embedding=self.relation_embeddings["retail_mortgage_amortization_recirculation"],
+            )
+        if "floa_bank_instant_credit" in sub.entities and "svt_dealers_bnp_socgen" in sub.entities:
+            sub.add_relation(
+                source_id="floa_bank_instant_credit",
+                target_id="svt_dealers_bnp_socgen",
+                relation="instant_credit_repayment_recirculation",
+                weight=0.85,
+                rel_embedding=self.relation_embeddings["instant_credit_repayment_recirculation"],
+            )
+        if "paris_habitat_hlm" in sub.entities and "banque_populaire_val_de_france" in sub.entities:
+            sub.add_relation(
+                source_id="paris_habitat_hlm",
+                target_id="banque_populaire_val_de_france",
+                relation="social_housing_rent_recirculation",
+                weight=0.85,
+                rel_embedding=self.relation_embeddings["social_housing_rent_recirculation"],
             )
 
         logger.info(

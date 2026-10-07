@@ -1,41 +1,17 @@
 {
-  "system_integrity_score": 37.7,
+  "system_integrity_score": 54.3,
   "category_scores": {
-    "conservation": 0.0,
-    "dimensional": 11.5,
-    "temporal": 12.2,
-    "topology": 9.6,
-    "dark_matter": 4.4
+    "conservation": 6.7,
+    "dimensional": 20.0,
+    "temporal": 13.0,
+    "topology": 9.4,
+    "dark_matter": 5.2
   },
-  "total_leakage_usd": 2576614000000.0,
-  "unit_errors_count": 7,
-  "unmodeled_dark_matter_usd": 601524793000000.0,
-  "coverage_ratio_pct": 6.831215217677696,
+  "total_leakage_usd": 56972381113000.0,
+  "unit_errors_count": 0,
+  "unmodeled_dark_matter_usd": 575000000000000.0,
+  "coverage_ratio_pct": 10.939636202856507,
   "high_risk_anomalies": [
-    {
-      "id": "ANOMALY-CONSERVATION-01",
-      "severity": "CRITICAL",
-      "dimension": "Accounting Conservation",
-      "entity": "shadow_tanker_energy_arbitrage",
-      "description": "Double-entry leak of $85,000,000,000.00 USD: $140,000,000,000.00 Urals crude entered shadow tankers from CBR vault, but only $55,000,000,000.00 arrived at India refining hub.",
-      "impact": "Unaccounted $85 Billion floating in maritime dark waters; counterpart liabilities missing."
-    },
-    {
-      "id": "ANOMALY-DIMENSIONAL-01",
-      "severity": "CRITICAL",
-      "dimension": "Dimensional Integrity",
-      "entity": "oat_bund_10y_spread_bp",
-      "description": "Basis point yield spread 'oat_bund_10y_spread_bp' (73.0 bps) was treated as fiat currency and converted to $79.57000000000001 USD.",
-      "impact": "Rate friction scalar conflated with currency balance transfer, distorting net liquidity metrics."
-    },
-    {
-      "id": "ANOMALY-DIMENSIONAL-02",
-      "severity": "HIGH",
-      "dimension": "Dimensional Integrity",
-      "entity": "target2_fr / merchandise_trade_balance",
-      "description": "Found 18 flow events with negative nominal amounts.",
-      "impact": "Directed graph conservation breaks when edge weights are signed; violates flow orientation."
-    },
     {
       "id": "ANOMALY-TEMPORAL-01",
       "severity": "HIGH",

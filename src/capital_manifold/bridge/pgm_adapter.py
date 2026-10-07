@@ -298,6 +298,56 @@ FINANCIAL_ENTITIES: Dict[str, Dict[str, Any]] = {
         "jurisdiction": "AFRICA",
         "description": "DRC/Zambia cobalt and copper mining concessions servicing $45B in sovereign loans to Chinese state lenders.",
     },
+    # Phase 3 Topology Resilience & Dark Matter Architecture
+    "ficc_sponsored_repo_clearing": {
+        "tier": MonetaryTier.TRANSMISSION,
+        "name": "DTCC FICC Sponsored Repo Clearing Platform",
+        "sector": "clearinghouse_repo",
+        "jurisdiction": "US",
+        "description": "FICC sponsored DVP repo platform ($1.2T daily clearing) providing centralized netting and bypassing triparty broker-dealers.",
+    },
+    "fed_standing_repo_facility": {
+        "tier": MonetaryTier.TRANSMISSION,
+        "name": "Federal Reserve Standing Repo Facility (SRF)",
+        "sector": "central_bank_liquidity_backstop",
+        "jurisdiction": "US",
+        "description": "Federal Reserve standing facility ($500B capacity) offering daily overnight repo backstop against Treasury collateral.",
+    },
+    "ca_cib_natixis_dealer_syndicate": {
+        "tier": MonetaryTier.TRANSMISSION,
+        "name": "Crédit Agricole CIB & Natixis Secondary SVT Syndicate",
+        "sector": "primary_dealer_syndicate",
+        "jurisdiction": "FR_EU",
+        "description": "Secondary French primary dealer syndication syndicate providing issuance clearance resilience and FX swap facilities.",
+    },
+    "bis_otc_derivatives_pool": {
+        "tier": MonetaryTier.TRAVERSAL,
+        "name": "BIS Global OTC Derivatives Clearing Pool",
+        "sector": "macro_dark_matter",
+        "jurisdiction": "GLOBAL_OFFSHORE",
+        "description": "Offshore global OTC derivatives market ($25T gross market value, $600T gross notional) dominating interest rate and FX swap risk.",
+    },
+    "dtcc_treasury_basis_trade_clearing": {
+        "tier": MonetaryTier.TRANSMISSION,
+        "name": "DTCC Treasury Cash-Futures Basis Trade Clearing",
+        "sector": "macro_dark_matter",
+        "jurisdiction": "US",
+        "description": "Hedge fund Treasury cash-futures basis trade clearing pool ($800B repo leverage) absorbing duration risk via bilateral repo.",
+    },
+    "pboc_bilateral_swap_network": {
+        "tier": MonetaryTier.TRANSMISSION,
+        "name": "PBOC Bilateral Currency Swap Agreement Network",
+        "sector": "macro_dark_matter",
+        "jurisdiction": "CN_GLOBAL",
+        "description": "People's Bank of China network of 40+ bilateral local currency swap lines ($550B total capacity) bypassing USD correspondent banking.",
+    },
+    "imf_errors_and_omissions_pool": {
+        "tier": MonetaryTier.SINK,
+        "name": "IMF Global Balance of Payments Net Errors & Omissions Pool",
+        "sector": "macro_dark_matter",
+        "jurisdiction": "GLOBAL",
+        "description": "Global statistical discrepancy and unrecorded capital flight sink ($175B annual) capturing dark matter cross-border flows.",
+    },
 }
 
 
@@ -474,6 +524,19 @@ class ManifoldPGMBridge:
             "gulf_sovereign_euro_debt_placement",
             "saudi_capital_diversification_oat",
             "immobilized_euroclear_reserve_claim",
+            # Phase 3 Topology Resilience & Dark Matter Relations
+            "sponsored_repo_clearing_injection",
+            "sponsored_dvp_repo_settlement",
+            "srf_backstop_liquidity_injection",
+            "oat_secondary_syndication_auction",
+            "syndicate_reserve_clearing",
+            "syndicate_usd_fx_swap",
+            "basis_trade_leverage_absorption",
+            "otc_derivatives_collateral_drain",
+            "pboc_bilateral_swap_activation",
+            "imf_errors_and_omissions_absorption",
+            "syndicate_sponsored_repo_conduit",
+            "fx_swap_sponsored_repo_conduit",
         ]
         for idx, r_name in enumerate(relation_types):
             vec = np.zeros(self.rel_dim, dtype=np.float32)
@@ -545,6 +608,11 @@ class ManifoldPGMBridge:
             "commodity_central_bank": 38,
             "energy_refining_hub": 51,
             "frontier_mineral_conduit": 45,
+            # Phase 3 sectors
+            "clearinghouse_repo": 40,
+            "central_bank_liquidity_backstop": 44,
+            "primary_dealer_syndicate": 40,
+            "macro_dark_matter": 48,
         }
 
         for eid, meta in FINANCIAL_ENTITIES.items():
@@ -688,6 +756,21 @@ class ManifoldPGMBridge:
                 vec[104:112] = np.array([0.7, 1.1, 1.3, 1.0, 0.6, 0.9, 0.8, 0.5], dtype=np.float32)
             elif eid == "africa_critical_minerals_debt_conduit":
                 vec[104:112] = np.array([1.2, 0.6, 0.9, 0.7, 0.3, 1.0, 0.5, 0.8], dtype=np.float32)
+            # Phase 3 Entity Embeddings
+            elif eid == "ficc_sponsored_repo_clearing":
+                vec[104:112] = np.array([0.5, 0.9, 1.7, 1.4, 0.3, 1.0, 1.1, 0.8], dtype=np.float32)
+            elif eid == "fed_standing_repo_facility":
+                vec[104:112] = np.array([0.2, 0.4, 1.8, 1.6, 0.1, 0.9, 1.3, 1.0], dtype=np.float32)
+            elif eid == "ca_cib_natixis_dealer_syndicate":
+                vec[104:112] = np.array([spread_norm * 0.75, pressure_norm * 0.65, 0.7, 0.6, t2_norm * 0.4, 0.5, 0.4, 0.3], dtype=np.float32)
+            elif eid == "bis_otc_derivatives_pool":
+                vec[112:120] = np.array([1.9, 1.1, 1.6, 1.8, 1.4, 1.2, 1.5, 1.3], dtype=np.float32)
+            elif eid == "dtcc_treasury_basis_trade_clearing":
+                vec[104:112] = np.array([1.2, 0.8, 1.5, 1.4, 0.9, 1.1, 0.7, 1.0], dtype=np.float32)
+            elif eid == "pboc_bilateral_swap_network":
+                vec[104:112] = np.array([0.8, 1.0, 1.2, 1.3, 0.9, 0.7, 1.1, 0.6], dtype=np.float32)
+            elif eid == "imf_errors_and_omissions_pool":
+                vec[120:128] = np.array([1.1, 0.9, 0.7, 1.4, 1.2, 0.8, 1.0, 1.3], dtype=np.float32)
 
             # Strict L2 normalization to unit sphere
             norm = np.linalg.norm(vec)
@@ -703,15 +786,21 @@ class ManifoldPGMBridge:
         is_domestic_retention: bool = False,
         friction_sensitivity: float = 1.0,
         volume_sensitivity: float = 0.5,
+        velocity_turnover_days: Optional[float] = None,
     ) -> float:
         """Calculates edge weight directly proportional to risk friction and inversely to flow volume.
 
         Formula:
             Weight (impedance) = W_base * (1 + kappa * risk_friction) / (1 + gamma * log10(1 + V_B))
-            where V_B is normalized volume in Billions EUR.
+            where V_B is normalized volume in Billions EUR (annualized if velocity_turnover_days provided).
         Domestic reinvestment incurs amplified impedance when sovereign risk friction spreads widen.
         """
-        vol_b = max(0.0, abs(flow_volume_eur) / 1e9)
+        if velocity_turnover_days is not None and velocity_turnover_days > 0.0:
+            effective_vol = flow_volume_eur * (365.0 / max(float(velocity_turnover_days), 1.0))
+        else:
+            effective_vol = flow_volume_eur
+
+        vol_b = max(0.0, abs(effective_vol) / 1e9)
         kappa = friction_sensitivity * (2.2 if is_domestic_retention else 1.0)
         gamma = volume_sensitivity
 
@@ -742,10 +831,11 @@ class ManifoldPGMBridge:
         # 3. Construct transmission relations
         # Corridor 1: Sovereign Debt Issuance -> Primary Dealers -> Central Bank -> TARGET2
         w_issuance = self.compute_edge_weight(
-            base_weight=1.2,
-            flow_volume_eur=debt_eur / 100.0,  # ~€35B annual gross issuance tranche
+            base_weight=2.40,
+            flow_volume_eur=285.0e9,
             risk_friction=spread_friction,
             is_domestic_retention=False,
+            velocity_turnover_days=30.0,
         )
         self.substrate.add_relation(
             source_id="french_republic_tresor",
@@ -1473,6 +1563,160 @@ class ManifoldPGMBridge:
             metadata={"frozen_reserves_usd": 300.0e9, "tier_step": "0->2"},
         )
 
+        # ---------------------------------------------------------------------
+        # CORRIDOR 9: Phase 3 SPOF Mitigation & Dark Matter Architecture
+        # ---------------------------------------------------------------------
+        # A) DTCC FICC Sponsored Repo & Fed SRF Backstop (Mitigating us_triparty_repo_pool SPOF)
+        w_ficc_sponsored = self.compute_edge_weight(
+            base_weight=1.04,
+            flow_volume_eur=1200.0e9,
+            risk_friction=0.08,
+            is_domestic_retention=False,
+            velocity_turnover_days=1.0,
+        )
+        self.substrate.add_relation(
+            source_id="japan_institutional_carry_desk",
+            target_id="ficc_sponsored_repo_clearing",
+            relation="sponsored_repo_clearing_injection",
+            weight=w_ficc_sponsored * 1.05,
+            rel_embedding=self.relation_embeddings["sponsored_repo_clearing_injection"],
+            metadata={"bypass": True, "sponsored_repo_volume_usd": 800.0e9, "tier_step": "1->1"},
+        )
+        self.substrate.add_relation(
+            source_id="offshore_fx_swap_desk",
+            target_id="ficc_sponsored_repo_clearing",
+            relation="fx_swap_sponsored_repo_conduit",
+            weight=w_ficc_sponsored * 1.08,
+            rel_embedding=self.relation_embeddings["fx_swap_sponsored_repo_conduit"],
+            metadata={"bypass": True, "sponsored_repo_volume_usd": 250.0e9, "tier_step": "1->1"},
+        )
+        self.substrate.add_relation(
+            source_id="ficc_sponsored_repo_clearing",
+            target_id="us_treasuries_custody",
+            relation="sponsored_dvp_repo_settlement",
+            weight=w_ficc_sponsored * 0.98,
+            rel_embedding=self.relation_embeddings["sponsored_dvp_repo_settlement"],
+            metadata={"bypass": True, "dvp_clearing_usd": 1200.0e9, "tier_step": "1->2"},
+        )
+        self.substrate.add_relation(
+            source_id="ficc_sponsored_repo_clearing",
+            target_id="us_treasury_tga",
+            relation="sponsored_dvp_repo_settlement",
+            weight=w_ficc_sponsored,
+            rel_embedding=self.relation_embeddings["sponsored_dvp_repo_settlement"],
+            metadata={"bypass": True, "dvp_clearing_usd": 1200.0e9, "tier_step": "1->3"},
+        )
+        w_srf = self.compute_edge_weight(
+            base_weight=1.12,
+            flow_volume_eur=500.0e9,
+            risk_friction=0.05,
+            is_domestic_retention=False,
+            velocity_turnover_days=1.0,
+        )
+        self.substrate.add_relation(
+            source_id="fed_standing_repo_facility",
+            target_id="us_treasury_tga",
+            relation="srf_backstop_liquidity_injection",
+            weight=w_srf,
+            rel_embedding=self.relation_embeddings["srf_backstop_liquidity_injection"],
+            metadata={"srf_capacity_usd": 500.0e9, "tier_step": "1->3"},
+        )
+
+        # B) Crédit Agricole CIB & Natixis Dealer Syndicate Bypass (Mitigating svt_dealers_bnp_socgen SPOF)
+        w_syndicate = self.compute_edge_weight(
+            base_weight=1.00,
+            flow_volume_eur=35.0e9,
+            risk_friction=spread_friction * 1.20,
+            is_domestic_retention=False,
+            velocity_turnover_days=30.0,
+        )
+        self.substrate.add_relation(
+            source_id="french_republic_tresor",
+            target_id="ca_cib_natixis_dealer_syndicate",
+            relation="oat_secondary_syndication_auction",
+            weight=w_syndicate,
+            rel_embedding=self.relation_embeddings["oat_secondary_syndication_auction"],
+            metadata={"bypass": True, "syndicate_volume_eur": 35.0e9, "tier_step": "0->1"},
+        )
+        self.substrate.add_relation(
+            source_id="ca_cib_natixis_dealer_syndicate",
+            target_id="banque_de_france",
+            relation="syndicate_reserve_clearing",
+            weight=w_syndicate * 0.95,
+            rel_embedding=self.relation_embeddings["syndicate_reserve_clearing"],
+            metadata={"bypass": True, "tier_step": "1->1"},
+        )
+        self.substrate.add_relation(
+            source_id="ca_cib_natixis_dealer_syndicate",
+            target_id="offshore_fx_swap_desk",
+            relation="syndicate_usd_fx_swap",
+            weight=w_syndicate * 1.05,
+            rel_embedding=self.relation_embeddings["syndicate_usd_fx_swap"],
+            metadata={"bypass": True, "tier_step": "1->1"},
+        )
+
+        # C) Dark Matter Entities Wiring
+        w_dark_matter = self.compute_edge_weight(
+            base_weight=1.00,
+            flow_volume_eur=800.0e9,
+            risk_friction=0.15,
+            is_domestic_retention=False,
+            velocity_turnover_days=1.0,
+        )
+        self.substrate.add_relation(
+            source_id="dtcc_treasury_basis_trade_clearing",
+            target_id="us_treasuries_custody",
+            relation="basis_trade_leverage_absorption",
+            weight=w_dark_matter,
+            rel_embedding=self.relation_embeddings["basis_trade_leverage_absorption"],
+            metadata={"dark_matter_usd": 800.0e9, "tier_step": "1->2"},
+        )
+        w_bis = self.compute_edge_weight(
+            base_weight=1.05,
+            flow_volume_eur=25000.0e9,
+            risk_friction=0.10,
+            is_domestic_retention=False,
+            velocity_turnover_days=90.0,
+        )
+        self.substrate.add_relation(
+            source_id="bis_otc_derivatives_pool",
+            target_id="offshore_fx_swap_desk",
+            relation="otc_derivatives_collateral_drain",
+            weight=w_bis,
+            rel_embedding=self.relation_embeddings["otc_derivatives_collateral_drain"],
+            metadata={"dark_matter_usd": 25000.0e9, "tier_step": "2->1"},
+        )
+        w_pboc_swap = self.compute_edge_weight(
+            base_weight=1.08,
+            flow_volume_eur=550.0e9,
+            risk_friction=0.18,
+            is_domestic_retention=False,
+            velocity_turnover_days=365.0,
+        )
+        self.substrate.add_relation(
+            source_id="pboc_safe_foreign_reserves",
+            target_id="pboc_bilateral_swap_network",
+            relation="pboc_bilateral_swap_activation",
+            weight=w_pboc_swap,
+            rel_embedding=self.relation_embeddings["pboc_bilateral_swap_activation"],
+            metadata={"dark_matter_usd": 550.0e9, "tier_step": "0->1"},
+        )
+        w_imf_eo = self.compute_edge_weight(
+            base_weight=1.10,
+            flow_volume_eur=175.0e9,
+            risk_friction=0.25,
+            is_domestic_retention=False,
+            velocity_turnover_days=365.0,
+        )
+        self.substrate.add_relation(
+            source_id="imf_errors_and_omissions_pool",
+            target_id="us_triparty_repo_pool",
+            relation="imf_errors_and_omissions_absorption",
+            weight=w_imf_eo,
+            rel_embedding=self.relation_embeddings["imf_errors_and_omissions_absorption"],
+            metadata={"dark_matter_usd": 175.0e9, "tier_step": "3->2"},
+        )
+
     def initialize_landmarks(self) -> None:
         """Builds coarse landmark clusters strictly aligned with the 4 monetary tiers."""
         lm = self.engine.landmark_graph
@@ -1484,6 +1728,8 @@ class ManifoldPGMBridge:
         # Group entities strictly by monetary tier
         tier_embeddings = {0: [], 1: [], 2: [], 3: []}
         for eid, meta in FINANCIAL_ENTITIES.items():
+            if eid not in sub.entities:
+                continue
             tier_int = int(meta["tier"])
             emb = sub.entities[eid].embedding
             tier_embeddings[tier_int].append(emb)

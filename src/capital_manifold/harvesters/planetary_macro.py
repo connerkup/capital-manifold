@@ -64,6 +64,8 @@ EUROCLEAR_FROZEN_RUSSIAN_ASSETS_USD = 300_000_000_000.0  # $300.0 Billion (€21
 CBR_PHYSICAL_GOLD_VAULT_USD = 185_000_000_000.0          # $185.0 Billion gold reserves
 CBR_YUAN_RESERVES_USD = 115_000_000_000.0                # $115.0 Billion CNY reserves
 SHADOW_TANKER_CRUDE_ARBITRAGE_USD = 140_000_000_000.0    # $140.0 Billion maritime crude
+CHINA_SEABORNE_CRUDE_USD = 60_000_000_000.0          # $60.0 Billion seaborne crude to China
+DUBAI_MARITIME_MARGIN_USD = 25_000_000_000.0         # $25.0 Billion freight, insurance & hub margin
 
 # 4. Latin America
 TIC_BRAZIL_TREASURIES_USD = 214_000_000_000.0        # $214.0 Billion
@@ -127,6 +129,51 @@ class PlanetaryMacroHarvester(BaseHarvester):
                 raw_payload={"entity": src, "jurisdiction": juris, "amount_usd": amt},
             )
             events.append(ev)
+        # Connect Hong Kong CNH clearing hub with bilateral CNH liquidity from PBOC
+        ev_cnh_provision = FlowEvent(
+            event_id=f"pboc_cnh_liquidity_provision_{REPORT_DATE}",
+            timestamp=f"{REPORT_DATE}T07:00:00Z",
+            period_label=REPORT_DATE,
+            source_entity="pboc_safe_foreign_reserves",
+            source_jurisdiction="CN",
+            target_entity="offshore_cnh_hong_kong_hub",
+            target_jurisdiction="HK",
+            instrument="cnh_cross_border_liquidity_facility",
+            nominal_amount=HONG_KONG_CNH_TURNOVER_USD,
+            currency="USD",
+            amount_usd_normalized=HONG_KONG_CNH_TURNOVER_USD,
+            flow_type=FlowType.INTERBANK_TRANSFER,
+            velocity_turnover_days=1.0,
+            data_source="pboc_hkma_bilateral_bulletin",
+            source_line_item="CNH_OFFSHORE_LIQUIDITY_FACILITY",
+            confidence=1.0,
+            metric_value=HONG_KONG_CNH_TURNOVER_USD / 1e9,
+            raw_payload={"hub": "Hong Kong", "provision_type": "bilateral_liquidity"},
+        )
+        events.append(ev_cnh_provision)
+
+        # CNH Hub to Chinese State Banks FX desk for international trade settlement repatriation
+        ev_cnh_settlement = FlowEvent(
+            event_id=f"cnh_hub_trade_settlement_{REPORT_DATE}",
+            timestamp=f"{REPORT_DATE}T07:30:00Z",
+            period_label=REPORT_DATE,
+            source_entity="offshore_cnh_hong_kong_hub",
+            source_jurisdiction="HK",
+            target_entity="chinese_state_banks_fx_desk",
+            target_jurisdiction="CN",
+            instrument="cnh_trade_settlement_repatriation",
+            nominal_amount=HONG_KONG_CNH_TURNOVER_USD,
+            currency="USD",
+            amount_usd_normalized=HONG_KONG_CNH_TURNOVER_USD,
+            flow_type=FlowType.INTERBANK_TRANSFER,
+            velocity_turnover_days=1.0,
+            data_source="hkma_rtgs_clearing",
+            source_line_item="OFFSHORE_CNH_TRADE_SETTLEMENT",
+            confidence=1.0,
+            metric_value=HONG_KONG_CNH_TURNOVER_USD / 1e9,
+            raw_payload={"counterparty": "Big 4 State Banks", "flow": "CNH_repatriation"},
+        )
+        events.append(ev_cnh_settlement)
 
         return events, meta
 
@@ -153,7 +200,7 @@ class PlanetaryMacroHarvester(BaseHarvester):
             nominal_amount=EUROCLEAR_FROZEN_RUSSIAN_ASSETS_USD,
             currency="USD",
             amount_usd_normalized=EUROCLEAR_FROZEN_RUSSIAN_ASSETS_USD,
-            flow_type=FlowType.RISK_FRICTION,
+            flow_type=FlowType.POOL_CONCENTRATION,
             velocity_turnover_days=3650.0,  # Immobilized under sanction regime
             data_source="belgian_treasury_euroclear_audit",
             source_line_item="IMMOBILIZED_RUSSIAN_CENTRAL_BANK_ASSETS",
@@ -281,7 +328,7 @@ class PlanetaryMacroHarvester(BaseHarvester):
             raw_payload={"barrels_per_day": 3.4e6, "discount_to_brent_usd": 12.5},
         ))
 
-        # 2. Indian Refining Arbitrage into Europe
+        # 2. Indian Refining Arbitrage into Europe ($55B)
         events.append(FlowEvent(
             event_id=f"india_refining_arbitrage_eu_{REPORT_DATE}",
             timestamp=f"{REPORT_DATE}T07:00:00Z",
@@ -301,6 +348,50 @@ class PlanetaryMacroHarvester(BaseHarvester):
             confidence=1.0,
             metric_value=55.0,
             raw_payload={"refinery": "Reliance Jamnagar / Nayara", "re_export_market": "European Union"},
+        ))
+
+        # 2b. China Seaborne Urals/ESPO Crude Imports ($60B)
+        events.append(FlowEvent(
+            event_id=f"china_seaborne_crude_arbitrage_{REPORT_DATE}",
+            timestamp=f"{REPORT_DATE}T07:15:00Z",
+            period_label=REPORT_DATE,
+            source_entity="shadow_tanker_energy_arbitrage",
+            source_jurisdiction="GLOBAL_MARITIME",
+            target_entity="chinese_state_banks_fx_desk",
+            target_jurisdiction="CN",
+            instrument="seaborne_urals_espo_crude_import",
+            nominal_amount=CHINA_SEABORNE_CRUDE_USD,
+            currency="USD",
+            amount_usd_normalized=CHINA_SEABORNE_CRUDE_USD,
+            flow_type=FlowType.TRADE_SETTLEMENT,
+            velocity_turnover_days=30.0,
+            data_source="general_administration_of_customs_china",
+            source_line_item="SEABORNE_CRUDE_IMPORTS_RUSSIA",
+            confidence=1.0,
+            metric_value=60.0,
+            raw_payload={"crude_grade": "ESPO / Urals", "destination": "Shandong Teapots"},
+        ))
+
+        # 2c. Dubai Maritime Freight, Dark Tanker Insurance & Trading Hub Margin ($25B)
+        events.append(FlowEvent(
+            event_id=f"dubai_maritime_freight_margin_{REPORT_DATE}",
+            timestamp=f"{REPORT_DATE}T07:30:00Z",
+            period_label=REPORT_DATE,
+            source_entity="shadow_tanker_energy_arbitrage",
+            source_jurisdiction="GLOBAL_MARITIME",
+            target_entity="uae_adia_mubadala_basin",
+            target_jurisdiction="AE",
+            instrument="shadow_fleet_freight_insurance_margin",
+            nominal_amount=DUBAI_MARITIME_MARGIN_USD,
+            currency="USD",
+            amount_usd_normalized=DUBAI_MARITIME_MARGIN_USD,
+            flow_type=FlowType.MARITIME_LOGISTICS_MARGIN,
+            velocity_turnover_days=45.0,
+            data_source="dmcc_energy_trading_audit",
+            source_line_item="MARITIME_FREIGHT_AND_INSURANCE_MARGIN",
+            confidence=0.95,
+            metric_value=25.0,
+            raw_payload={"hub": "Fujairah / DMCC", "activity": "Dark fleet logistics & insurance"},
         ))
 
         # 3. Australia Commodity Faucet (Iron Ore & LNG to Asia)

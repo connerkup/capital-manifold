@@ -939,68 +939,101 @@ class UnmodeledRiskEstimator:
         # 4 Pillars of Dark Matter
         benchmarks: List[DarkMatterBenchmark] = []
 
-        # Pillar 1: BIS OTC Derivatives
+        # Pillar 1: BIS OTC Derivatives ($25T GMV, $600T Notional)
+        modeled_bis = 0.0
+        if not df.empty:
+            bis_rows = df[df["instrument"].str.contains("bis_otc_derivatives", na=False)]
+            if not bis_rows.empty:
+                modeled_bis = float(bis_rows["amount_usd_normalized"].iloc[0])
+        gap_bis = max(0.0, self.BIS_OTC_DERIVATIVES_NOTIONAL_USD - modeled_bis)
+        cov_bis = (modeled_bis / self.BIS_OTC_DERIVATIVES_NOTIONAL_USD) * 100.0
+
         benchmarks.append(DarkMatterBenchmark(
             domain_name="BIS OTC Derivatives",
-            modeled_notional_usd=0.0,  # Unmodeled
+            modeled_notional_usd=modeled_bis,
             real_world_notional_usd=self.BIS_OTC_DERIVATIVES_NOTIONAL_USD,
             real_world_metric_label="$600T Notional (~$25T Gross Market Value)",
-            gap_usd=self.BIS_OTC_DERIVATIVES_NOTIONAL_USD,
-            coverage_ratio_pct=0.0,
+            gap_usd=gap_bis,
+            coverage_ratio_pct=cov_bis,
             primary_risk_mechanism=(
                 "Hidden synthetic leverage, cross-currency basis squeeze, and off-balance-sheet "
                 "margin-call liquidity demands (BIS Global Liquidity Indicators)."
             ),
         ))
 
-        # Pillar 2: Treasury Cash-Futures Basis Trade & Hedge Fund Repo Leverage
+        # Pillar 2: Treasury Cash-Futures Basis Trade & Hedge Fund Repo Leverage ($800B)
+        modeled_basis = 0.0
+        if not df.empty:
+            basis_rows = df[df["instrument"].str.contains("dtcc_treasury_cash_futures_basis_repo", na=False)]
+            if not basis_rows.empty:
+                modeled_basis = float(basis_rows["amount_usd_normalized"].iloc[0])
+        gap_basis = max(0.0, self.TREASURY_BASIS_TRADE_REPO_USD - modeled_basis)
+        cov_basis = (modeled_basis / self.TREASURY_BASIS_TRADE_REPO_USD) * 100.0
+
         benchmarks.append(DarkMatterBenchmark(
             domain_name="Treasury Basis Trade & Hedge Fund Repo",
-            modeled_notional_usd=0.0,
+            modeled_notional_usd=modeled_basis,
             real_world_notional_usd=self.TREASURY_BASIS_TRADE_REPO_USD,
             real_world_metric_label="$800B+ Repo at DTCC/FICC (20x-50x Synthetic Exposure)",
-            gap_usd=self.TREASURY_BASIS_TRADE_REPO_USD,
-            coverage_ratio_pct=0.0,
+            gap_usd=gap_basis,
+            coverage_ratio_pct=cov_basis,
             primary_risk_mechanism=(
                 "Basis divergence fire sales, clearinghouse margin spikes, and sudden dealer repo withdrawal "
                 "(analogous to the March 2020 Treasury market breakdown)."
             ),
         ))
 
-        # Pillar 3: Global Trade Statistical Discrepancy (Errors and Omissions)
+        # Pillar 3: Global Trade Statistical Discrepancy (Errors and Omissions) ($175B)
+        modeled_trade = 0.0
+        if not df.empty:
+            trade_rows = df[df["instrument"].str.contains("imf_global_trade_errors_and_omissions", na=False)]
+            if not trade_rows.empty:
+                modeled_trade = float(trade_rows["amount_usd_normalized"].iloc[0])
+        gap_trade = max(0.0, self.GLOBAL_TRADE_STATISTICAL_DISCREPANCY_USD - modeled_trade)
+        cov_trade = (modeled_trade / self.GLOBAL_TRADE_STATISTICAL_DISCREPANCY_USD) * 100.0
+
         benchmarks.append(DarkMatterBenchmark(
             domain_name="Global Trade Statistical Discrepancy (Errors & Omissions)",
-            modeled_notional_usd=0.0,
+            modeled_notional_usd=modeled_trade,
             real_world_notional_usd=self.GLOBAL_TRADE_STATISTICAL_DISCREPANCY_USD,
             real_world_metric_label="$150-200B/yr Unaccounted Net Capital Flight",
-            gap_usd=self.GLOBAL_TRADE_STATISTICAL_DISCREPANCY_USD,
-            coverage_ratio_pct=0.0,
+            gap_usd=gap_trade,
+            coverage_ratio_pct=cov_trade,
             primary_risk_mechanism=(
                 "Dark capital flight, trade misinvoicing, tariff avoidance arbitrage, and untracked "
                 "illicit offshore dollar transfers leaking out of developing economies."
             ),
         ))
 
-        # Pillar 4: Foreign Central Bank Currency Swap Lines (PBOC Bilateral Swaps)
-        modeled_swaps = 207e6  # Fed-ECB swap line modeled in DuckDB
+        # Pillar 4: Foreign Central Bank Currency Swap Lines (PBOC Bilateral Swaps) ($550B)
+        modeled_swaps = 0.0
         if not df.empty:
+            pboc_rows = df[df["instrument"].str.contains("pboc_bilateral_currency_swap_network", na=False)]
+            if not pboc_rows.empty:
+                modeled_swaps += float(pboc_rows["amount_usd_normalized"].iloc[0])
             swap_rows = df[df["instrument"] == "central_bank_liquidity_swap"]
             if not swap_rows.empty:
-                modeled_swaps = float(swap_rows["amount_usd_normalized"].iloc[0])
+                modeled_swaps += float(swap_rows["amount_usd_normalized"].iloc[0])
+        else:
+            modeled_swaps = 207e6
+
+        gap_swaps = max(0.0, self.PBOC_BILATERAL_SWAP_LINES_USD - modeled_swaps)
+        cov_swaps = (modeled_swaps / self.PBOC_BILATERAL_SWAP_LINES_USD) * 100.0
 
         benchmarks.append(DarkMatterBenchmark(
             domain_name="Foreign Central Bank Currency Swap Lines (PBOC & Bilateral)",
             modeled_notional_usd=modeled_swaps,
             real_world_notional_usd=self.PBOC_BILATERAL_SWAP_LINES_USD,
             real_world_metric_label="$550B+ Bilateral Renminbi Swaps across 40+ Central Banks",
-            gap_usd=self.PBOC_BILATERAL_SWAP_LINES_USD - modeled_swaps,
-            coverage_ratio_pct=(modeled_swaps / self.PBOC_BILATERAL_SWAP_LINES_USD) * 100.0,
+            gap_usd=gap_swaps,
+            coverage_ratio_pct=cov_swaps,
             primary_risk_mechanism=(
                 "Alternative non-dollar bilateral currency corridors circumventing Fed standing facilities "
                 "and clearing outside Western RTGS/SWIFT surveillance."
             ),
         ))
 
+        total_explicit_modeled += modeled_bis + modeled_basis + modeled_trade + modeled_swaps
         total_unmodeled = sum(b.gap_usd for b in benchmarks)
         total_real_world = total_explicit_modeled + total_unmodeled
         overall_coverage_pct = (total_explicit_modeled / total_real_world) * 100.0

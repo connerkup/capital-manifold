@@ -2,7 +2,7 @@ from __future__ import annotations
 from enum import Enum
 from datetime import datetime
 from typing import Optional, Dict, Any
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, model_validator
 
 class FlowType(str, Enum):
     GENESIS_CREDIT = "genesis_credit"           # Central bank QE / commercial bank loan creation
@@ -14,6 +14,10 @@ class FlowType(str, Enum):
     TRADE_SETTLEMENT = "trade_settlement"       # Import/Export payment drain or inflow
     POOL_CONCENTRATION = "pool_concentration"   # Capital accumulating in MMF / Corporate cash
     RISK_FRICTION = "risk_friction"             # Spread / potential gradient indicator
+    SYNTHETIC_DERIVATIVE = "synthetic_derivative" # OTC interest rate / FX derivatives
+    BILATERAL_SWAP = "bilateral_swap"           # Cross-currency central bank swap lines
+    REINVESTMENT_ALLOCATION = "reinvestment_allocation" # Corporate cash reinvestment in T-bills/MMF
+    MARITIME_LOGISTICS_MARGIN = "maritime_logistics_margin" # Freight, dark tanker insurance & trading margin
 
 class FlowEvent(BaseModel):
     event_id: str
@@ -41,6 +45,26 @@ class FlowEvent(BaseModel):
     confidence: float = 1.0
     metric_value: Optional[float] = None        # Secondary scalar (e.g. yield %, debt % of GDP)
     raw_payload: Dict[str, Any] = Field(default_factory=dict)
+
+    @model_validator(mode="after")
+    def validate_flow_invariants(self) -> FlowEvent:
+        if self.nominal_amount < 0.0:
+            raise ValueError(f"nominal_amount must be >= 0.0 for directed flow events, got {self.nominal_amount}")
+        if self.amount_usd_normalized < 0.0:
+            raise ValueError(f"amount_usd_normalized must be >= 0.0 for directed flow events, got {self.amount_usd_normalized}")
+
+        is_spread_metric = (
+            self.flow_type == FlowType.RISK_FRICTION
+            or (self.instrument and self.instrument.endswith("_bp"))
+        )
+        if is_spread_metric:
+            if self.nominal_amount != 0.0 or self.amount_usd_normalized != 0.0:
+                raise ValueError(
+                    f"Flow events with RISK_FRICTION or instrument ending in '_bp' must have nominal_amount == 0.0 "
+                    f"and amount_usd_normalized == 0.0, storing the basis point value strictly in metric_value. "
+                    f"Got nominal_amount={self.nominal_amount}, amount_usd_normalized={self.amount_usd_normalized}"
+                )
+        return self
 
 class MacroStressSnapshot(BaseModel):
     timestamp: str

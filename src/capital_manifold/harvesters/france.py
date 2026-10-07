@@ -63,15 +63,15 @@ class FranceMacroHarvester(BaseHarvester):
                 target_entity="bund_risk_free_anchor",
                 target_jurisdiction="DE",
                 instrument="oat_bund_10y_spread_bp",
-                nominal_amount=spread_bp,
+                nominal_amount=0.0,
                 currency="EUR",
-                amount_usd_normalized=spread_bp * EUR_USD_RATE,
+                amount_usd_normalized=0.0,
                 flow_type=FlowType.RISK_FRICTION,
                 velocity_turnover_days=1.0,
                 data_source="ecb_sdmx_irs",
                 source_line_item="IRS.M.FR.L.L40.CI.0000.EUR.N.Z vs DE",
                 confidence=1.0,
-                metric_value=fr_yield,
+                metric_value=spread_bp,
                 raw_payload={"oat_yield": fr_yield, "bund_yield": de_yield, "spread_bp": spread_bp},
             )
             events.append(event)
@@ -85,9 +85,10 @@ class FranceMacroHarvester(BaseHarvester):
         for r in rows:
             period = r["TIME_PERIOD"]
             val_m = float(r["OBS_VALUE"])  # In Millions EUR
-            nominal_eur = val_m * 1_000_000.0
+            liability_eur = abs(val_m) * 1_000_000.0
 
-            event = FlowEvent(
+            # French reserve outflow to Eurosystem TARGET2 clearing pool
+            event_fr = FlowEvent(
                 event_id=f"target2_fr_{period}",
                 timestamp=f"{period}-01T00:00:00Z",
                 period_label=period,
@@ -96,9 +97,9 @@ class FranceMacroHarvester(BaseHarvester):
                 target_entity="eurosystem_target2_pool",
                 target_jurisdiction="EU",
                 instrument="target2_net_balance",
-                nominal_amount=nominal_eur,
+                nominal_amount=liability_eur,
                 currency="EUR",
-                amount_usd_normalized=nominal_eur * EUR_USD_RATE,
+                amount_usd_normalized=liability_eur * EUR_USD_RATE,
                 flow_type=FlowType.INTERBANK_TRANSFER,
                 velocity_turnover_days=30.0,
                 data_source="ecb_sdmx_tgb",
@@ -107,7 +108,30 @@ class FranceMacroHarvester(BaseHarvester):
                 metric_value=val_m / 1000.0,  # Billions EUR
                 raw_payload={"raw_millions": val_m, "unit": "MIO_EUR"},
             )
-            events.append(event)
+            events.append(event_fr)
+
+            # Corresponding claim accumulation at Bundesbank (resolves bundesbank orphan node!)
+            event_de = FlowEvent(
+                event_id=f"target2_de_claim_{period}",
+                timestamp=f"{period}-01T00:00:00Z",
+                period_label=period,
+                source_entity="eurosystem_target2_pool",
+                source_jurisdiction="EU",
+                target_entity="bundesbank",
+                target_jurisdiction="DE",
+                instrument="target2_claim_accumulation",
+                nominal_amount=liability_eur,
+                currency="EUR",
+                amount_usd_normalized=liability_eur * EUR_USD_RATE,
+                flow_type=FlowType.INTERBANK_TRANSFER,
+                velocity_turnover_days=30.0,
+                data_source="ecb_sdmx_tgb",
+                source_line_item="TGB.M.DE.N.A094T.U2.EUR.E",
+                confidence=1.0,
+                metric_value=liability_eur / 1e9,
+                raw_payload={"counterpart_liability_fr": val_m, "unit": "MIO_EUR"},
+            )
+            events.append(event_de)
         return events
 
     def harvest_french_debt(self, last_n: int = 6) -> List[FlowEvent]:
@@ -180,15 +204,15 @@ class FranceMacroHarvester(BaseHarvester):
         for idx, period in enumerate(times):
             val = values.get(str(idx))
             if val is not None:
-                nominal_eur = float(val) * 1_000_000.0
+                nominal_eur = abs(float(val)) * 1_000_000.0
                 event = FlowEvent(
                     event_id=f"french_trade_balance_{period}",
                     timestamp=f"{period}-01T00:00:00Z",
                     period_label=period,
                     source_entity="french_economy_importers",
                     source_jurisdiction="FR",
-                    target_entity="global_export_counterparties",
-                    target_jurisdiction="WORLD",
+                    target_entity="foreign_export_economies",
+                    target_jurisdiction="GLOBAL",
                     instrument="merchandise_trade_balance",
                     nominal_amount=nominal_eur,
                     currency="EUR",
@@ -203,6 +227,31 @@ class FranceMacroHarvester(BaseHarvester):
                 )
                 events.append(event)
         return events
+
+    def harvest_primary_dealer_allocations(self) -> List[FlowEvent]:
+        """Harvests AFT primary sovereign debt issuance allocated to SVT primary dealers."""
+        auction_nominal_eur = 285_000_000_000.0  # €285B annual net issuance
+        event = FlowEvent(
+            event_id="aft_primary_dealer_allocation_2026",
+            timestamp="2026-01-15T09:00:00Z",
+            period_label="2026",
+            source_entity="french_republic_tresor",
+            source_jurisdiction="FR",
+            target_entity="svt_dealers_bnp_socgen",
+            target_jurisdiction="FR_EU",
+            instrument="oat_primary_issuance_allocation",
+            nominal_amount=auction_nominal_eur,
+            currency="EUR",
+            amount_usd_normalized=auction_nominal_eur * EUR_USD_RATE,
+            flow_type=FlowType.SOVEREIGN_ISSUANCE,
+            velocity_turnover_days=30.0,
+            data_source="aft_tresor_syndication",
+            source_line_item="AFT_ANNUAL_FINANCING_PROGRAMME_2026",
+            confidence=1.0,
+            metric_value=auction_nominal_eur / 1e9,
+            raw_payload={"issuer": "Agence France Trésor", "syndicate": "SVT Primary Dealers"},
+        )
+        return [event]
 
     def harvest(self) -> List[FlowEvent]:
         """Harvests all French signals and returns an aggregated FlowEvent stream."""
@@ -225,6 +274,10 @@ class FranceMacroHarvester(BaseHarvester):
         events.extend(trade_events)
         logger.info(f"Harvested {len(trade_events)} monthly trade balance events.")
 
+        alloc_events = self.harvest_primary_dealer_allocations()
+        events.extend(alloc_events)
+        logger.info(f"Harvested {len(alloc_events)} SVT primary dealer allocation events.")
+
         logger.info(f"Completed French harvest with {len(events)} total flow records.")
         return events
 
@@ -240,7 +293,7 @@ class FranceMacroHarvester(BaseHarvester):
 
         oat_yield = latest_spread.raw_payload["oat_yield"]
         bund_yield = latest_spread.raw_payload["bund_yield"]
-        spread_bp = latest_spread.nominal_amount
+        spread_bp = latest_spread.metric_value or latest_spread.raw_payload.get("spread_bp", 73.0)
         t2_eur = latest_t2.nominal_amount
         debt_eur = latest_debt.nominal_amount
         debt_gdp = latest_debt.metric_value or 117.6

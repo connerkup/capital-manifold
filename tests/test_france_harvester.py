@@ -28,9 +28,9 @@ def test_duckdb_storage_roundtrip(tmp_path):
         target_entity="eurosystem_target2_pool",
         target_jurisdiction="EU",
         instrument="target2_net_balance",
-        nominal_amount=-181336520000.0,
+        nominal_amount=181336520000.0,
         currency="EUR",
-        amount_usd_normalized=-197656806800.0,
+        amount_usd_normalized=197656806800.0,
         flow_type=FlowType.INTERBANK_TRANSFER,
         velocity_turnover_days=30.0,
         data_source="ecb_sdmx_tgb",
@@ -46,6 +46,6 @@ def test_duckdb_storage_roundtrip(tmp_path):
     df = store.query_df("SELECT * FROM flow_events WHERE event_id = 'test_ev_1'")
     assert len(df) == 1
     assert df["instrument"].iloc[0] == "target2_net_balance"
-    assert df["nominal_amount"].iloc[0] == -181336520000.0
+    assert df["nominal_amount"].iloc[0] == 181336520000.0
     
     store.close()

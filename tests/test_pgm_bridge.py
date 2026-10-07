@@ -274,3 +274,57 @@ def test_topological_contraction_of_intermediate_clearing_nodes(bridge: Manifold
     # Reachability between endpoints is preserved in L2
     assert "banque_de_france" in l2_graph.out_edges["french_republic_tresor"]
     assert shortcut.relation in l2_graph.out_edges["french_republic_tresor"]["banque_de_france"]
+
+
+def test_spof_mitigation_triparty_repo_outage_activates_ficc_bypass(bridge: ManifoldPGMBridge):
+    """Verifies that simulated outage of us_triparty_repo_pool activates FICC sponsored repo bypass."""
+    # 1. Baseline path verification
+    res_base = bridge.materialize_liquidity_path(
+        source_id="japan_institutional_carry_desk",
+        target_id="us_treasury_tga",
+    )
+    assert res_base.success is True
+    assert "japan_institutional_carry_desk" == res_base.path_nodes[0]
+    assert "us_treasury_tga" == res_base.path_nodes[-1]
+
+    # 2. Simulate catastrophic SPOF outage of us_triparty_repo_pool
+    sub = bridge.substrate
+    sub.entities.pop("us_triparty_repo_pool", None)
+    sub.adjacency.pop("us_triparty_repo_pool", None)
+    for neighbors in sub.adjacency.values():
+        neighbors.pop("us_triparty_repo_pool", None)
+
+    # Refresh landmark graph to reflect outage
+    bridge.initialize_landmarks()
+
+    # 3. Query liquidity path under simulated outage
+    res_bypass = bridge.materialize_liquidity_path(
+        source_id="japan_institutional_carry_desk",
+        target_id="us_treasury_tga",
+    )
+    assert res_bypass.success is True
+    assert "us_triparty_repo_pool" not in res_bypass.path_nodes
+    assert "ficc_sponsored_repo_clearing" in res_bypass.path_nodes
+    assert "us_treasury_tga" == res_bypass.path_nodes[-1]
+
+
+def test_spof_mitigation_svt_dealer_outage_activates_syndicate_bypass(bridge: ManifoldPGMBridge):
+    """Verifies that simulated outage of svt_dealers_bnp_socgen activates CA-CIB Natixis syndicate bypass."""
+    sub = bridge.substrate
+    # Simulate catastrophic outage of primary SVT dealers
+    sub.entities.pop("svt_dealers_bnp_socgen", None)
+    sub.adjacency.pop("svt_dealers_bnp_socgen", None)
+    for neighbors in sub.adjacency.values():
+        neighbors.pop("svt_dealers_bnp_socgen", None)
+
+    bridge.initialize_landmarks()
+
+    res_syndicate = bridge.materialize_liquidity_path(
+        source_id="french_republic_tresor",
+        target_id="eurosystem_target2_pool",
+    )
+    assert res_syndicate.success is True
+    assert "svt_dealers_bnp_socgen" not in res_syndicate.path_nodes
+    assert "ca_cib_natixis_dealer_syndicate" in res_syndicate.path_nodes
+    assert "banque_de_france" in res_syndicate.path_nodes
+    assert "eurosystem_target2_pool" == res_syndicate.path_nodes[-1]
