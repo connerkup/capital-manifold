@@ -244,35 +244,20 @@ def test_api_simulate_invalid_regime(client: TestClient):
 
 
 # =============================================================================
-# 7. Private Assets Endpoint Tests
+# 7. Macro Circuits & Pure Macro Isolation Tests
 # =============================================================================
 
-def test_api_private_assets(client: TestClient):
-    """Verifies GET /api/private_assets returns Desk Master hierarchy and macro links."""
-    res = client.get("/api/private_assets")
-    assert res.status_code == 200
+def test_circuits_and_pure_macro_isolation(client: TestClient):
+    """Verifies that private asset demo endpoints are absent and institutional macro circuits are active."""
+    res_priv = client.get("/api/private_assets")
+    assert res_priv.status_code == 404
 
-    data = res.json()
-    assert data["hierarchy_name"] == "Desk Master Multi-Domain Governance Hierarchy"
-
-    entities = {e["id"]: e for e in data["portfolio_entities"]}
-    assert len(entities) == 6
-    assert "conner_principal_vault" in entities
-    assert "launchfizz_treasury_vault" in entities
-    assert "vesperspatial_actuarial_reserves" in entities
-    assert "silvera_renewable_packaging" in entities
-    assert "scientific_fleet_compute_pool" in entities
-    assert "valle_rd_asset_ledger" in entities
-
-    # Quantitative aggregates
-    aggs = data["aggregates"]
-    assert aggs["total_private_commitments_usd"] >= 7_000_000.0
-    assert aggs["apex_liquid_yield_usd"] == 450_000.0
-    assert aggs["operating_revolving_credit_usd"] == 1_850_000.0
-    assert aggs["statutory_reinsurance_capacity_usd"] == 25_000_000.0
-
-    # Macro liquidity links
-    assert len(data["macro_liquidity_links"]) >= 5
+    res_circ = client.get("/api/circuits")
+    assert res_circ.status_code == 200
+    circuits = res_circ.json()
+    circuit_ids = [c["id"] for c in circuits]
+    assert "CIRCUIT-06-GULF-PETRODOLLAR" in circuit_ids
+    assert "CIRCUIT-06-CONNER-APEX" not in circuit_ids
 
 
 # =============================================================================

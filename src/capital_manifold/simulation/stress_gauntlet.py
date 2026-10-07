@@ -302,7 +302,6 @@ class StressGauntletEngine:
             ("japan_institutional_carry_desk", "us_treasury_tga"),
             ("offshore_fx_swap_desk", "us_treasury_tga"),
             ("us_prime_mmf_basin", "us_treasury_tga"),
-            ("japan_institutional_carry_desk", "us_treasuries_custody"),
         ]
 
         base_engine = self._create_procedural_engine(self._clone_substrate())

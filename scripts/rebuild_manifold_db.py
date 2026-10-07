@@ -28,7 +28,6 @@ from capital_manifold.harvesters.us_transatlantic import TransatlanticMacroHarve
 from capital_manifold.harvesters.transpacific_corporate import TranspacificCorporateHarvester
 from capital_manifold.harvesters.planetary_macro import PlanetaryMacroHarvester
 from capital_manifold.harvesters.dark_matter import DarkMatterHarvester
-from capital_manifold.harvesters.private_assets import PrivateAssetsHarvester
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(name)s: %(message)s")
 logger = logging.getLogger("rebuild_db")
@@ -83,16 +82,9 @@ def main():
     # 6. Dark Matter
     logger.info("Harvesting Global Macro Dark Matter...")
     with DarkMatterHarvester() as h_dm:
-        dm_events = h_dm.harvest()
+        dm_events = h_dm.harvest(store=store)
         c6 = store.insert_flow_events(dm_events)
         total_events += c6
-
-    # 7. Private Asset Portfolios & Principal Holdings
-    logger.info("Harvesting Private Asset Portfolios & Principal Holdings...")
-    with PrivateAssetsHarvester() as h_pa:
-        pa_events = h_pa.harvest()
-        c7 = store.insert_flow_events(pa_events)
-        total_events += c7
 
     logger.info(f"Total FlowEvents inserted into DuckDB: {total_events}")
 
@@ -102,7 +94,7 @@ def main():
     logger.info("Clean Parquet files exported successfully.")
 
     store.close()
-    print(f"SUCCESS: Database rebuilt with {total_events} FlowEvents across 7 harvesters.")
+    print(f"SUCCESS: Database rebuilt with {total_events} FlowEvents across 6 harvesters.")
 
 
 if __name__ == "__main__":

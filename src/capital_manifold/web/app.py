@@ -584,241 +584,6 @@ def post_simulate(req: SimulateRequest) -> Dict[str, Any]:
         raise HTTPException(status_code=500, detail=str(ex))
 
 
-@app.get("/api/private_assets")
-def get_private_assets() -> Dict[str, Any]:
-    """Returns the Desk Master multi-domain private asset hierarchy and macro liquidity links."""
-    entities = [
-        {
-            "id": "conner_principal_vault",
-            "name": "Conner Principal Sovereign Vault",
-            "domain": "Layer 0 Apex Sovereign Vault",
-            "role": "Sovereign capital reserves & multi-domain liquidity governance",
-            "jurisdiction": "US",
-            "allocation_usd": 1_730_000.0,
-            "metrics": {
-                "sovereign_equity_endowment_usd": 1_280_000.0,
-                "annual_mmf_treasury_yield_usd": 450_000.0,
-                "liquidity_coverage_ratio": 3.84,
-            },
-            "inbound_flows": [
-                {
-                    "source": "us_prime_mmf_basin",
-                    "instrument": "T-Bill & Prime MMF Yield Distribution",
-                    "amount_usd": 450_000.0,
-                    "frequency": "Annualized Monthly Sweep",
-                },
-                {
-                    "source": "family_office_principal_endowment",
-                    "instrument": "Principal Sovereign Equity Capital Allocation",
-                    "amount_usd": 1_280_000.0,
-                    "frequency": "Capital Endowment",
-                },
-            ],
-            "outbound_allocations": [
-                {"target": "launchfizz_treasury_vault", "purpose": "Venture Equity Injection", "amount_usd": 250_000.0},
-                {"target": "scientific_fleet_compute_pool", "purpose": "TWE / Jarvis Compute Endowment", "amount_usd": 480_000.0},
-                {"target": "silvera_renewable_packaging", "purpose": "Molded-Fiber Capex Injection", "amount_usd": 350_000.0},
-                {"target": "valle_rd_asset_ledger", "purpose": "Real Estate Equity Collateral", "amount_usd": 650_000.0},
-            ],
-        },
-        {
-            "id": "launchfizz_treasury_vault",
-            "name": "LaunchFizz Commercial Studio Treasury",
-            "domain": "Layer 1 Operating Venture (Agency / Studio)",
-            "role": "Commercial cashflow, agency operations & contractor disbursement",
-            "jurisdiction": "US",
-            "allocation_usd": 2_100_000.0,
-            "metrics": {
-                "active_commercial_credit_line_usd": 1_850_000.0,
-                "equity_injected_usd": 250_000.0,
-                "monthly_cash_burn_usd": 175_000.0,
-            },
-            "inbound_flows": [
-                {
-                    "source": "us_commercial_bank_credit_pool",
-                    "instrument": "Commercial Operating Revenue & Revolving Credit Line",
-                    "amount_usd": 1_850_000.0,
-                    "frequency": "Rolling Revolving Facility",
-                },
-                {
-                    "source": "conner_principal_vault",
-                    "instrument": "Venture Capital Equity Injection",
-                    "amount_usd": 250_000.0,
-                    "frequency": "Direct Equity Injection",
-                },
-            ],
-            "outbound_allocations": [
-                {"target": "agency_operating_payroll_and_vendors", "purpose": "Production Payroll & Vendors", "amount_usd": 1_750_000.0},
-                {"target": "commercial_cloud_and_saas_vendors", "purpose": "Commercial Cloud & SaaS Infrastructure", "amount_usd": 350_000.0},
-            ],
-        },
-        {
-            "id": "vesperspatial_actuarial_reserves",
-            "name": "VesperSpatial Actuarial Catastrophe Reserves",
-            "domain": "Layer 1 Actuarial Underwriting & Reinsurance",
-            "role": "Delphi-1.0 catastrophe risk underwriting & statutory PML collateral escrow",
-            "jurisdiction": "US",
-            "allocation_usd": 2_500_000.0,
-            "metrics": {
-                "statutory_collateral_pledge_usd": 2_500_000.0,
-                "pml_underwriting_capacity_usd": 25_000_000.0,
-                "collateral_ratio_pct": 10.0,
-            },
-            "inbound_flows": [
-                {
-                    "source": "catastrophe_reinsurance_cedants",
-                    "instrument": "Delphi Catastrophe Reinsurance Premiums Written",
-                    "amount_usd": 2_500_000.0,
-                    "frequency": "Underwriting Season Inflow",
-                }
-            ],
-            "outbound_allocations": [
-                {
-                    "target": "us_treasuries_custody",
-                    "purpose": "Statutory Reinsurance Collateral Escrow Pledge (T-Bills)",
-                    "amount_usd": 2_500_000.0,
-                }
-            ],
-        },
-        {
-            "id": "silvera_renewable_packaging",
-            "name": "Silvera Renewable Packaging Co.",
-            "domain": "Layer 1 Clean Manufacturing",
-            "role": "Molded-fiber capex, tooling fabrication & bio-resin ag feedstock",
-            "jurisdiction": "US",
-            "allocation_usd": 350_000.0,
-            "metrics": {
-                "tooling_capex_usd": 350_000.0,
-                "annual_production_units": 12_500_000,
-                "raw_feedstock_capacity_tons": 4_200,
-            },
-            "inbound_flows": [
-                {
-                    "source": "conner_principal_vault",
-                    "instrument": "Molded-Fiber Capex & Working Capital Allocation",
-                    "amount_usd": 350_000.0,
-                    "frequency": "Capex Tranche",
-                }
-            ],
-            "outbound_allocations": [
-                {
-                    "target": "molded_fiber_tooling_and_feedstock_vendors",
-                    "purpose": "Industrial Tooling & Bio-Resin Ag Residue Procurement",
-                    "amount_usd": 350_000.0,
-                }
-            ],
-        },
-        {
-            "id": "scientific_fleet_compute_pool",
-            "name": "Scientific Fleet Distributed Compute Pool",
-            "domain": "Layer 2B Scientific Compute & Predictive Intelligence",
-            "role": "TWE / Jarvis / Kinetic compute budget, GPU cluster silicon & Kalshi calibration",
-            "jurisdiction": "US",
-            "allocation_usd": 480_000.0,
-            "metrics": {
-                "compute_endowment_usd": 480_000.0,
-                "active_fleets": ["TWE", "Jarvis", "Kinetic", "Kalshi-Calibration"],
-                "hardware_sweep_target": "Apple BigTech Share Repurchase Burn",
-            },
-            "inbound_flows": [
-                {
-                    "source": "conner_principal_vault",
-                    "instrument": "Scientific Fleet GPU & API Compute Endowment",
-                    "amount_usd": 480_000.0,
-                    "frequency": "Compute Allocation",
-                }
-            ],
-            "outbound_allocations": [
-                {
-                    "target": "apple_bigtech_treasury_vault",
-                    "purpose": "Cloud Compute & Silicon Hardware Disbursements",
-                    "amount_usd": 480_000.0,
-                }
-            ],
-        },
-        {
-            "id": "valle_rd_asset_ledger",
-            "name": "Valle Road Real Estate Asset Ledger",
-            "domain": "Private Property & Real Assets",
-            "role": "Background real estate holding, mortgage amortizations & equity cushion",
-            "jurisdiction": "US",
-            "allocation_usd": 650_000.0,
-            "metrics": {
-                "retained_equity_cushion_usd": 530_000.0,
-                "mortgage_amortization_annual_usd": 120_000.0,
-                "loan_to_value_pct": 42.5,
-            },
-            "inbound_flows": [
-                {
-                    "source": "conner_principal_vault",
-                    "instrument": "Private Real Estate Equity Capitalization",
-                    "amount_usd": 650_000.0,
-                    "frequency": "Equity Capitalization",
-                }
-            ],
-            "outbound_allocations": [
-                {
-                    "target": "us_commercial_bank_credit_pool",
-                    "purpose": "Mortgage Debt Service Principal & Interest",
-                    "amount_usd": 120_000.0,
-                },
-                {
-                    "target": "valle_rd_property_equity_escrow",
-                    "purpose": "Retained Equity Cushion & Capital Improvement Reserve",
-                    "amount_usd": 530_000.0,
-                },
-            ],
-        },
-    ]
-
-    aggregates = {
-        "total_private_commitments_usd": sum(e["allocation_usd"] for e in entities),
-        "apex_liquid_yield_usd": 450_000.0,
-        "operating_revolving_credit_usd": 1_850_000.0,
-        "statutory_reinsurance_capacity_usd": 25_000_000.0,
-        "retained_real_estate_equity_usd": 530_000.0,
-        "scientific_compute_budget_usd": 480_000.0,
-    }
-
-    return {
-        "timestamp": datetime.now(timezone.utc).isoformat(),
-        "hierarchy_name": "Desk Master Multi-Domain Governance Hierarchy",
-        "portfolio_entities": entities,
-        "macro_liquidity_links": [
-            {
-                "conduit": "US Prime MMF Basin -> Conner Principal Vault",
-                "instrument": "T-Bill Yield Pass-Through",
-                "volume_usd": 450_000.0,
-                "direction": "Macro Inflow -> Private Principal",
-            },
-            {
-                "conduit": "US Commercial Banking Pool -> LaunchFizz Treasury",
-                "instrument": "Revolving Operating Facility",
-                "volume_usd": 1_850_000.0,
-                "direction": "Macro Inflow -> OpCo Treasury",
-            },
-            {
-                "conduit": "VesperSpatial Actuarial Reserves -> US Treasuries Custody",
-                "instrument": "Statutory Custodial Escrow Pledge",
-                "volume_usd": 2_500_000.0,
-                "direction": "Private Asset -> Sovereign Collateral Sink",
-            },
-            {
-                "conduit": "Scientific Fleet -> Apple Treasury -> Buyback Chamber",
-                "instrument": "Silicon Disbursements -> Corporate Equity Burn",
-                "volume_usd": 480_000.0,
-                "direction": "Compute Outflow -> QT Equity Burn",
-            },
-            {
-                "conduit": "Valle Road Ledger -> US Commercial Bank Pool",
-                "instrument": "Mortgage Amortization Service",
-                "volume_usd": 120_000.0,
-                "direction": "Real Estate Cashflow -> Bank Credit Sink",
-            },
-        ],
-        "aggregates": aggregates,
-    }
-
 
 # =============================================================================
 # User-Requested Explorer Endpoints: Pools, Deep Pool Inspection, Paths, Circuits
@@ -1111,6 +876,7 @@ def get_discovered_path(
     }
 
 
+@app.get("/api/circuits")
 @app.get("/api/circuits/featured")
 def get_featured_circuits() -> List[Dict[str, Any]]:
     """Curated institutional circuits for instant one-click graph animation and synchronized inspection."""
@@ -1198,20 +964,19 @@ def get_featured_circuits() -> List[Dict[str, Any]]:
             ],
         },
         {
-            "id": "CIRCUIT-06-CONNER-APEX",
-            "title": "Conner Principal Apex Sovereign Capital Allocation",
-            "subtitle": "Layer 0 sovereign capital governance transmitting macro yields to operating ventures",
-            "source_id": "conner_principal_vault",
-            "target_id": "launchfizz_treasury_vault",
-            "macro_theme": "Private Asset Portfolios & Downstream Cashflow Waterfall",
-            "description": "Traces Apex sovereign capital allocation from Conner Principal Vault into LaunchFizz commercial studio, VesperSpatial actuarial reserves, Silvera manufacturing, and the Scientific Compute Fleet.",
+            "id": "CIRCUIT-06-GULF-PETRODOLLAR",
+            "title": "Gulf Petrodollar Sovereign Wealth Recycling",
+            "subtitle": "Hydrocarbon revenues accumulated into sovereign wealth funds and recycled into Western capital anchors",
+            "source_id": "gulf_petrodollar_sovereign_wealth_basin",
+            "target_id": "french_republic_oat_market",
+            "macro_theme": "Planetary Petrodollar Recycling",
+            "description": "Traces crude oil dollar revenues flowing from Saudi SAMA/PIF and UAE Mubadala basins through cross-border clearing into European sovereign debt and global capital anchors.",
             "regime_link": None,
             "key_nodes": [
-                "us_prime_mmf_basin",
-                "conner_principal_vault",
-                "launchfizz_treasury_vault",
-                "vesperspatial_actuarial_reserves",
-                "scientific_fleet_compute_pool",
+                "saudi_sama_pif_nexus",
+                "uae_adia_mubadala_basin",
+                "gulf_petrodollar_sovereign_wealth_basin",
+                "french_republic_oat_market",
             ],
         },
         {

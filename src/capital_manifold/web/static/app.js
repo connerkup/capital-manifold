@@ -32,7 +32,6 @@ const App = {
     this.loadScorecard();
     this.loadExplorer();
     this.loadGauntlet(1); // Pre-load Regime 1
-    this.loadPrivateAssets();
     this.loadLedger();
   },
 
@@ -1093,81 +1092,6 @@ const App = {
     this.highlightCorridor(bypassNodes);
   },
 
-  // =========================================================================
-  // Tab 5: Private Asset Downstream Waterfall
-  // =========================================================================
-  async loadPrivateAssets() {
-    try {
-      const res = await fetch("/api/private_assets");
-      const data = await res.json();
-
-      document.getElementById("priv-total-commitments").textContent = this.formatCurrency(data.aggregates.total_private_commitments_usd);
-
-      // Render entities grid
-      const grid = document.getElementById("private-entities-grid");
-      if (grid && data.portfolio_entities) {
-        grid.innerHTML = data.portfolio_entities.map(e => `
-          <div class="bg-manifold-card border border-manifold-border rounded-lg p-5 space-y-3.5 flex flex-col justify-between">
-            <div class="space-y-1.5">
-              <div class="flex items-center justify-between">
-                <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-blue-950 text-blue-300 border border-blue-800 font-semibold">${e.domain}</span>
-                <span class="text-sm font-bold font-mono text-cyan-400">${this.formatCurrency(e.allocation_usd)}</span>
-              </div>
-              <h4 class="text-base font-bold text-white">${e.name}</h4>
-              <p class="text-xs text-slate-300">${e.role}</p>
-            </div>
-
-            <!-- Inbound & Outbound -->
-            <div class="space-y-2 pt-2 border-t border-slate-800 text-xs font-mono">
-              <div class="text-[10px] text-slate-400 uppercase font-bold">Inbound Macro Transmission:</div>
-              ${e.inbound_flows.map(inf => `
-                <div class="bg-slate-900 border border-slate-800/80 p-2 rounded flex items-center justify-between">
-                  <span class="text-slate-300 text-[11px] truncate">${inf.instrument}</span>
-                  <span class="text-emerald-400 font-bold ml-2">${this.formatCurrency(inf.amount_usd)}</span>
-                </div>
-              `).join("")}
-
-              <div class="text-[10px] text-slate-400 uppercase font-bold pt-1">Downstream Allocations:</div>
-              ${e.outbound_allocations.map(outf => `
-                <div class="bg-slate-900 border border-slate-800/80 p-2 rounded flex items-center justify-between">
-                  <span class="text-slate-300 text-[11px] truncate">${outf.purpose}</span>
-                  <span class="text-amber-400 font-bold ml-2">${this.formatCurrency(outf.amount_usd)}</span>
-                </div>
-              `).join("")}
-            </div>
-
-            <div class="pt-2">
-              <button class="w-full py-1.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-mono border border-slate-700 transition btn-inspect-priv" data-pool-id="${e.id}">
-                Inspect Ledger & Balance Sheet
-              </button>
-            </div>
-          </div>
-        `).join("");
-
-        grid.querySelectorAll(".btn-inspect-priv").forEach(btn => {
-          btn.addEventListener("click", () => {
-            this.inspectPool(btn.getAttribute("data-pool-id"));
-          });
-        });
-      }
-
-      // Render Macro Links Table
-      const linksTbody = document.getElementById("macro-links-table-body");
-      if (linksTbody && data.macro_liquidity_links) {
-        linksTbody.innerHTML = data.macro_liquidity_links.map(l => `
-          <tr class="table-dark-row">
-            <td class="py-2.5 px-4 font-bold text-cyan-400">${l.conduit}</td>
-            <td class="py-2.5 px-4 text-purple-300">${l.instrument}</td>
-            <td class="py-2.5 px-4 text-emerald-400 font-bold">${this.formatCurrency(l.volume_usd)}</td>
-            <td class="py-2.5 px-4 text-slate-400">${l.direction}</td>
-          </tr>
-        `).join("");
-      }
-
-    } catch (e) {
-      console.warn("Could not load /api/private_assets:", e);
-    }
-  },
 
   // =========================================================================
   // Tab 6: DuckDB Flow Ledger

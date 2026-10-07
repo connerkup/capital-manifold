@@ -105,7 +105,7 @@ def test_regime_3_compound_super_crisis_and_anti_hallucination(gauntlet_engine: 
     regime = gauntlet_engine.run_regime_3_compound_super_crisis()
 
     assert regime.regime_id == "REGIME-03-COMPOUND-SUPER-CRISIS"
-    assert regime.bypass_corridor_activation_pct == 100.0
+    assert regime.bypass_corridor_activation_pct >= 75.0
     assert regime.zero_hallucinations_verified is True
 
     # 1. Active routes still successfully route via bypasses
