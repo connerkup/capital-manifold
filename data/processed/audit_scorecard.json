@@ -1,0 +1,102 @@
+{
+  "system_integrity_score": 37.7,
+  "category_scores": {
+    "conservation": 0.0,
+    "dimensional": 11.5,
+    "temporal": 12.2,
+    "topology": 9.6,
+    "dark_matter": 4.4
+  },
+  "total_leakage_usd": 2576614000000.0,
+  "unit_errors_count": 7,
+  "unmodeled_dark_matter_usd": 601524793000000.0,
+  "coverage_ratio_pct": 6.831215217677696,
+  "high_risk_anomalies": [
+    {
+      "id": "ANOMALY-CONSERVATION-01",
+      "severity": "CRITICAL",
+      "dimension": "Accounting Conservation",
+      "entity": "shadow_tanker_energy_arbitrage",
+      "description": "Double-entry leak of $85,000,000,000.00 USD: $140,000,000,000.00 Urals crude entered shadow tankers from CBR vault, but only $55,000,000,000.00 arrived at India refining hub.",
+      "impact": "Unaccounted $85 Billion floating in maritime dark waters; counterpart liabilities missing."
+    },
+    {
+      "id": "ANOMALY-DIMENSIONAL-01",
+      "severity": "CRITICAL",
+      "dimension": "Dimensional Integrity",
+      "entity": "oat_bund_10y_spread_bp",
+      "description": "Basis point yield spread 'oat_bund_10y_spread_bp' (73.0 bps) was treated as fiat currency and converted to $79.57000000000001 USD.",
+      "impact": "Rate friction scalar conflated with currency balance transfer, distorting net liquidity metrics."
+    },
+    {
+      "id": "ANOMALY-DIMENSIONAL-02",
+      "severity": "HIGH",
+      "dimension": "Dimensional Integrity",
+      "entity": "target2_fr / merchandise_trade_balance",
+      "description": "Found 18 flow events with negative nominal amounts.",
+      "impact": "Directed graph conservation breaks when edge weights are signed; violates flow orientation."
+    },
+    {
+      "id": "ANOMALY-TEMPORAL-01",
+      "severity": "HIGH",
+      "dimension": "Temporal Cadence",
+      "entity": "us_public_debt_outstanding / maastricht_gross_debt",
+      "description": "Stored 11 static debt stocks ($40T+ US, $3.5T French) in the same table as daily flows without velocity normalization.",
+      "impact": "Comparing daily repo ($3T/day) directly to debt stock ($40T) commits a severe Stock vs. Flow category error."
+    },
+    {
+      "id": "ANOMALY-TOPOLOGY-01",
+      "severity": "CRITICAL",
+      "dimension": "Graph Topology",
+      "entity": "us_triparty_repo_pool",
+      "description": "Removal of US Triparty Repo Pool severs 100% of Transatlantic dollar carry routes.",
+      "impact": "Single point of failure: Japanese institutional carry desks and European G-SIBs cannot fund Treasuries."
+    },
+    {
+      "id": "ANOMALY-DARKMATTER-01",
+      "severity": "CRITICAL",
+      "dimension": "Macro Dark Matter",
+      "entity": "BIS Global OTC Derivatives",
+      "description": "$600 Trillion in OTC derivatives notional is completely absent from manifold balance sheets.",
+      "impact": "The system models only ~6.8% of global capital commitments; 93.2% remains unmodeled dark matter."
+    }
+  ],
+  "remediation_recommendations": [
+    {
+      "id": "REMEDIATION-01",
+      "area": "Dimensional / Schema",
+      "action": "Segregate Yield/Rate Spreads from Flow Events",
+      "details": "Move spread metrics (bps, yields) to MacroStressSnapshot or set nominal_amount=0.0 and store value in metric_value."
+    },
+    {
+      "id": "REMEDIATION-02",
+      "area": "Directed Flow Accounting",
+      "action": "Enforce Non-Negative Flow Quantities",
+      "details": "Store directional flows with nominal_amount >= 0. For deficit balances, invert the edge (source -> target)."
+    },
+    {
+      "id": "REMEDIATION-03",
+      "area": "Accounting Conservation",
+      "action": "Model Refining Margins and Shadow Arbitrage Conduits",
+      "details": "Explicitly model maritime tanker losses, crude discounts, and Indian refinery retained margin so Inflow == Outflow + Margin."
+    },
+    {
+      "id": "REMEDIATION-04",
+      "area": "Temporal Velocity",
+      "action": "Implement Velocity-Adjusted Annualized Flow Rates",
+      "details": "Normalize all flows to annualized turnover rates (Hz or USD/year) before performing path cost optimization or volume comparisons."
+    },
+    {
+      "id": "REMEDIATION-05",
+      "area": "Graph Resilience",
+      "action": "Establish Redundant Interbank Clearing Bypass Corridors",
+      "details": "Synthesize emergency bilateral bypass conduits around critical articulation points like us_triparty_repo_pool."
+    },
+    {
+      "id": "REMEDIATION-06",
+      "area": "Dark Matter Integration",
+      "action": "Ingest BIS OTC Derivatives Gross Market Value and Basis Trade Repo",
+      "details": "Incorporate BIS OTC gross market value ($25T) and DTCC Treasury basis trade repo ($800B) into the manifold substrate."
+    }
+  ]
+}
