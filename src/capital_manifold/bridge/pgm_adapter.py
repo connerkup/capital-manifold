@@ -348,6 +348,112 @@ FINANCIAL_ENTITIES: Dict[str, Dict[str, Any]] = {
         "jurisdiction": "GLOBAL",
         "description": "Global statistical discrepancy and unrecorded capital flight sink ($175B annual) capturing dark matter cross-border flows.",
     },
+    # Desk Master Multi-Domain Governance Hierarchy (Private Asset Portfolios & Principal Holdings)
+    "conner_principal_vault": {
+        "tier": MonetaryTier.TRANSMISSION,
+        "name": "Conner Principal Sovereign Vault",
+        "sector": "apex_family_office",
+        "jurisdiction": "US",
+        "description": "Layer 0 Apex decision architecture, sovereign capital, T-bill cash reserves, and multi-domain liquidity allocation.",
+    },
+    "launchfizz_treasury_vault": {
+        "tier": MonetaryTier.TRAVERSAL,
+        "name": "LaunchFizz Commercial Studio Treasury",
+        "sector": "operating_venture",
+        "jurisdiction": "US",
+        "description": "Layer 1 Studio commercial cashflow, agency wholesale operating accounts, and vendor payroll conduit.",
+    },
+    "vesperspatial_actuarial_reserves": {
+        "tier": MonetaryTier.TRANSMISSION,
+        "name": "VesperSpatial Actuarial Catastrophe Reserves",
+        "sector": "catastrophe_underwriting",
+        "jurisdiction": "US",
+        "description": "Layer 1 Delphi-1.0 catastrophe risk underwriting liquidity, PML spatial accumulation collateral, and reinsurance escrow.",
+    },
+    "silvera_renewable_packaging": {
+        "tier": MonetaryTier.TRAVERSAL,
+        "name": "Silvera Renewable Packaging Co.",
+        "sector": "clean_manufacturing",
+        "jurisdiction": "US",
+        "description": "Layer 1 Molded-fiber Capex, bio-resin equipment financing conduit, and ag residue feedstock working capital.",
+    },
+    "scientific_fleet_compute_pool": {
+        "tier": MonetaryTier.TRAVERSAL,
+        "name": "Scientific Fleet Distributed Compute Pool",
+        "sector": "scientific_compute",
+        "jurisdiction": "US",
+        "description": "Layer 2B TWE / Jarvis / Kinetic compute budget, GPU cluster allocations, and prediction market calibration funds.",
+    },
+    "valle_rd_asset_ledger": {
+        "tier": MonetaryTier.SINK,
+        "name": "Valle Road Real Estate Asset Ledger",
+        "sector": "private_real_estate",
+        "jurisdiction": "US",
+        "description": "Long-term background real estate holding, mortgage amortizations, and equity collateral cushion.",
+    },
+    "family_office_principal_endowment": {
+        "tier": MonetaryTier.GENESIS,
+        "name": "Family Office Principal Sovereign Capital Endowment",
+        "sector": "apex_family_office",
+        "jurisdiction": "US",
+        "description": "Sovereign capital equity reserve providing foundational liquidity endowments to the apex principal vault.",
+    },
+    "us_treasuries_custody": {
+        "tier": MonetaryTier.SINK,
+        "name": "US Treasuries Statutory Custodial Escrow",
+        "sector": "custodial_escrow",
+        "jurisdiction": "US",
+        "description": "Statutory custodial escrow holding pledged Treasury bill collateral backing Delphi reinsurance underwriting capacity.",
+    },
+    "agency_operating_payroll_and_vendors": {
+        "tier": MonetaryTier.SINK,
+        "name": "Agency Operating Payroll & Production Vendors",
+        "sector": "commercial_vendors",
+        "jurisdiction": "US",
+        "description": "Wholesale commercial vendor disbursements and creative production payroll settlement.",
+    },
+    "commercial_cloud_and_saas_vendors": {
+        "tier": MonetaryTier.SINK,
+        "name": "Commercial Cloud, SaaS & IT Infrastructure Vendors",
+        "sector": "technology_vendors",
+        "jurisdiction": "US",
+        "description": "Enterprise cloud services, operational software subscriptions, and developer toolchain disbursements.",
+    },
+    "catastrophe_reinsurance_cedants": {
+        "tier": MonetaryTier.GENESIS,
+        "name": "Global Catastrophe Reinsurance Cedants & Syndicates",
+        "sector": "reinsurance_market",
+        "jurisdiction": "GLOBAL",
+        "description": "Primary insurance carriers and Lloyd's syndicates ceding catastrophe risk premiums into VesperSpatial Delphi reserves.",
+    },
+    "molded_fiber_tooling_and_feedstock_vendors": {
+        "tier": MonetaryTier.SINK,
+        "name": "Molded-Fiber Tooling & Ag Feedstock Suppliers",
+        "sector": "industrial_supply",
+        "jurisdiction": "US",
+        "description": "Machinery manufacturers, tooling fabricators, and agricultural residue feedstock suppliers.",
+    },
+    "valle_rd_property_equity_escrow": {
+        "tier": MonetaryTier.SINK,
+        "name": "Valle Road Property Retained Equity & Escrow Cushion",
+        "sector": "real_estate_equity",
+        "jurisdiction": "US",
+        "description": "Unlevered equity value cushion and long-term capital improvement reserve for background real estate holdings.",
+    },
+    "us_corporate_and_household_borrowers": {
+        "tier": MonetaryTier.SINK,
+        "name": "US Corporate & Household Commercial Bank Borrowers",
+        "sector": "commercial_borrowers",
+        "jurisdiction": "US",
+        "description": "Domestic non-financial business and consumer credit sink absorbing commercial bank credit creation.",
+    },
+    "us_commercial_bank_credit_pool": {
+        "tier": MonetaryTier.TRANSMISSION,
+        "name": "US Commercial Banking Credit & Revolving Facility Pool",
+        "sector": "commercial_bank",
+        "jurisdiction": "US",
+        "description": "Domestic banking system commercial credit creation, credit line revolving facilities, and mortgage underwriting nexus.",
+    },
 }
 
 
@@ -1591,6 +1697,14 @@ class ManifoldPGMBridge:
             metadata={"bypass": True, "sponsored_repo_volume_usd": 250.0e9, "tier_step": "1->1"},
         )
         self.substrate.add_relation(
+            source_id="us_prime_mmf_basin",
+            target_id="ficc_sponsored_repo_clearing",
+            relation="sponsored_repo_clearing_injection",
+            weight=w_ficc_sponsored * 1.02,
+            rel_embedding=self.relation_embeddings["sponsored_repo_clearing_injection"],
+            metadata={"bypass": True, "sponsored_repo_volume_usd": 150.0e9, "tier_step": "1->1"},
+        )
+        self.substrate.add_relation(
             source_id="ficc_sponsored_repo_clearing",
             target_id="us_treasuries_custody",
             relation="sponsored_dvp_repo_settlement",
@@ -1653,6 +1767,14 @@ class ManifoldPGMBridge:
             weight=w_syndicate * 1.05,
             rel_embedding=self.relation_embeddings["syndicate_usd_fx_swap"],
             metadata={"bypass": True, "tier_step": "1->1"},
+        )
+        self.substrate.add_relation(
+            source_id="ca_cib_natixis_dealer_syndicate",
+            target_id="french_republic_oat_market",
+            relation="secondary_market_distribution",
+            weight=w_syndicate * 1.05,
+            rel_embedding=self.relation_embeddings["secondary_market_distribution"],
+            metadata={"bypass": True, "tier_step": "1->0"},
         )
 
         # C) Dark Matter Entities Wiring

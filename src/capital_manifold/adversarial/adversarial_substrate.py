@@ -46,6 +46,7 @@ class EntityCategory(str, Enum):
     DARK_FOREST_RING2 = "dark_forest_ring2"
     GLOBAL_TRIANGLE = "global_triangle"
     PLANETARY_MANIFOLD = "planetary_manifold"
+    PRIVATE_ASSETS = "private_assets"
 
 
 @dataclass
@@ -223,6 +224,20 @@ class AdversarialSubstrateBuilder:
             "property_mortgage_syndication",
             "fintech_loan_brokering",
             "offshore_subordinated_transfer",
+            # Private Asset Portfolios & Principal Holdings transmission edges
+            "private_yield_transmission",
+            "commercial_credit_line",
+            "venture_capital_allocation",
+            "underwriting_collateral_escrow",
+            "scientific_compute_endowment",
+            "compute_vendor_disbursements",
+            "clean_packaging_capex",
+            "real_estate_equity_cushion",
+            "mortgage_debt_service",
+            "commercial_dividend_distribution",
+            "operating_cashflow_sweep",
+            "underwriting_profit_distribution",
+            "property_equity_distribution",
         ]
         for idx, r_name in enumerate(rel_types):
             vec = np.zeros(self.rel_dim, dtype=np.float32)
@@ -681,6 +696,50 @@ class AdversarialSubstrateBuilder:
             duration_sensitivity=0.10, state_ownership_pct=0.50, npl_ratio=0.000, deposit_funded_ratio=0.00,
             interbank_lending_ratio=0.10, trade_finance_exposure=0.90, sovereign_holding_ratio=0.50,
             central_bank_refi_access=0.0, regulatory_tier_rank=0.50,
+        ))
+
+        # Private Asset Portfolios & Principal Holdings (Desk Master Hierarchy)
+        self._register("conner_principal_vault", EntityCategory.PRIVATE_ASSETS, BalanceSheetMetrics(
+            log_total_assets=0.85, leverage_ratio=0.00, cash_reserves_ratio=0.80, svt_dealer_mandate=0.0,
+            target2_direct_participant=0.0, wholesale_repo_volume=0.20, cross_border_liability_ratio=0.30,
+            duration_sensitivity=0.25, state_ownership_pct=0.00, npl_ratio=0.000, deposit_funded_ratio=0.00,
+            interbank_lending_ratio=0.10, trade_finance_exposure=0.15, sovereign_holding_ratio=0.75,
+            central_bank_refi_access=0.0, regulatory_tier_rank=0.60,
+        ))
+        self._register("launchfizz_treasury_vault", EntityCategory.PRIVATE_ASSETS, BalanceSheetMetrics(
+            log_total_assets=0.82, leverage_ratio=0.20, cash_reserves_ratio=0.35, svt_dealer_mandate=0.0,
+            target2_direct_participant=0.0, wholesale_repo_volume=0.10, cross_border_liability_ratio=0.25,
+            duration_sensitivity=0.10, state_ownership_pct=0.00, npl_ratio=0.005, deposit_funded_ratio=0.00,
+            interbank_lending_ratio=0.05, trade_finance_exposure=0.60, sovereign_holding_ratio=0.20,
+            central_bank_refi_access=0.0, regulatory_tier_rank=0.40,
+        ))
+        self._register("vesperspatial_actuarial_reserves", EntityCategory.PRIVATE_ASSETS, BalanceSheetMetrics(
+            log_total_assets=0.86, leverage_ratio=0.05, cash_reserves_ratio=0.70, svt_dealer_mandate=0.0,
+            target2_direct_participant=0.0, wholesale_repo_volume=0.40, cross_border_liability_ratio=0.50,
+            duration_sensitivity=0.30, state_ownership_pct=0.00, npl_ratio=0.000, deposit_funded_ratio=0.00,
+            interbank_lending_ratio=0.20, trade_finance_exposure=0.40, sovereign_holding_ratio=0.80,
+            central_bank_refi_access=0.0, regulatory_tier_rank=0.55,
+        ))
+        self._register("silvera_renewable_packaging", EntityCategory.PRIVATE_ASSETS, BalanceSheetMetrics(
+            log_total_assets=0.78, leverage_ratio=0.25, cash_reserves_ratio=0.25, svt_dealer_mandate=0.0,
+            target2_direct_participant=0.0, wholesale_repo_volume=0.05, cross_border_liability_ratio=0.15,
+            duration_sensitivity=0.05, state_ownership_pct=0.00, npl_ratio=0.010, deposit_funded_ratio=0.00,
+            interbank_lending_ratio=0.00, trade_finance_exposure=0.50, sovereign_holding_ratio=0.05,
+            central_bank_refi_access=0.0, regulatory_tier_rank=0.35,
+        ))
+        self._register("scientific_fleet_compute_pool", EntityCategory.PRIVATE_ASSETS, BalanceSheetMetrics(
+            log_total_assets=0.80, leverage_ratio=0.00, cash_reserves_ratio=0.50, svt_dealer_mandate=0.0,
+            target2_direct_participant=0.0, wholesale_repo_volume=0.15, cross_border_liability_ratio=0.40,
+            duration_sensitivity=0.05, state_ownership_pct=0.00, npl_ratio=0.000, deposit_funded_ratio=0.00,
+            interbank_lending_ratio=0.05, trade_finance_exposure=0.30, sovereign_holding_ratio=0.10,
+            central_bank_refi_access=0.0, regulatory_tier_rank=0.45,
+        ))
+        self._register("valle_rd_asset_ledger", EntityCategory.PRIVATE_ASSETS, BalanceSheetMetrics(
+            log_total_assets=0.83, leverage_ratio=0.30, cash_reserves_ratio=0.15, svt_dealer_mandate=0.0,
+            target2_direct_participant=0.0, wholesale_repo_volume=0.00, cross_border_liability_ratio=0.00,
+            duration_sensitivity=0.20, state_ownership_pct=0.00, npl_ratio=0.000, deposit_funded_ratio=0.00,
+            interbank_lending_ratio=0.00, trade_finance_exposure=0.00, sovereign_holding_ratio=0.00,
+            central_bank_refi_access=0.0, regulatory_tier_rank=0.30,
         ))
 
     def build_adversarial_substrate(self) -> Tuple[L3LatentSubstrate, Dict[str, BalanceSheetMetrics]]:
@@ -1477,6 +1536,106 @@ class AdversarialSubstrateBuilder:
             relation="repo_dollar_financing",
             weight=1.00,
             rel_embedding=self.relation_embeddings["repo_dollar_financing"],
+        )
+
+        # 6. Private Asset Portfolios & Principal Holdings Macro Transmission
+        # Yield Transmission
+        sub.add_relation(
+            source_id="us_prime_mmf_basin",
+            target_id="conner_principal_vault",
+            relation="private_yield_transmission",
+            weight=1.00,
+            rel_embedding=self.relation_embeddings["private_yield_transmission"],
+        )
+        # Commercial Banking & Venture Lines
+        sub.add_relation(
+            source_id="us_commercial_bank_credit_pool",
+            target_id="launchfizz_treasury_vault",
+            relation="commercial_credit_line",
+            weight=1.00,
+            rel_embedding=self.relation_embeddings["commercial_credit_line"],
+        )
+        sub.add_relation(
+            source_id="conner_principal_vault",
+            target_id="launchfizz_treasury_vault",
+            relation="venture_capital_allocation",
+            weight=1.00,
+            rel_embedding=self.relation_embeddings["venture_capital_allocation"],
+        )
+        # Catastrophe Underwriting Escrow
+        sub.add_relation(
+            source_id="conner_principal_vault",
+            target_id="vesperspatial_actuarial_reserves",
+            relation="underwriting_collateral_escrow",
+            weight=1.00,
+            rel_embedding=self.relation_embeddings["underwriting_collateral_escrow"],
+        )
+        # Scientific Compute Endowment & Hardware Disbursements
+        sub.add_relation(
+            source_id="conner_principal_vault",
+            target_id="scientific_fleet_compute_pool",
+            relation="scientific_compute_endowment",
+            weight=1.00,
+            rel_embedding=self.relation_embeddings["scientific_compute_endowment"],
+        )
+        sub.add_relation(
+            source_id="scientific_fleet_compute_pool",
+            target_id="apple_bigtech_treasury_vault",
+            relation="compute_vendor_disbursements",
+            weight=1.00,
+            rel_embedding=self.relation_embeddings["compute_vendor_disbursements"],
+        )
+        # Clean Packaging Capex
+        sub.add_relation(
+            source_id="conner_principal_vault",
+            target_id="silvera_renewable_packaging",
+            relation="clean_packaging_capex",
+            weight=1.00,
+            rel_embedding=self.relation_embeddings["clean_packaging_capex"],
+        )
+        # Real Estate Collateral & Mortgage Amortization
+        sub.add_relation(
+            source_id="conner_principal_vault",
+            target_id="valle_rd_asset_ledger",
+            relation="real_estate_equity_cushion",
+            weight=1.00,
+            rel_embedding=self.relation_embeddings["real_estate_equity_cushion"],
+        )
+        sub.add_relation(
+            source_id="valle_rd_asset_ledger",
+            target_id="us_commercial_bank_credit_pool",
+            relation="mortgage_debt_service",
+            weight=1.00,
+            rel_embedding=self.relation_embeddings["mortgage_debt_service"],
+        )
+        # Circular feedback edges preventing absorbing sink traps
+        sub.add_relation(
+            source_id="launchfizz_treasury_vault",
+            target_id="conner_principal_vault",
+            relation="commercial_dividend_distribution",
+            weight=0.90,
+            rel_embedding=self.relation_embeddings["commercial_dividend_distribution"],
+        )
+        sub.add_relation(
+            source_id="silvera_renewable_packaging",
+            target_id="conner_principal_vault",
+            relation="operating_cashflow_sweep",
+            weight=0.90,
+            rel_embedding=self.relation_embeddings["operating_cashflow_sweep"],
+        )
+        sub.add_relation(
+            source_id="vesperspatial_actuarial_reserves",
+            target_id="conner_principal_vault",
+            relation="underwriting_profit_distribution",
+            weight=0.95,
+            rel_embedding=self.relation_embeddings["underwriting_profit_distribution"],
+        )
+        sub.add_relation(
+            source_id="valle_rd_asset_ledger",
+            target_id="conner_principal_vault",
+            relation="property_equity_distribution",
+            weight=0.90,
+            rel_embedding=self.relation_embeddings["property_equity_distribution"],
         )
 
         logger.info(

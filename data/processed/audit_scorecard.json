@@ -1,9 +1,9 @@
 {
-  "system_integrity_score": 90.8,
+  "system_integrity_score": 91.1,
   "category_scores": {
     "conservation": 20.0,
     "dimensional": 20.0,
-    "temporal": 13.3,
+    "temporal": 13.6,
     "topology": 19.0,
     "dark_matter": 18.5
   },

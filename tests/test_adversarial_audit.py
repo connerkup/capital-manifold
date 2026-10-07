@@ -36,7 +36,7 @@ def test_adversarial_substrate_composition(adversarial_env):
     """Verifies that the substrate contains authentic SVTs and 65+ decoys across 5 categories."""
     builder, _, sub = adversarial_env
     assert len(sub.entities) >= 80
-    assert len(sub.entities) == 124  # 90 base + 4 Ring 1 + 5 Ring 2 + 5 Global Triangle + 13 Planetary + 7 Phase 3 nodes
+    assert len(sub.entities) == 130  # 124 previous + 6 private asset nodes
 
     # Verify 15 Authentic AFT SVTs
     svts = [eid for eid, cat in builder.entity_categories.items() if cat == EntityCategory.SVT_PRIMARY_DEALER]
