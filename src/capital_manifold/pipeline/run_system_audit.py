@@ -184,8 +184,10 @@ def print_audit_report(scorecard: FullAuditScorecard) -> None:
     print(f" * Total Modeled Daily Repo Volume:   {format_usd(dm.modeled_daily_repo_volume_usd)}")
     print(f" * Total Unmodeled Dark Matter:       {format_usd(dm.total_unmodeled_dark_matter_usd)} Notional")
     print(f" * Global Manifold Coverage Ratio:    {dm.overall_coverage_ratio_pct:.2f}% Modeled / {100.0 - dm.overall_coverage_ratio_pct:.2f}% Dark Matter")
-    print(f" * Dark Matter Risk Multiplier:       {dm.dark_matter_multiplier:.1f}x Unmodeled Commitments per Modeled Asset")
-    print(f" * Systemic Blindspot Score:          {dm.systemic_blindspot_score:.1f} / 100.0 (High Severity)")
+    print(f" * Dark Matter Risk Multiplier:       {dm.dark_matter_multiplier:.1f}x Unmodeled Commitments per Sovereign Debt")
+    print(f" * Systemic Blindspot Score:          {dm.systemic_blindspot_score:.1f} / 100.0 (Tail Risk Severity)")
+    print(f" * ISDA Netted At-Risk Commitments:   {format_usd(dm.at_risk_economic_commitments_usd)} ($25T GMV + $67T Shadow + $1.7T PC + Debt + Repo)")
+    print(f" * Modeled At-Risk Commitments:       {format_usd(dm.modeled_at_risk_commitments_usd)} ({dm.at_risk_coverage_ratio_pct:.1f}% At-Risk Coverage)")
 
     print("\n   [*] Dark Matter Pillars Breakdown:")
     for b in dm.benchmarks:
@@ -260,8 +262,12 @@ def main() -> None:
                 "dark_matter": scorecard.dark_matter_score,
             },
             "total_leakage_usd": scorecard.conservation_report.total_leakage_volume_usd,
+            "conduit_leaks_count": len(scorecard.conservation_report.detected_leaks),
             "unit_errors_count": scorecard.dimensional_report.unit_mismatches_count,
             "unmodeled_dark_matter_usd": scorecard.unmodeled_risk_report.total_unmodeled_dark_matter_usd,
+            "at_risk_economic_commitments_usd": scorecard.unmodeled_risk_report.at_risk_economic_commitments_usd,
+            "modeled_at_risk_commitments_usd": scorecard.unmodeled_risk_report.modeled_at_risk_commitments_usd,
+            "at_risk_coverage_ratio_pct": scorecard.unmodeled_risk_report.at_risk_coverage_ratio_pct,
             "coverage_ratio_pct": scorecard.unmodeled_risk_report.overall_coverage_ratio_pct,
             "high_risk_anomalies": scorecard.high_risk_anomalies,
             "remediation_recommendations": scorecard.remediation_recommendations,

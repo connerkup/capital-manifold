@@ -83,6 +83,10 @@ def test_accounting_conservation_double_entry_leaks(duckdb_available):
     assert apple_summary.is_leak is False
     assert apple_summary.leak_amount_usd == pytest.approx(0.0, abs=1e-3)
 
+    # Verify zero conduit leaks across the entire manifold
+    assert len(report.detected_leaks) == 0
+    assert report.total_leakage_volume_usd == pytest.approx(0.0, abs=1e-3)
+
     # Verify detector catches synthetic double-entry leaks when present
     mock_df = pd.DataFrame([
         {
@@ -235,28 +239,31 @@ def test_graph_topology_connectivity_and_cut_vertices():
     assert report.total_nodes >= 117
     assert report.total_edges >= 150
     assert report.weakly_connected_components > 0
+    # Hardened topology: Articulation points radically reduced from 43 to < 15
+    assert len(report.articulation_points) < 15
     assert len(report.articulation_points) > 0
 
-    # French Treasury and import conduit are cut vertices in sovereign trade circuits
+    # French Treasury remains a core articulation point in sovereign trade circuits
     assert "french_republic_tresor" in report.articulation_points or "french_economy_importers" in report.articulation_points
 
 
 def test_graph_topology_absorbing_sinks():
-    """Verifies distinction between legitimate monetary burns and unintended sink traps."""
+    """Verifies complete elimination of unintended sink traps and preservation of legitimate monetary burns."""
     auditor = GraphTopologyAuditor()
     report = auditor.audit()
 
-    assert len(report.absorbing_sinks) >= 15
-    assert len(report.legitimate_burn_sinks) >= 4
-    assert len(report.unintended_sink_traps) >= 8
+    # Hardened topology: All unintended decoy traps eliminated (0 dead-ends), only 6 legitimate monetary burns remain
+    assert len(report.absorbing_sinks) == 6
+    assert len(report.legitimate_burn_sinks) == 6
+    assert len(report.unintended_sink_traps) == 0
 
     # Legitimate burns
     assert "fed_soma_qt_burn_chamber" in report.legitimate_burn_sinks
     assert "corporate_share_buyback_burn_chamber" in report.legitimate_burn_sinks
     assert "fed_on_rrp_buffer_sink" in report.legitimate_burn_sinks
-
-    # Decoy fintech dead-ends
-    assert any("fintech" in s or "broker" in s or "credit" in s for s in report.unintended_sink_traps)
+    assert "bund_risk_free_anchor" in report.legitimate_burn_sinks
+    assert "sovereign_debt_holders" in report.legitimate_burn_sinks
+    assert "offshore_cayman_hedge_pool" in report.legitimate_burn_sinks
 
 
 def test_graph_topology_critical_node_removal():
@@ -291,9 +298,11 @@ def test_unmodeled_risk_estimator_dark_matter(duckdb_available):
     assert report.dark_matter_multiplier > 5.0               # Multiplier > 5x
     assert report.systemic_blindspot_score > 70.0            # High blindspot
 
-    # Check 4 pillars
+    # Check 6 pillars
     benchmarks_by_domain = {b.domain_name: b for b in report.benchmarks}
     assert "BIS OTC Derivatives" in benchmarks_by_domain
+    assert "FSB Narrow Shadow Banking" in benchmarks_by_domain
+    assert "Global Private Credit" in benchmarks_by_domain
     assert "Treasury Basis Trade & Hedge Fund Repo" in benchmarks_by_domain
     assert "Global Trade Statistical Discrepancy (Errors & Omissions)" in benchmarks_by_domain
     assert "Foreign Central Bank Currency Swap Lines (PBOC & Bilateral)" in benchmarks_by_domain
@@ -302,6 +311,16 @@ def test_unmodeled_risk_estimator_dark_matter(duckdb_available):
     assert bis_b.real_world_notional_usd == 600e12
     assert bis_b.modeled_notional_usd == 25e12
     assert bis_b.gap_usd == 575e12
+
+    fsb_b = benchmarks_by_domain["FSB Narrow Shadow Banking"]
+    assert fsb_b.real_world_notional_usd == 67e12
+    assert fsb_b.modeled_notional_usd == 67e12
+    assert fsb_b.gap_usd == 0.0
+
+    pc_b = benchmarks_by_domain["Global Private Credit"]
+    assert pc_b.real_world_notional_usd == 1.7e12
+    assert pc_b.modeled_notional_usd == 1.7e12
+    assert pc_b.gap_usd == 0.0
 
     basis_b = benchmarks_by_domain["Treasury Basis Trade & Hedge Fund Repo"]
     assert basis_b.real_world_notional_usd == 800e9
@@ -318,6 +337,11 @@ def test_unmodeled_risk_estimator_dark_matter(duckdb_available):
     assert pboc_b.modeled_notional_usd >= 550e9
     assert pboc_b.gap_usd == 0.0
 
+    # ISDA Netting & At-Risk Economic Commitments
+    assert report.at_risk_coverage_ratio_pct >= 90.0
+    assert report.at_risk_economic_commitments_usd >= 135e12
+    assert report.modeled_at_risk_commitments_usd >= 135e12
+
 
 # -------------------------------------------------------------------------
 # 6. Integrated End-to-End System Auditor Scorecard Test
@@ -330,12 +354,12 @@ def test_system_auditor_end_to_end_scorecard(duckdb_available):
 
     assert isinstance(scorecard, FullAuditScorecard)
     assert 0.0 <= scorecard.system_integrity_score <= 100.0
-    assert scorecard.system_integrity_score >= 50.0
+    assert scorecard.system_integrity_score >= 85.0
     assert scorecard.dimensional_score == 20.0  # Remediated dimensional integrity
-    assert scorecard.conservation_score > 5.0
+    assert scorecard.conservation_score == 20.0 # Remediated double-entry conservation (0 leaks)
     assert scorecard.temporal_score > 10.0
     assert scorecard.topology_score > 5.0
-    assert scorecard.dark_matter_score > 4.0
+    assert scorecard.dark_matter_score >= 16.0  # ISDA netted at-risk commitments coverage > 90%
 
     assert len(scorecard.high_risk_anomalies) >= 3
     assert len(scorecard.remediation_recommendations) >= 5

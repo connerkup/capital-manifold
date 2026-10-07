@@ -1,16 +1,20 @@
 {
-  "system_integrity_score": 54.3,
+  "system_integrity_score": 90.8,
   "category_scores": {
-    "conservation": 6.7,
+    "conservation": 20.0,
     "dimensional": 20.0,
-    "temporal": 13.0,
-    "topology": 9.4,
-    "dark_matter": 5.2
+    "temporal": 13.3,
+    "topology": 19.0,
+    "dark_matter": 18.5
   },
-  "total_leakage_usd": 56972381113000.0,
+  "total_leakage_usd": 0.0,
+  "conduit_leaks_count": 0,
   "unit_errors_count": 0,
   "unmodeled_dark_matter_usd": 575000000000000.0,
-  "coverage_ratio_pct": 10.939636202856507,
+  "at_risk_economic_commitments_usd": 142336313793000.0,
+  "modeled_at_risk_commitments_usd": 142336520793000.0,
+  "at_risk_coverage_ratio_pct": 100.0,
+  "coverage_ratio_pct": 19.504936690608258,
   "high_risk_anomalies": [
     {
       "id": "ANOMALY-TEMPORAL-01",

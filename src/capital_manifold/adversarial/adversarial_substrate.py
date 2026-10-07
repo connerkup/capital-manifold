@@ -202,6 +202,21 @@ class AdversarialSubstrateBuilder:
             "instant_credit_repayment_recirculation",
             "social_housing_rent_recirculation",
             "fx_swap_sponsored_repo_conduit",
+            # Phase 4 Topology Hardening Relations
+            "collateral_pledge_repo_financing",
+            "custody_safekeeping_distribution",
+            "swap_line_drawdown_liquidity",
+            "consumer_loan_repayment_recirculation",
+            "credit_card_interchange_settlement",
+            "social_housing_rent_remittance",
+            "regional_reserve_clearing",
+            "regional_interbank_liquidity",
+            "dealer_interbank_liquidity_mesh",
+            "triparty_ficc_interoperability_bridge",
+            "central_bank_bilateral_swap",
+            "scpi_liquidity_sharing",
+            "scpi_mortgage_financing",
+            "central_bank_liquidity_refi",
             # Decoy edge types
             "retail_deposit_aggregation",
             "utility_corporate_financing",
@@ -1114,26 +1129,49 @@ class AdversarialSubstrateBuilder:
                 rel_embedding=self.relation_embeddings["retail_deposit_aggregation"],
             )
 
-        # Municipal utilities connect among themselves and real economy corporate accounts
+        # Municipal utilities connect among themselves in a 2-chord cycle (no leaf cut vertices)
         utilities = [eid for eid, cat in self.entity_categories.items() if cat == EntityCategory.DECOY_MUNICIPAL_UTILITY]
-        for i in range(len(utilities) - 1):
+        for i in range(len(utilities)):
             sub.add_relation(
                 source_id=utilities[i],
-                target_id=utilities[i + 1],
+                target_id=utilities[(i + 1) % len(utilities)],
                 relation="utility_corporate_financing",
-                weight=0.50,
+                weight=0.70,
+                rel_embedding=self.relation_embeddings["utility_corporate_financing"],
+            )
+            sub.add_relation(
+                source_id=utilities[i],
+                target_id=utilities[(i + 2) % len(utilities)],
+                relation="utility_corporate_financing",
+                weight=0.70,
                 rel_embedding=self.relation_embeddings["utility_corporate_financing"],
             )
 
-        # Property SCPIs connect to regional banks for mortgage financing
+        # Property SCPIs connect to regional banks and inter-fund liquidity
         scpis = [eid for eid, cat in self.entity_categories.items() if cat == EntityCategory.DECOY_REAL_ESTATE_SCPI]
         for i, sc in enumerate(scpis):
             rb = reg_banks[i % len(reg_banks)]
+            next_sc = scpis[(i + 1) % len(scpis)]
+            next_rb = reg_banks[(i + 1) % len(reg_banks)]
             sub.add_relation(
                 source_id=sc,
-                target_id=rb,
+                target_id=next_sc,
+                relation="scpi_liquidity_sharing",
+                weight=0.70,
+                rel_embedding=self.relation_embeddings["scpi_liquidity_sharing"],
+            )
+            sub.add_relation(
+                source_id=sc,
+                target_id=next_rb,
+                relation="scpi_mortgage_financing",
+                weight=0.70,
+                rel_embedding=self.relation_embeddings["scpi_mortgage_financing"],
+            )
+            sub.add_relation(
+                source_id=rb,
+                target_id=sc,
                 relation="property_mortgage_syndication",
-                weight=0.45,
+                weight=0.70,
                 rel_embedding=self.relation_embeddings["property_mortgage_syndication"],
             )
 
@@ -1242,36 +1280,204 @@ class AdversarialSubstrateBuilder:
             rel_embedding=self.relation_embeddings["imf_errors_and_omissions_absorption"],
         )
 
-        # Decoy Sink Trap Mitigation: Retag fintechs/housing as pass-through and recirculate repayments
-        for decoy_id in ["pretto_digital_mortgage", "floa_bank_instant_credit", "paris_habitat_hlm"]:
-            if decoy_id in sub.entities:
-                sub.entities[decoy_id].metadata["is_pass_through"] = True
-                sub.entities[decoy_id].metadata["absorbing_sink"] = False
+        # ---------------------------------------------------------------------
+        # Topology Hardening: Sinks Elimination & Cut Vertex Minimization
+        # ---------------------------------------------------------------------
+        # 1. Eliminate all 15 Unintended Sink Traps:
+        # A) Retag and wire all 12 consumer fintechs back to regional savings banks
+        for i, ft in enumerate(fintech_list):
+            if ft in sub.entities:
+                sub.entities[ft].metadata["is_pass_through"] = True
+                sub.entities[ft].metadata["absorbing_sink"] = False
+                rb1 = reg_banks[i % len(reg_banks)]
+                rb2 = reg_banks[(i + 1) % len(reg_banks)]
+                sub.add_relation(
+                    source_id=ft,
+                    target_id=rb1,
+                    relation="consumer_loan_repayment_recirculation",
+                    weight=0.80,
+                    rel_embedding=self.relation_embeddings["consumer_loan_repayment_recirculation"],
+                )
+                sub.add_relation(
+                    source_id=ft,
+                    target_id=rb2,
+                    relation="credit_card_interchange_settlement",
+                    weight=0.75,
+                    rel_embedding=self.relation_embeddings["credit_card_interchange_settlement"],
+                )
 
-        if "pretto_digital_mortgage" in sub.entities and "caisse_epargne_idf" in sub.entities:
+        # B) us_treasuries_custody recirculates collateral to repo and sovereign safekeeping
+        sub.add_relation(
+            source_id="us_treasuries_custody",
+            target_id="us_triparty_repo_pool",
+            relation="collateral_pledge_repo_financing",
+            weight=1.00,
+            rel_embedding=self.relation_embeddings["collateral_pledge_repo_financing"],
+        )
+        sub.add_relation(
+            source_id="us_treasuries_custody",
+            target_id="sovereign_debt_holders",
+            relation="custody_safekeeping_distribution",
+            weight=0.90,
+            rel_embedding=self.relation_embeddings["custody_safekeeping_distribution"],
+        )
+
+        # C) pboc_bilateral_swap_network settles with Chinese state banks
+        sub.add_relation(
+            source_id="pboc_bilateral_swap_network",
+            target_id="chinese_state_banks_fx_desk",
+            relation="swap_line_drawdown_liquidity",
+            weight=1.00,
+            rel_embedding=self.relation_embeddings["swap_line_drawdown_liquidity"],
+        )
+
+        # D) svt_dealers_bnp_socgen clears reserves, distributes OATs, and accesses FX swaps
+        sub.add_relation(
+            source_id="svt_dealers_bnp_socgen",
+            target_id="banque_de_france",
+            relation="dealer_reserve_clearing",
+            weight=1.10,
+            rel_embedding=self.relation_embeddings["dealer_reserve_clearing"],
+        )
+        sub.add_relation(
+            source_id="svt_dealers_bnp_socgen",
+            target_id="french_republic_oat_market",
+            relation="secondary_market_distribution",
+            weight=0.85,
+            rel_embedding=self.relation_embeddings["secondary_market_distribution"],
+        )
+        sub.add_relation(
+            source_id="svt_dealers_bnp_socgen",
+            target_id="offshore_fx_swap_desk",
+            relation="synthetic_usd_fx_swap",
+            weight=1.10,
+            rel_embedding=self.relation_embeddings["synthetic_usd_fx_swap"],
+        )
+
+        # 2. Regional Savings Banks: 2-chord ring and central bank refi injections (directed core -> retail)
+        for i in range(len(reg_banks)):
             sub.add_relation(
-                source_id="pretto_digital_mortgage",
-                target_id="caisse_epargne_idf",
-                relation="retail_mortgage_amortization_recirculation",
-                weight=0.85,
-                rel_embedding=self.relation_embeddings["retail_mortgage_amortization_recirculation"],
+                source_id=reg_banks[i],
+                target_id=reg_banks[(i + 1) % len(reg_banks)],
+                relation="regional_interbank_liquidity",
+                weight=0.80,
+                rel_embedding=self.relation_embeddings["regional_interbank_liquidity"],
             )
-        if "floa_bank_instant_credit" in sub.entities and "svt_dealers_bnp_socgen" in sub.entities:
             sub.add_relation(
-                source_id="floa_bank_instant_credit",
-                target_id="svt_dealers_bnp_socgen",
-                relation="instant_credit_repayment_recirculation",
-                weight=0.85,
-                rel_embedding=self.relation_embeddings["instant_credit_repayment_recirculation"],
+                source_id=reg_banks[i],
+                target_id=reg_banks[(i + 2) % len(reg_banks)],
+                relation="regional_interbank_liquidity",
+                weight=0.80,
+                rel_embedding=self.relation_embeddings["regional_interbank_liquidity"],
             )
-        if "paris_habitat_hlm" in sub.entities and "banque_populaire_val_de_france" in sub.entities:
-            sub.add_relation(
-                source_id="paris_habitat_hlm",
-                target_id="banque_populaire_val_de_france",
-                relation="social_housing_rent_recirculation",
-                weight=0.85,
-                rel_embedding=self.relation_embeddings["social_housing_rent_recirculation"],
-            )
+
+        sub.add_relation(
+            source_id="banque_de_france",
+            target_id="caisse_epargne_idf",
+            relation="central_bank_liquidity_refi",
+            weight=0.90,
+            rel_embedding=self.relation_embeddings["central_bank_liquidity_refi"],
+        )
+        sub.add_relation(
+            source_id="banque_de_france",
+            target_id="banque_populaire_rives_paris",
+            relation="central_bank_liquidity_refi",
+            weight=0.90,
+            rel_embedding=self.relation_embeddings["central_bank_liquidity_refi"],
+        )
+        sub.add_relation(
+            source_id="svt_credit_agricole_cib",
+            target_id="credit_agricole_idf_regional",
+            relation="regional_interbank_liquidity",
+            weight=0.90,
+            rel_embedding=self.relation_embeddings["regional_interbank_liquidity"],
+        )
+        sub.add_relation(
+            source_id="svt_natixis_bpce",
+            target_id="caisse_epargne_rhone_alpes",
+            relation="regional_interbank_liquidity",
+            weight=0.90,
+            rel_embedding=self.relation_embeddings["regional_interbank_liquidity"],
+        )
+
+        # 3. Primary Dealer Consortium Mesh (cross-connecting top primary dealers bilaterally)
+        top_dealers = ["svt_bnp_paribas", "svt_societe_generale", "svt_credit_agricole_cib", "svt_natixis_bpce", "ca_cib_natixis_dealer_syndicate"]
+        for i in range(len(top_dealers)):
+            for j in range(i + 1, len(top_dealers)):
+                sub.add_relation(
+                    source_id=top_dealers[i],
+                    target_id=top_dealers[j],
+                    relation="dealer_interbank_liquidity_mesh",
+                    weight=0.85,
+                    rel_embedding=self.relation_embeddings["dealer_interbank_liquidity_mesh"],
+                )
+                sub.add_relation(
+                    source_id=top_dealers[j],
+                    target_id=top_dealers[i],
+                    relation="dealer_interbank_liquidity_mesh",
+                    weight=0.85,
+                    rel_embedding=self.relation_embeddings["dealer_interbank_liquidity_mesh"],
+                )
+
+        # 4. Transatlantic Carry Desks & Repo Clearing Interoperability
+        sub.add_relation(
+            source_id="japan_institutional_carry_desk",
+            target_id="fed_standing_repo_facility",
+            relation="srf_backstop_liquidity_injection",
+            weight=1.00,
+            rel_embedding=self.relation_embeddings["srf_backstop_liquidity_injection"],
+        )
+        sub.add_relation(
+            source_id="us_prime_mmf_basin",
+            target_id="ficc_sponsored_repo_clearing",
+            relation="sponsored_repo_clearing_injection",
+            weight=1.00,
+            rel_embedding=self.relation_embeddings["sponsored_repo_clearing_injection"],
+        )
+        sub.add_relation(
+            source_id="us_triparty_repo_pool",
+            target_id="ficc_sponsored_repo_clearing",
+            relation="triparty_ficc_interoperability_bridge",
+            weight=1.00,
+            rel_embedding=self.relation_embeddings["triparty_ficc_interoperability_bridge"],
+        )
+        sub.add_relation(
+            source_id="ficc_sponsored_repo_clearing",
+            target_id="us_triparty_repo_pool",
+            relation="triparty_ficc_interoperability_bridge",
+            weight=1.00,
+            rel_embedding=self.relation_embeddings["triparty_ficc_interoperability_bridge"],
+        )
+
+        # 5. Eurosystem & Trade Cross-Links
+        sub.add_relation(
+            source_id="banque_de_france",
+            target_id="bundesbank",
+            relation="central_bank_bilateral_swap",
+            weight=1.00,
+            rel_embedding=self.relation_embeddings["central_bank_bilateral_swap"],
+        )
+        sub.add_relation(
+            source_id="foreign_export_economies",
+            target_id="french_economy_importers",
+            relation="global_product_fuel_distribution",
+            weight=1.00,
+            rel_embedding=self.relation_embeddings["global_product_fuel_distribution"],
+        )
+        sub.add_relation(
+            source_id="apple_bigtech_treasury_vault",
+            target_id="us_prime_mmf_basin",
+            relation="corporate_commercial_paper_and_t_bill_placement",
+            weight=1.00,
+            rel_embedding=self.relation_embeddings["corporate_commercial_paper_and_t_bill_placement"],
+        )
+        sub.add_relation(
+            source_id="london_eurodollar_pool",
+            target_id="us_triparty_repo_pool",
+            relation="repo_dollar_financing",
+            weight=1.00,
+            rel_embedding=self.relation_embeddings["repo_dollar_financing"],
+        )
 
         logger.info(
             f"Synthesized adversarial substrate: {len(sub.entities)} nodes, "
