@@ -264,262 +264,199 @@
       </div>
 
       <!-- =====================================================================
-           VISUAL TREE FLOW EXPLORER CONTAINER
+           PUBLIC UTILITY: FOLLOW THE MONEY & LINKED DOSSIER NETWORK
            ===================================================================== -->
       <div id="visual-flow-tree-section" class="bg-manifold-surface border border-manifold-border rounded-xl p-5 md:p-6 space-y-5 shadow-2xl relative">
         
-        <!-- Section Header & Explorer Mode Toggles -->
+        <!-- Header & Top Level Utility Switcher -->
         <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 border-b border-manifold-border pb-4">
           <div>
             <div class="flex items-center gap-2">
               <span class="px-2.5 py-0.5 rounded bg-cyan-950 text-cyan-300 font-mono text-[11px] font-bold border border-cyan-800 tracking-wider">
-                <i class="fa-solid fa-sitemap mr-1"></i> VISUAL TREE FLOW EXPLORER
+                <i class="fa-solid fa-scale-balanced mr-1"></i> PUBLIC UTILITY MONEY TRACKER
               </span>
               <span class="text-xs font-mono text-emerald-400 bg-emerald-950/60 px-2 py-0.5 rounded border border-emerald-800">
-                <i class="fa-solid fa-shield-halved mr-1"></i> $0.00 LEAK VERIFIED
+                <i class="fa-solid fa-shield-halved mr-1"></i> $0.00 LEAK VERIFIED (CONSERVED)
               </span>
             </div>
             <h3 class="text-xl font-bold text-white tracking-tight mt-1.5 flex items-center gap-2">
-              Multi-Tier Capital Flow & Balance-Sheet Pipeline
+              Global Capital Flow &amp; Balance-Sheet Investigator
             </h3>
             <p class="text-xs text-slate-400 mt-0.5 max-w-3xl">
-              Inspect how multi-billion capital flows traverse across sovereign genesis faucets, primary dealer books, wholesale clearing pools, and safe-haven sinks without balance-sheet leakage.
+              Track multi-billion sovereign capital conduits across 14 curated international trails, or search the Panama Papers-style directory of 148 institutions with linked counterparty balance sheets.
             </p>
           </div>
 
-          <!-- Explorer Mode Switches: Circuits vs Sovereign Roots -->
+          <!-- Utility Sub-Mode Toggles: Follow the Money vs Institution Directory -->
           <div class="flex items-center gap-2 w-full sm:w-auto">
             <div class="bg-slate-900 border border-slate-700/80 p-1 rounded-lg flex items-center gap-1 font-mono text-xs w-full sm:w-auto">
-              <button id="btn-mode-circuits" class="min-h-[44px] flex-1 sm:flex-none px-3.5 py-2 rounded-md font-bold transition bg-cyan-500 text-black shadow flex items-center justify-center gap-1">
-                <i class="fa-solid fa-bolt mr-1"></i> 14 Macro Circuits
+              <button id="btn-utility-trails" class="min-h-[44px] flex-1 sm:flex-none px-4 py-2 rounded-md font-bold transition bg-cyan-500 text-black shadow flex items-center justify-center gap-1.5">
+                <i class="fa-solid fa-magnifying-glass"></i> Follow the Money
               </button>
-              <button id="btn-mode-roots" class="min-h-[44px] flex-1 sm:flex-none px-3.5 py-2 rounded-md font-medium text-slate-300 hover:text-white transition flex items-center justify-center gap-1">
-                <i class="fa-solid fa-landmark mr-1"></i> 9 Sovereign Roots
+              <button id="btn-utility-dossiers" class="min-h-[44px] flex-1 sm:flex-none px-4 py-2 rounded-md font-medium text-slate-300 hover:text-white transition flex items-center justify-center gap-1.5">
+                <i class="fa-solid fa-landmark"></i> Institution Directory &amp; Dossiers
               </button>
             </div>
           </div>
         </div>
 
-        <!-- Mobile / Desktop Layout Viewport Mode Switcher -->
-        <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 p-2.5 bg-slate-950/90 border border-slate-800 rounded-xl font-mono text-xs">
-          <div class="flex items-center gap-2 px-1 text-slate-300 font-semibold text-xs">
-            <span class="w-2 h-2 rounded-full bg-cyan-400 animate-pulse"></span>
-            <span>EXPLORER VIEWPORT MODE:</span>
-          </div>
-          <div class="grid grid-cols-3 sm:flex items-center gap-1.5">
-            <button id="btn-tree-layout-flow" class="min-h-[44px] px-3.5 py-2 rounded-lg font-bold transition flex items-center justify-center gap-1.5 bg-cyan-500 text-black shadow-md shadow-cyan-500/20 tree-layout-mode-btn active" data-mode="flow-sequence" title="Mobile cascading vertical flow pipeline">
-              <span>📱</span>
-              <span class="truncate">Flow Sequence</span>
-            </button>
-            <button id="btn-tree-layout-tier" class="min-h-[44px] px-3.5 py-2 rounded-lg font-bold transition flex items-center justify-center gap-1.5 bg-slate-900 text-slate-300 hover:text-white border border-slate-800 tree-layout-mode-btn" data-mode="by-tier" title="Mobile tabbed switcher by tier">
-              <span>📑</span>
-              <span class="truncate">By Tier</span>
-            </button>
-            <button id="btn-tree-layout-matrix" class="min-h-[44px] px-3.5 py-2 rounded-lg font-bold transition flex items-center justify-center gap-1.5 bg-slate-900 text-slate-300 hover:text-white border border-slate-800 tree-layout-mode-btn" data-mode="matrix" title="Desktop 4-column matrix">
-              <span>🖥️</span>
-              <span class="truncate">Wide Matrix</span>
-            </button>
-          </div>
-        </div>
-
-        <!-- By-Tier Tab Switcher (Visible in By-Tier mode) -->
-        <div id="tree-tier-tabs-bar" class="hidden grid grid-cols-2 sm:grid-cols-4 gap-2 font-mono">
-          <button class="tier-tab-btn min-h-[48px] p-3 rounded-xl border text-left transition bg-amber-950/70 border-amber-500 text-amber-300 font-bold shadow-lg shadow-amber-950/50" data-tier-tab="0">
-            <div class="flex items-center justify-between text-xs">
-              <span class="font-bold">T0 GENESIS</span>
-              <span id="tier-tab-0-count" class="text-[10px] px-1.5 py-0.5 rounded bg-amber-900/60 text-amber-300">0</span>
+        <!-- ===================================================================
+             VIEW 1: FOLLOW THE MONEY (Investigative Trails)
+             =================================================================== -->
+        <div id="utility-view-trails" class="space-y-5">
+          <!-- Curated Topic Filter Pills -->
+          <div class="space-y-2">
+            <div class="flex items-center justify-between text-xs font-mono text-slate-400">
+              <span class="uppercase tracking-wider font-semibold text-slate-300">Curated Investigative Topics</span>
+              <span>14 Cross-Border Conduits</span>
             </div>
-            <div class="text-[10px] opacity-75 truncate mt-0.5">Sovereign Faucets</div>
-          </button>
-          <button class="tier-tab-btn min-h-[48px] p-3 rounded-xl border text-left transition bg-slate-950/60 border-slate-800 text-slate-400 hover:border-slate-700" data-tier-tab="1">
-            <div class="flex items-center justify-between text-xs">
-              <span class="font-bold">T1 DEALERS</span>
-              <span id="tier-tab-1-count" class="text-[10px] px-1.5 py-0.5 rounded bg-cyan-900/60 text-cyan-300">0</span>
-            </div>
-            <div class="text-[10px] opacity-75 truncate mt-0.5">Transmission & CBs</div>
-          </button>
-          <button class="tier-tab-btn min-h-[48px] p-3 rounded-xl border text-left transition bg-slate-950/60 border-slate-800 text-slate-400 hover:border-slate-700" data-tier-tab="2">
-            <div class="flex items-center justify-between text-xs">
-              <span class="font-bold">T2 TRAVERSAL</span>
-              <span id="tier-tab-2-count" class="text-[10px] px-1.5 py-0.5 rounded bg-purple-900/60 text-purple-300">0</span>
-            </div>
-            <div class="text-[10px] opacity-75 truncate mt-0.5">Wholesale Clearing</div>
-          </button>
-          <button class="tier-tab-btn min-h-[48px] p-3 rounded-xl border text-left transition bg-slate-950/60 border-slate-800 text-slate-400 hover:border-slate-700" data-tier-tab="3">
-            <div class="flex items-center justify-between text-xs">
-              <span class="font-bold">T3 SINKS</span>
-              <span id="tier-tab-3-count" class="text-[10px] px-1.5 py-0.5 rounded bg-emerald-900/60 text-emerald-300">0</span>
-            </div>
-            <div class="text-[10px] opacity-75 truncate mt-0.5">Collateral Anchors</div>
-          </button>
-        </div>
-
-        <!-- Filter & Search Bar -->
-        <div class="flex flex-wrap items-center justify-between gap-3 bg-slate-900/60 border border-slate-800/80 p-3 rounded-lg">
-          <!-- Currency Filter Pills -->
-          <div class="flex items-center gap-1.5 flex-wrap">
-            <span class="text-[11px] font-mono text-slate-400 uppercase tracking-wider mr-1">Currency:</span>
-            <div id="tree-currency-filters" class="flex items-center gap-1 flex-wrap">
-              <button class="px-2 py-0.5 rounded text-[11px] font-mono bg-cyan-900/80 text-cyan-200 border border-cyan-600 font-bold tree-curr-btn" data-currency="ALL">ALL</button>
-              <button class="px-2 py-0.5 rounded text-[11px] font-mono bg-slate-800 text-slate-300 border border-slate-700 hover:border-slate-500 tree-curr-btn" data-currency="USD">USD</button>
-              <button class="px-2 py-0.5 rounded text-[11px] font-mono bg-slate-800 text-slate-300 border border-slate-700 hover:border-slate-500 tree-curr-btn" data-currency="EUR">EUR</button>
-              <button class="px-2 py-0.5 rounded text-[11px] font-mono bg-slate-800 text-slate-300 border border-slate-700 hover:border-slate-500 tree-curr-btn" data-currency="CNY">CNY</button>
-              <button class="px-2 py-0.5 rounded text-[11px] font-mono bg-slate-800 text-slate-300 border border-slate-700 hover:border-slate-500 tree-curr-btn" data-currency="RUB">RUB</button>
-              <button class="px-2 py-0.5 rounded text-[11px] font-mono bg-slate-800 text-slate-300 border border-slate-700 hover:border-slate-500 tree-curr-btn" data-currency="NOK">NOK</button>
-              <button class="px-2 py-0.5 rounded text-[11px] font-mono bg-slate-800 text-slate-300 border border-slate-700 hover:border-slate-500 tree-curr-btn" data-currency="CHF">CHF</button>
-              <button class="px-2 py-0.5 rounded text-[11px] font-mono bg-slate-800 text-slate-300 border border-slate-700 hover:border-slate-500 tree-curr-btn" data-currency="JPY">JPY</button>
-              <button class="px-2 py-0.5 rounded text-[11px] font-mono bg-slate-800 text-slate-300 border border-slate-700 hover:border-slate-500 tree-curr-btn" data-currency="GBP">GBP</button>
+            <div id="trail-topic-filters" class="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-thin">
+              <button class="trail-topic-btn px-3.5 py-2 rounded-xl text-xs font-mono font-bold bg-cyan-950 text-cyan-300 border border-cyan-500 shadow-sm active" data-topic="ALL">
+                🌐 All Trails (14)
+              </button>
+              <button class="trail-topic-btn px-3.5 py-2 rounded-xl text-xs font-mono bg-slate-900/90 text-slate-400 border border-slate-800 hover:text-slate-200" data-topic="energy">
+                🛢️ Shadow Energy &amp; Arbitrage
+              </button>
+              <button class="trail-topic-btn px-3.5 py-2 rounded-xl text-xs font-mono bg-slate-900/90 text-slate-400 border border-slate-800 hover:text-slate-200" data-topic="sovereign">
+                🏛️ Sovereign Debt &amp; Crises
+              </button>
+              <button class="trail-topic-btn px-3.5 py-2 rounded-xl text-xs font-mono bg-slate-900/90 text-slate-400 border border-slate-800 hover:text-slate-200" data-topic="central_banks">
+                🏦 Central Banks &amp; FX
+              </button>
+              <button class="trail-topic-btn px-3.5 py-2 rounded-xl text-xs font-mono bg-slate-900/90 text-slate-400 border border-slate-800 hover:text-slate-200" data-topic="swf">
+                💎 Sovereign Wealth Funds
+              </button>
+              <button class="trail-topic-btn px-3.5 py-2 rounded-xl text-xs font-mono bg-slate-900/90 text-slate-400 border border-slate-800 hover:text-slate-200" data-topic="corporate">
+                💻 Corporate &amp; Shadow Cash
+              </button>
             </div>
           </div>
 
-          <!-- Search Input & Branch Toggle -->
-          <div class="flex items-center gap-2">
-            <div class="relative w-52">
-              <i class="fa-solid fa-search absolute left-2.5 top-2 text-[10px] text-slate-500"></i>
-              <input id="tree-search-input" type="text" placeholder="Search tree nodes..." class="w-full bg-slate-950 border border-slate-700/80 rounded pl-7 pr-2.5 py-1 text-xs text-slate-200 focus:outline-none focus:border-cyan-400 font-mono">
-            </div>
-            <button id="btn-toggle-all-branches" class="px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 text-xs font-mono flex items-center gap-1.5 transition">
-              <i class="fa-solid fa-code-branch text-[10px] text-cyan-400"></i> <span id="branches-toggle-text">Expand Branches</span>
-            </button>
-          </div>
-        </div>
-
-        <!-- Circuit / Root Selector Carousel Pills -->
-        <div class="space-y-2">
-          <div id="tree-selector-pills" class="flex gap-2 overflow-x-auto pb-2 scrollbar-thin">
+          <!-- Trail Selector Cards Grid / Carousel -->
+          <div id="trail-cards-selector" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
             <!-- Populated dynamically by app.js -->
           </div>
-        </div>
 
-        <!-- Active Circuit / Scenario Summary Banner -->
-        <div id="active-circuit-banner" class="bg-gradient-to-r from-slate-900 via-slate-900/90 to-slate-950 border border-slate-700/80 rounded-lg p-4 space-y-2.5">
-          <!-- Populated by app.js -->
-        </div>
+          <!-- Active Trail Investigation Story Banner -->
+          <div id="active-trail-banner" class="bg-gradient-to-r from-slate-900 via-slate-900/90 to-slate-950 border border-slate-700/80 rounded-xl p-4 sm:p-5 space-y-3 shadow-lg">
+            <!-- Populated dynamically by app.js -->
+          </div>
 
-        <!-- "Walk the Flow" Stepper Controls & Narrative Banner -->
-        <div class="bg-slate-950 border border-cyan-900/40 rounded-lg p-4 space-y-3 shadow-inner">
-          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-800/80 pb-3">
-            <div class="flex items-center gap-2">
-              <span class="text-xs font-mono font-bold text-cyan-400 flex items-center gap-1.5">
-                <i class="fa-solid fa-forward-step"></i> WALK THE CAPITAL FLOW:
+          <!-- Step-by-Step Progress & Controls Bar -->
+          <div class="bg-slate-950 border border-cyan-900/40 rounded-xl p-4 space-y-3 shadow-inner">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-800/80 pb-3">
+              <div class="flex items-center gap-2">
+                <span class="text-xs font-mono font-bold text-cyan-400 flex items-center gap-1.5">
+                  <i class="fa-solid fa-forward-step"></i> STEP PROGRESS:
+                </span>
+                <span id="step-counter-badge" class="px-2 py-0.5 rounded bg-cyan-950 text-cyan-300 font-mono text-xs border border-cyan-800 font-bold">
+                  Hop 1 of 4
+                </span>
+              </div>
+
+              <!-- Stepper Navigation Buttons -->
+              <div class="flex items-center gap-2">
+                <button id="btn-step-prev" class="min-h-[44px] px-3.5 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 font-mono text-xs border border-slate-700 flex items-center gap-1.5 transition">
+                  <i class="fa-solid fa-chevron-left text-[10px]"></i> Prev Hop
+                </button>
+                <button id="btn-step-next" class="min-h-[44px] px-4 py-2 rounded-lg bg-cyan-500 hover:bg-cyan-400 text-black font-mono text-xs font-bold flex items-center gap-1.5 transition shadow">
+                  Next Hop <i class="fa-solid fa-chevron-right text-[10px]"></i>
+                </button>
+                <button id="btn-step-autoplay" class="min-h-[44px] px-3.5 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-mono text-xs font-bold flex items-center gap-1.5 transition shadow">
+                  <i class="fa-solid fa-play text-[10px]"></i> Auto-Play
+                </button>
+                <button id="btn-step-reset" class="min-h-[44px] px-3 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-400 font-mono text-xs border border-slate-700 transition" title="Reset Hop">
+                  <i class="fa-solid fa-rotate-left"></i>
+                </button>
+              </div>
+            </div>
+
+            <!-- Progress Bar -->
+            <div class="flow-progress-bar">
+              <div id="flow-progress-fill" class="flow-progress-fill" style="width: 25%;"></div>
+            </div>
+
+            <!-- Step Narrative Story Card -->
+            <div id="step-narrative-container" class="rounded-xl border border-cyan-500/40 bg-gradient-to-br from-cyan-950/30 via-slate-900 to-slate-950 p-4 space-y-3 shadow-lg">
+              <!-- Populated dynamically by app.js -->
+            </div>
+          </div>
+
+          <!-- ISOLATED TRAIL CONDUIT PIPELINE (Only 3-5 nodes!) -->
+          <div class="space-y-3">
+            <div class="flex items-center justify-between text-xs font-mono text-slate-400">
+              <span class="uppercase tracking-wider font-semibold text-slate-300 flex items-center gap-1.5">
+                <span class="w-2 h-2 rounded-full bg-cyan-400 animate-pulse"></span>
+                Trail Conduit Pipeline (Isolated Key Institutions)
               </span>
-              <span id="step-counter-badge" class="px-2 py-0.5 rounded bg-cyan-950 text-cyan-300 font-mono text-xs border border-cyan-800 font-bold">
-                Hop 1 of 5
-              </span>
+              <span>Click any node to view balance-sheet dossier</span>
             </div>
 
-            <!-- Stepper Navigation Buttons -->
-            <div class="flex items-center gap-2">
-              <button id="btn-step-prev" class="px-3 py-1.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-200 font-mono text-xs border border-slate-700 flex items-center gap-1.5 transition">
-                <i class="fa-solid fa-chevron-left text-[10px]"></i> Prev Hop
-              </button>
-              <button id="btn-step-next" class="px-3 py-1.5 rounded bg-cyan-600 hover:bg-cyan-500 text-black font-mono text-xs font-bold flex items-center gap-1.5 transition shadow">
-                Next Hop <i class="fa-solid fa-chevron-right text-[10px]"></i>
-              </button>
-              <button id="btn-step-autoplay" class="px-3 py-1.5 rounded bg-emerald-600 hover:bg-emerald-500 text-black font-mono text-xs font-bold flex items-center gap-1.5 transition shadow">
-                <i class="fa-solid fa-play text-[10px]"></i> Auto-Play
-              </button>
-              <button id="btn-step-reset" class="px-2.5 py-1.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-400 font-mono text-xs border border-slate-700 transition" title="Reset Hop">
-                <i class="fa-solid fa-rotate-left"></i>
-              </button>
-            </div>
-          </div>
-
-          <!-- Stepper Progress Bar -->
-          <div class="flow-progress-bar">
-            <div id="flow-progress-fill" class="flow-progress-fill" style="width: 20%;"></div>
-          </div>
-
-          <!-- Transaction Mechanism Commentary -->
-          <div id="step-narrative-container" class="bg-slate-900/90 border border-slate-800 rounded p-3 flex items-start gap-3">
-            <div class="w-7 h-7 rounded bg-cyan-950 border border-cyan-700/60 flex items-center justify-center text-cyan-400 shrink-0 mt-0.5">
-              <i class="fa-solid fa-circle-info text-xs"></i>
-            </div>
-            <div class="space-y-1 flex-1">
-              <div class="flex items-center justify-between">
-                <span id="step-hop-title" class="text-xs font-mono font-bold text-white">Origin Sovereign Issuance</span>
-                <span id="step-action-badge" class="px-2 py-0.5 rounded bg-amber-950 text-amber-300 font-mono text-[10px] border border-amber-800 font-bold uppercase">AUCTION ISSUANCE</span>
-              </div>
-              <p id="step-hop-explanation" class="text-xs text-slate-300 font-sans leading-relaxed">
-                French Republic Trésor issues €45.2B in 10-year OAT sovereign bonds via syndication to primary SVT dealers.
-              </p>
+            <div id="trail-isolated-nodes-pipeline" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
+              <!-- Populated dynamically by app.js with ONLY the nodes for this trail -->
             </div>
           </div>
         </div>
 
-        <!-- 4-Tier Interactive Flow Tree Canvas -->
-        <div class="tree-flow-canvas rounded-xl border border-slate-800 p-4 relative overflow-hidden">
-          
-          <!-- SVG Connector Layer -->
-          <svg id="tree-flow-svg" class="absolute inset-0 w-full h-full pointer-events-none z-0" style="min-width: 1100px;">
-            <!-- Dynamic flow path curves inserted by app.js -->
-          </svg>
-
-          <!-- 4-Tier Columns Grid -->
-          <div id="tree-columns-grid" class="grid grid-cols-1 md:grid-cols-4 gap-4 sm:gap-6 relative z-10" style="min-width: 1050px;">
-            
-            <!-- Tier 0 Column -->
-            <div class="tier-flow-column space-y-3" data-tier="0">
-              <div class="tier-header p-2.5 rounded-lg bg-amber-950/30 border border-amber-800/50 flex items-center justify-between">
-                <div class="flex items-center gap-2">
-                  <span class="w-6 h-6 rounded bg-amber-900/80 text-amber-300 font-mono text-xs font-bold flex items-center justify-center border border-amber-700">T0</span>
-                  <span class="text-xs font-mono font-bold text-amber-300">SOVEREIGN GENESIS</span>
-                </div>
-                <span class="text-[10px] font-mono text-slate-400" id="tier-0-count">0 Nodes</span>
+        <!-- ===================================================================
+             VIEW 2: INSTITUTION DIRECTORY & DOSSIERS (Panama Papers)
+             =================================================================== -->
+        <div id="utility-view-dossiers" class="hidden space-y-5">
+          <!-- Search & Filter Controls -->
+          <div class="p-4 bg-slate-950/90 border border-slate-800 rounded-xl space-y-3.5 shadow-md">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div>
+                <span class="text-xs font-mono font-bold uppercase tracking-wider text-cyan-400 bg-cyan-950 px-2 py-0.5 rounded border border-cyan-800">
+                  OFFSHORE LEAKS &amp; SOVEREIGN DIRECTORY
+                </span>
+                <h4 class="text-base font-bold text-white mt-1">Search Planetary Institutions</h4>
               </div>
-              <div id="tier-0-nodes" class="space-y-3 min-h-[300px]">
-                <!-- Node cards -->
+              <div id="dossier-search-count" class="text-xs font-mono text-slate-400">
+                148 Institutions
               </div>
             </div>
 
-            <!-- Tier 1 Column -->
-            <div class="tier-flow-column space-y-3" data-tier="1">
-              <div class="tier-header p-2.5 rounded-lg bg-cyan-950/30 border border-cyan-800/50 flex items-center justify-between">
-                <div class="flex items-center gap-2">
-                  <span class="w-6 h-6 rounded bg-cyan-900/80 text-cyan-300 font-mono text-xs font-bold flex items-center justify-center border border-cyan-700">T1</span>
-                  <span class="text-xs font-mono font-bold text-cyan-300">TRANSMISSION DEALERS</span>
-                </div>
-                <span class="text-[10px] font-mono text-slate-400" id="tier-1-count">0 Nodes</span>
-              </div>
-              <div id="tier-1-nodes" class="space-y-3 min-h-[300px]">
-                <!-- Node cards -->
-              </div>
+            <div class="relative">
+              <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3 text-slate-500 text-xs"></i>
+              <input
+                id="dossier-search-input"
+                type="text"
+                placeholder="Search global institutions (e.g. UBS, Sberbank, TARGET2, Apple, Saudi SAMA, Banque de France)..."
+                class="w-full min-h-[44px] bg-slate-900 border border-slate-700 rounded-lg pl-9 pr-4 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-cyan-400 font-sans"
+              >
             </div>
 
-            <!-- Tier 2 Column -->
-            <div class="tier-flow-column space-y-3" data-tier="2">
-              <div class="tier-header p-2.5 rounded-lg bg-purple-950/30 border border-purple-800/50 flex items-center justify-between">
-                <div class="flex items-center gap-2">
-                  <span class="w-6 h-6 rounded bg-purple-900/80 text-purple-300 font-mono text-xs font-bold flex items-center justify-center border border-purple-700">T2</span>
-                  <span class="text-xs font-mono font-bold text-purple-300">TRAVERSAL & CLEARING</span>
+            <!-- Sector & Country filter pills -->
+            <div class="space-y-2 pt-1 text-xs font-mono">
+              <div class="flex flex-wrap items-center gap-1.5">
+                <span class="text-slate-400 mr-1 uppercase text-[10px]">Sector:</span>
+                <div id="dossier-sector-filters" class="flex flex-wrap items-center gap-1">
+                  <!-- Populated by app.js -->
                 </div>
-                <span class="text-[10px] font-mono text-slate-400" id="tier-2-count">0 Nodes</span>
               </div>
-              <div id="tier-2-nodes" class="space-y-3 min-h-[300px]">
-                <!-- Node cards -->
+              <div class="flex flex-wrap items-center gap-1.5">
+                <span class="text-slate-400 mr-1 uppercase text-[10px]">Country:</span>
+                <div id="dossier-country-filters" class="flex flex-wrap items-center gap-1">
+                  <!-- Populated by app.js -->
+                </div>
               </div>
             </div>
-
-            <!-- Tier 3 Column -->
-            <div class="tier-flow-column space-y-3" data-tier="3">
-              <div class="tier-header p-2.5 rounded-lg bg-emerald-950/30 border border-emerald-800/50 flex items-center justify-between">
-                <div class="flex items-center gap-2">
-                  <span class="w-6 h-6 rounded bg-emerald-900/80 text-emerald-300 font-mono text-xs font-bold flex items-center justify-center border border-emerald-700">T3</span>
-                  <span class="text-xs font-mono font-bold text-emerald-300">COLLATERAL SINKS</span>
-                </div>
-                <span class="text-[10px] font-mono text-slate-400" id="tier-3-count">0 Nodes</span>
-              </div>
-              <div id="tier-3-nodes" class="space-y-3 min-h-[300px]">
-                <!-- Node cards -->
-              </div>
-            </div>
-
           </div>
-        </div>
 
-        <!-- Node Inspection Drawer / Card Anchor -->
-        <div id="tree-node-inspection-card" class="hidden bg-slate-900/95 border border-cyan-500/50 rounded-xl p-5 space-y-4 shadow-2xl transition">
-          <!-- Populated by app.js when any node in the tree is clicked -->
+          <!-- Active Institution Dossier View -->
+          <div id="active-institution-dossier" class="rounded-xl border border-cyan-500/60 bg-slate-900/95 p-5 space-y-5 shadow-2xl">
+            <!-- Populated dynamically by app.js -->
+          </div>
+
+          <!-- Directory Browser Grid -->
+          <div class="space-y-2">
+            <div class="text-xs font-mono font-bold text-slate-300 uppercase tracking-wider">
+              Browse All Matching Institutions
+            </div>
+            <div id="dossier-browser-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+              <!-- Populated dynamically by app.js -->
+            </div>
+          </div>
         </div>
 
       </div>

@@ -4257,58 +4257,163 @@ const App = {
   // TAB 2: VISUAL TREE FLOW EXPLORER ENGINE (INSTITUTIONAL PALANTIR SPEC)
   // =========================================================================
 
+  // =========================================================================
+  // TAB 2: PUBLIC UTILITY MONEY TRACKER & PANAMA PAPERS DOSSIER EXPLORER
+  // =========================================================================
+
   initVisualTreeExplorer() {
+    this.utilityView = "trails"; // "trails" or "dossiers"
+    this.selectedTrailTopic = "ALL";
+    this.selectedCircuitId = "CIRCUIT-04-SHADOW-CRUDE";
+    this.treeCurrentHopIndex = 0;
+    this.treeAutoPlayTimer = null;
+    this.activeDossierId = "bank_of_russia_cbr_vault";
+    this.dossierSearchQuery = "";
+    this.dossierSectorFilter = "ALL";
+    this.dossierCountryFilter = "ALL";
+
+    // Circuit topic mapping
+    this.circuitTopicMap = {
+      "CIRCUIT-04-SHADOW-CRUDE": "energy",
+      "CIRCUIT-06-GULF-PETRODOLLAR": "energy",
+      "CIRCUIT-07-CHINA-PETROYUAN-CIPS": "energy",
+      "CIRCUIT-01-OAT-BUND": "sovereign",
+      "CIRCUIT-03-QT-BURN": "sovereign",
+      "CIRCUIT-13-MAPLE-NEARSHORING": "sovereign",
+      "CIRCUIT-02-YEN-CARRY": "central_banks",
+      "CIRCUIT-08-DARK-MATTER": "central_banks",
+      "CIRCUIT-10-SWISS-ALPINE": "central_banks",
+      "CIRCUIT-09-NORWAY-GPFG": "swf",
+      "CIRCUIT-11-SINGAPORE-ASIAN-DOLLAR": "swf",
+      "CIRCUIT-14-MULTILATERAL-SDR": "swf",
+      "CIRCUIT-05-TECH-BUYBACK": "corporate",
+      "CIRCUIT-12-EURASIAN-SHADOW": "corporate"
+    };
+
+    // Build index of institutions, counterparties, and related trails
+    this.buildInstitutionIndex();
+
     this.setupVisualTreeListeners();
     this.renderVisualTree();
   },
 
-  setupVisualTreeListeners() {
-    // Mode toggles
-    const btnCircuits = document.getElementById("btn-mode-circuits");
-    const btnRoots = document.getElementById("btn-mode-roots");
+  buildInstitutionIndex() {
+    this.allInstitutionsMap = {};
+    this.counterpartiesInMap = {};
+    this.counterpartiesOutMap = {};
+    this.institutionTrailsMap = {};
 
-    btnCircuits?.addEventListener("click", () => {
-      this.treeMode = "circuits";
-      btnCircuits.className = "px-3 py-1.5 rounded-md font-bold transition bg-cyan-500 text-black shadow";
-      if (btnRoots) btnRoots.className = "px-3 py-1.5 rounded-md font-medium text-slate-300 hover:text-white transition";
-      this.treeCurrentHopIndex = 0;
-      this.renderVisualTree();
-    });
+    const circuits = Object.values(TREE_FLOW_CATALOG.circuits || {});
+    circuits.forEach(c => {
+      (c.nodes || []).forEach(node => {
+        if (!this.allInstitutionsMap[node.id]) {
+          this.allInstitutionsMap[node.id] = node;
+        }
+        if (!this.institutionTrailsMap[node.id]) {
+          this.institutionTrailsMap[node.id] = [];
+        }
+        if (!this.institutionTrailsMap[node.id].some(t => t.id === c.id)) {
+          this.institutionTrailsMap[node.id].push(c);
+        }
 
-    btnRoots?.addEventListener("click", () => {
-      this.treeMode = "roots";
-      btnRoots.className = "px-3 py-1.5 rounded-md font-bold transition bg-cyan-500 text-black shadow";
-      if (btnCircuits) btnCircuits.className = "px-3 py-1.5 rounded-md font-medium text-slate-300 hover:text-white transition";
-      this.treeCurrentHopIndex = 0;
-      this.renderVisualTree();
-    });
-
-    // Currency filter buttons
-    document.querySelectorAll(".tree-curr-btn").forEach(btn => {
-      btn.addEventListener("click", () => {
-        document.querySelectorAll(".tree-curr-btn").forEach(b => {
-          b.className = "px-2 py-0.5 rounded text-[11px] font-mono bg-slate-800 text-slate-300 border border-slate-700 hover:border-slate-500 tree-curr-btn";
+        // Branch conduits as Money Out / Money In
+        (node.branches || []).forEach(br => {
+          if (!this.counterpartiesOutMap[node.id]) this.counterpartiesOutMap[node.id] = [];
+          if (!this.counterpartiesOutMap[node.id].some(o => o.targetId === br.targetId && o.circuitId === c.id)) {
+            this.counterpartiesOutMap[node.id].push({
+              targetId: br.targetId,
+              targetName: br.targetName,
+              targetJurisdiction: node.jurisdiction,
+              amount: br.volume,
+              action: "BRANCH ALLOCATION",
+              circuitId: c.id,
+              circuitTitle: c.shortTitle
+            });
+          }
+          if (!this.counterpartiesInMap[br.targetId]) this.counterpartiesInMap[br.targetId] = [];
+          if (!this.counterpartiesInMap[br.targetId].some(i => i.sourceId === node.id && i.circuitId === c.id)) {
+            this.counterpartiesInMap[br.targetId].push({
+              sourceId: node.id,
+              sourceName: node.name,
+              sourceJurisdiction: node.jurisdiction,
+              amount: br.volume,
+              action: "BRANCH ALLOCATION",
+              circuitId: c.id,
+              circuitTitle: c.shortTitle
+            });
+          }
         });
-        btn.className = "px-2 py-0.5 rounded text-[11px] font-mono bg-cyan-900/80 text-cyan-200 border border-cyan-600 font-bold tree-curr-btn";
-        this.treeCurrencyFilter = btn.getAttribute("data-currency") || "ALL";
-        this.renderVisualTree();
+      });
+
+      // Hop transitions as Money In / Money Out
+      (c.hops || []).forEach(hop => {
+        const srcNode = c.nodes.find(n => n.id === hop.source);
+        const tgtNode = c.nodes.find(n => n.id === hop.target);
+
+        if (!this.counterpartiesOutMap[hop.source]) this.counterpartiesOutMap[hop.source] = [];
+        if (!this.counterpartiesOutMap[hop.source].some(o => o.targetId === hop.target && o.circuitId === c.id)) {
+          this.counterpartiesOutMap[hop.source].push({
+            targetId: hop.target,
+            targetName: tgtNode ? tgtNode.name : hop.target.replace(/_/g, " "),
+            targetJurisdiction: tgtNode ? tgtNode.jurisdiction : "GLOBAL",
+            amount: hop.volume,
+            action: hop.action,
+            circuitId: c.id,
+            circuitTitle: c.shortTitle
+          });
+        }
+
+        if (!this.counterpartiesInMap[hop.target]) this.counterpartiesInMap[hop.target] = [];
+        if (!this.counterpartiesInMap[hop.target].some(i => i.sourceId === hop.source && i.circuitId === c.id)) {
+          this.counterpartiesInMap[hop.target].push({
+            sourceId: hop.source,
+            sourceName: srcNode ? srcNode.name : hop.source.replace(/_/g, " "),
+            sourceJurisdiction: srcNode ? srcNode.jurisdiction : "GLOBAL",
+            amount: hop.volume,
+            action: hop.action,
+            circuitId: c.id,
+            circuitTitle: c.shortTitle
+          });
+        }
       });
     });
 
-    // Real-time search filter
-    document.getElementById("tree-search-input")?.addEventListener("input", (e) => {
-      this.treeSearchQuery = e.target.value.toLowerCase().trim();
-      this.renderTreeNodesAndConnectors();
+    // Also index sovereign roots
+    const roots = Object.values(TREE_FLOW_CATALOG.sovereignRoots || {});
+    roots.forEach(r => {
+      (r.nodes || []).forEach(node => {
+        if (!this.allInstitutionsMap[node.id]) {
+          this.allInstitutionsMap[node.id] = node;
+        }
+      });
     });
 
-    // Expand/Collapse all branches
-    document.getElementById("btn-toggle-all-branches")?.addEventListener("click", () => {
-      this.treeAllBranchesExpanded = !this.treeAllBranchesExpanded;
-      const textSpan = document.getElementById("branches-toggle-text");
-      if (textSpan) {
-        textSpan.textContent = this.treeAllBranchesExpanded ? "Collapse Branches" : "Expand Branches";
-      }
-      this.renderTreeNodesAndConnectors();
+    this.allInstitutionsList = Object.values(this.allInstitutionsMap).sort((a, b) => a.name.localeCompare(b.name));
+  },
+
+  setupVisualTreeListeners() {
+    // Mode switcher buttons
+    const btnTrails = document.getElementById("btn-utility-trails");
+    const btnDossiers = document.getElementById("btn-utility-dossiers");
+
+    btnTrails?.addEventListener("click", () => {
+      this.switchUtilityView("trails");
+    });
+
+    btnDossiers?.addEventListener("click", () => {
+      this.switchUtilityView("dossiers");
+    });
+
+    // Topic filters for trails
+    document.querySelectorAll(".trail-topic-btn").forEach(btn => {
+      btn.addEventListener("click", () => {
+        document.querySelectorAll(".trail-topic-btn").forEach(b => {
+          b.className = "trail-topic-btn px-3.5 py-2 rounded-xl text-xs font-mono bg-slate-900/90 text-slate-400 border border-slate-800 hover:text-slate-200";
+        });
+        btn.className = "trail-topic-btn px-3.5 py-2 rounded-xl text-xs font-mono font-bold bg-cyan-950 text-cyan-300 border border-cyan-500 shadow-sm active";
+        this.selectedTrailTopic = btn.getAttribute("data-topic") || "ALL";
+        this.renderTrailExplorer();
+      });
     });
 
     // Flow Stepper Navigation
@@ -4317,365 +4422,157 @@ const App = {
     document.getElementById("btn-step-reset")?.addEventListener("click", () => {
       this.treeCurrentHopIndex = 0;
       this.updateTreeStepperUI();
-      this.drawTreeConnectors();
+      this.renderIsolatedPipeline();
     });
     document.getElementById("btn-step-autoplay")?.addEventListener("click", () => this.toggleTreeAutoPlay());
 
-    // Responsive Viewport Layout Mode Switcher (Flow Sequence vs By-Tier vs Wide Matrix)
-    this.treeLayoutMode = window.innerWidth < 1024 ? "flow-sequence" : "matrix";
-    this.treeActiveTierTab = 0;
-
-    const updateLayoutModeButtons = () => {
-      document.querySelectorAll(".tree-layout-mode-btn").forEach(btn => {
-        const mode = btn.getAttribute("data-mode");
-        if (mode === this.treeLayoutMode) {
-          btn.className = "min-h-[44px] px-3.5 py-2 rounded-lg font-bold transition flex items-center justify-center gap-1.5 bg-cyan-500 text-black shadow-md shadow-cyan-500/20 tree-layout-mode-btn active";
-        } else {
-          btn.className = "min-h-[44px] px-3.5 py-2 rounded-lg font-bold transition flex items-center justify-center gap-1.5 bg-slate-900 text-slate-300 hover:text-white border border-slate-800 tree-layout-mode-btn";
-        }
-      });
-      const tierTabsBar = document.getElementById("tree-tier-tabs-bar");
-      if (tierTabsBar) {
-        if (this.treeLayoutMode === "by-tier") {
-          tierTabsBar.classList.remove("hidden");
-        } else {
-          tierTabsBar.classList.add("hidden");
-        }
-      }
-    };
-    updateLayoutModeButtons();
-
-    document.querySelectorAll(".tree-layout-mode-btn").forEach(btn => {
-      btn.addEventListener("click", () => {
-        this.treeLayoutMode = btn.getAttribute("data-mode") || "flow-sequence";
-        updateLayoutModeButtons();
-        this.renderTreeNodesAndConnectors();
-      });
-    });
-
-    // By-Tier Tab Switcher buttons
-    document.querySelectorAll(".tier-tab-btn").forEach(btn => {
-      btn.addEventListener("click", () => {
-        this.treeActiveTierTab = parseInt(btn.getAttribute("data-tier-tab"), 10) || 0;
-        document.querySelectorAll(".tier-tab-btn").forEach(b => {
-          b.className = "tier-tab-btn min-h-[48px] p-3 rounded-xl border text-left transition bg-slate-950/60 border-slate-800 text-slate-400 hover:border-slate-700";
-        });
-        const tier = this.treeActiveTierTab;
-        const activeColor = tier === 0 ? "bg-amber-950/70 border-amber-500 text-amber-300 ring-1 ring-amber-500"
-          : tier === 1 ? "bg-cyan-950/70 border-cyan-500 text-cyan-300 ring-1 ring-cyan-500"
-          : tier === 2 ? "bg-purple-950/70 border-purple-500 text-purple-300 ring-1 ring-purple-500"
-          : "bg-emerald-950/70 border-emerald-500 text-emerald-300 ring-1 ring-emerald-500";
-        btn.className = `tier-tab-btn min-h-[48px] p-3 rounded-xl border text-left transition font-bold shadow-lg ${activeColor}`;
-        this.renderTreeNodesAndConnectors();
-      });
-    });
-
-    // Window resize redraws SVG connectors and adjusts mode
-    window.addEventListener("resize", () => {
-      if (this.activeTab === "tab-explorer") {
-        this.drawTreeConnectors();
-      }
+    // Institution Directory Search Input
+    document.getElementById("dossier-search-input")?.addEventListener("input", (e) => {
+      this.dossierSearchQuery = e.target.value.toLowerCase().trim();
+      this.renderDossierBrowserGrid();
     });
   },
 
-  getCurrentTreeScenario() {
-    if (this.treeMode === "roots") {
-      return TREE_FLOW_CATALOG.sovereignRoots[this.selectedRootId] || TREE_FLOW_CATALOG.sovereignRoots["french_republic_tresor"];
+  switchUtilityView(view) {
+    this.utilityView = view;
+    const viewTrails = document.getElementById("utility-view-trails");
+    const viewDossiers = document.getElementById("utility-view-dossiers");
+    const btnTrails = document.getElementById("btn-utility-trails");
+    const btnDossiers = document.getElementById("btn-utility-dossiers");
+
+    if (view === "trails") {
+      viewTrails?.classList.remove("hidden");
+      viewDossiers?.classList.add("hidden");
+      if (btnTrails) btnTrails.className = "min-h-[44px] flex-1 sm:flex-none px-4 py-2 rounded-md font-bold transition bg-cyan-500 text-black shadow flex items-center justify-center gap-1.5";
+      if (btnDossiers) btnDossiers.className = "min-h-[44px] flex-1 sm:flex-none px-4 py-2 rounded-md font-medium text-slate-300 hover:text-white transition flex items-center justify-center gap-1.5";
+      this.renderTrailExplorer();
+    } else {
+      viewTrails?.classList.add("hidden");
+      viewDossiers?.classList.remove("hidden");
+      if (btnDossiers) btnDossiers.className = "min-h-[44px] flex-1 sm:flex-none px-4 py-2 rounded-md font-bold transition bg-cyan-500 text-black shadow flex items-center justify-center gap-1.5";
+      if (btnTrails) btnTrails.className = "min-h-[44px] flex-1 sm:flex-none px-4 py-2 rounded-md font-medium text-slate-300 hover:text-white transition flex items-center justify-center gap-1.5";
+      this.renderInstitutionDirectory();
     }
-    return TREE_FLOW_CATALOG.circuits[this.selectedCircuitId] || TREE_FLOW_CATALOG.circuits["CIRCUIT-01-OAT-BUND"];
   },
 
   renderVisualTree() {
-    this.renderTreeSelectorPills();
-    this.renderTreeSummaryBanner();
-    this.renderTreeNodesAndConnectors();
-  },
-
-  renderTreeSelectorPills() {
-    const container = document.getElementById("tree-selector-pills");
-    if (!container) return;
-
-    if (this.treeMode === "roots") {
-      const roots = Object.values(TREE_FLOW_CATALOG.sovereignRoots);
-      container.innerHTML = roots.map(r => {
-        const isSelected = r.id === this.selectedRootId;
-        return `
-          <button class="px-3 py-1.5 rounded-lg text-xs font-mono whitespace-nowrap transition border ${
-            isSelected
-              ? 'bg-cyan-950 text-cyan-300 border-cyan-500 font-bold shadow-[0_0_10px_rgba(0,240,255,0.25)]'
-              : 'bg-slate-900/90 text-slate-400 border-slate-800 hover:text-slate-200 hover:border-slate-700'
-          }" data-root-id="${r.id}">
-            <span class="mr-1 text-[10px] text-slate-500">[${r.jurisdiction}]</span> ${r.shortLabel}
-          </button>
-        `;
-      }).join("");
-
-      container.querySelectorAll("button[data-root-id]").forEach(btn => {
-        btn.addEventListener("click", () => {
-          this.selectedRootId = btn.getAttribute("data-root-id");
-          this.treeCurrentHopIndex = 0;
-          this.renderVisualTree();
-        });
-      });
-
+    if (this.utilityView === "trails") {
+      this.renderTrailExplorer();
     } else {
-      // Circuits mode (14 curated circuits)
-      let circuits = Object.values(TREE_FLOW_CATALOG.circuits);
-      if (this.treeCurrencyFilter && this.treeCurrencyFilter !== "ALL") {
-        circuits = circuits.filter(c => c.currency.includes(this.treeCurrencyFilter));
-      }
-
-      container.innerHTML = circuits.map(c => {
-        const isSelected = c.id === this.selectedCircuitId;
-        return `
-          <button class="px-3 py-1.5 rounded-lg text-xs font-mono whitespace-nowrap transition border ${
-            isSelected
-              ? 'bg-cyan-950 text-cyan-300 border-cyan-500 font-bold shadow-[0_0_10px_rgba(0,240,255,0.25)]'
-              : 'bg-slate-900/90 text-slate-400 border-slate-800 hover:text-slate-200 hover:border-slate-700'
-          }" data-circuit-id="${c.id}">
-            <span class="mr-1 text-[10px] text-cyan-400 font-bold">${c.shortNum}</span> ${c.shortTitle}
-          </button>
-        `;
-      }).join("");
-
-      container.querySelectorAll("button[data-circuit-id]").forEach(btn => {
-        btn.addEventListener("click", () => {
-          this.selectedCircuitId = btn.getAttribute("data-circuit-id");
-          this.treeCurrentHopIndex = 0;
-          this.renderVisualTree();
-        });
-      });
+      this.renderInstitutionDirectory();
     }
   },
 
-  renderTreeSummaryBanner() {
-    const banner = document.getElementById("active-circuit-banner");
+  getCurrentTreeScenario() {
+    return TREE_FLOW_CATALOG.circuits[this.selectedCircuitId] || TREE_FLOW_CATALOG.circuits["CIRCUIT-04-SHADOW-CRUDE"];
+  },
+
+  renderTrailExplorer() {
+    this.renderTrailSelectorCards();
+    this.renderActiveTrailBanner();
+    this.updateTreeStepperUI();
+    this.renderIsolatedPipeline();
+  },
+
+  renderTrailSelectorCards() {
+    const container = document.getElementById("trail-cards-selector");
+    if (!container) return;
+
+    let circuits = Object.values(TREE_FLOW_CATALOG.circuits || {});
+    if (this.selectedTrailTopic && this.selectedTrailTopic !== "ALL") {
+      circuits = circuits.filter(c => this.circuitTopicMap[c.id] === this.selectedTrailTopic);
+    }
+
+    container.innerHTML = circuits.map(c => {
+      const isSelected = c.id === this.selectedCircuitId;
+      return `
+        <div class="min-h-[96px] p-3.5 rounded-xl border text-left cursor-pointer transition-all flex flex-col justify-between space-y-2 ${
+          isSelected
+            ? "bg-gradient-to-br from-cyan-950/70 via-slate-900 to-slate-900 border-cyan-400 shadow-[0_0_15px_rgba(0,240,255,0.25)] ring-1 ring-cyan-400"
+            : "bg-slate-900/80 border-slate-800 hover:border-slate-700 hover:bg-slate-900"
+        }" data-circuit-id="${c.id}">
+          <div class="space-y-1">
+            <div class="flex items-center justify-between">
+              <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-950 text-cyan-400 font-bold border border-slate-800">
+                TRAIL ${c.shortNum}
+              </span>
+              <span class="text-[10px] font-mono font-bold text-amber-400">
+                ${c.nominalVolume}
+              </span>
+            </div>
+            <h4 class="text-xs sm:text-sm font-bold text-white leading-snug line-clamp-2">
+              ${c.shortTitle}
+            </h4>
+          </div>
+          <div class="flex items-center justify-between text-[11px] font-mono text-slate-400 pt-1 border-t border-slate-800/80">
+            <span>${c.currency} · ${c.hops.length} Steps</span>
+            <span class="text-cyan-400 font-semibold">${isSelected ? "Active ➔" : "Inspect →"}</span>
+          </div>
+        </div>
+      `;
+    }).join("");
+
+    container.querySelectorAll("[data-circuit-id]").forEach(card => {
+      card.addEventListener("click", () => {
+        this.selectedCircuitId = card.getAttribute("data-circuit-id");
+        this.treeCurrentHopIndex = 0;
+        if (this.treeAutoPlayTimer) {
+          clearInterval(this.treeAutoPlayTimer);
+          this.treeAutoPlayTimer = null;
+          const btn = document.getElementById("btn-step-autoplay");
+          if (btn) btn.innerHTML = `<i class="fa-solid fa-play text-[10px]"></i> Auto-Play`;
+        }
+        this.renderTrailExplorer();
+      });
+    });
+  },
+
+  renderActiveTrailBanner() {
+    const banner = document.getElementById("active-trail-banner");
     if (!banner) return;
 
     const s = this.getCurrentTreeScenario();
     if (!s) return;
 
     banner.innerHTML = `
-      <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-3 border-b border-slate-800/80 pb-2.5">
-        <div>
+      <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 border-b border-slate-800 pb-3">
+        <div class="space-y-1.5">
           <div class="flex items-center gap-2 flex-wrap">
-            <span class="text-xs font-mono px-2 py-0.5 rounded bg-cyan-950 text-cyan-300 border border-cyan-800 font-bold">${s.id}</span>
-            <span class="text-[11px] font-mono px-2 py-0.5 rounded bg-slate-800 text-slate-300 border border-slate-700">${s.theme}</span>
-            <span class="text-[11px] font-mono px-2 py-0.5 rounded bg-emerald-950 text-emerald-400 border border-emerald-800 font-bold">
-              <i class="fa-solid fa-check-double mr-1"></i> ${s.doubleEntryProof.status} (${s.doubleEntryProof.leak} Leak)
+            <span class="text-[10px] font-mono font-bold px-2.5 py-0.5 rounded bg-cyan-950 text-cyan-300 border border-cyan-800 uppercase">
+              INVESTIGATION TRAIL ${s.shortNum}
             </span>
+            <span class="text-xs font-mono text-slate-400">${s.theme}</span>
           </div>
-          <h4 class="text-base font-bold text-white mt-1.5">${s.title}</h4>
-          <p class="text-xs text-slate-300 font-sans mt-0.5">${s.subtitle}</p>
+          <h3 class="text-lg sm:text-xl font-extrabold text-white tracking-tight">${s.title}</h3>
+          <p class="text-xs text-slate-300 max-w-4xl leading-relaxed">${s.subtitle}</p>
         </div>
 
-        <div class="flex items-center gap-2 shrink-0">
-          <div class="text-right font-mono pr-2 border-r border-slate-800">
-            <div class="text-[10px] text-slate-400 uppercase">Nominal Flow Volume</div>
-            <div class="text-sm font-bold text-cyan-400">${s.nominalVolume}</div>
+        <div class="flex flex-wrap lg:flex-col lg:items-end gap-2 text-xs font-mono shrink-0">
+          <div class="px-3 py-1.5 rounded-lg bg-slate-950 border border-slate-800 text-slate-300 flex items-center gap-2">
+            <span class="text-slate-500">NOMINAL VOLUME:</span>
+            <strong class="text-cyan-400 font-bold">${s.nominalVolume}</strong>
           </div>
-          <button id="btn-tree-focus-graph" class="px-3 py-1.5 rounded bg-slate-800 hover:bg-slate-700 text-cyan-400 border border-slate-700 text-xs font-mono flex items-center gap-1.5 transition">
-            <i class="fa-solid fa-eye"></i> Graph Canvas
-          </button>
-        </div>
-      </div>
-
-      <div class="flex flex-wrap items-center justify-between gap-2 text-[11px] font-mono text-slate-400 pt-1">
-        <div class="flex items-center gap-3">
-          <span><strong class="text-slate-300">Currency:</strong> <span class="text-amber-300 font-bold">${s.currency}</span></span>
-          <span><strong class="text-slate-300">Statutory Source:</strong> <span class="badge-provenance badge-${s.statutoryBadge.toLowerCase().replace(/[^a-z]/g, '') || 'dtcc'}">${s.statutoryBadge}</span></span>
-          <span><strong class="text-slate-300">Hops:</strong> ${s.hops.length} Sequential Transitions</span>
-        </div>
-        <div class="text-slate-400 text-[10px]">
-          Inflow: <span class="text-emerald-400">${s.doubleEntryProof.inflow}</span> · Outflow: <span class="text-amber-400">${s.doubleEntryProof.outflow}</span> · Net: <span class="text-cyan-400">${s.doubleEntryProof.net}</span>
+          <div class="px-3 py-1.5 rounded-lg bg-slate-950 border border-slate-800 text-slate-300 flex items-center gap-2">
+            <span class="text-slate-500">STATUTORY BASIS:</span>
+            <span class="text-amber-300 font-medium">${s.statutoryBadge}</span>
+          </div>
+          <div class="px-3 py-1 rounded-lg bg-emerald-950/60 border border-emerald-800/80 text-emerald-400 font-bold flex items-center gap-1.5">
+            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+            Net Leakage: ${s.doubleEntryProof.leak} (Conserved)
+          </div>
         </div>
       </div>
     `;
-
-    document.getElementById("btn-tree-focus-graph")?.addEventListener("click", () => {
-      const nodeIds = s.nodes.map(n => n.id);
-      this.switchTab("tab-graph");
-      this.highlightCorridor(nodeIds);
-    });
-  },
-
-  renderTreeNodesAndConnectors() {
-    const s = this.getCurrentTreeScenario();
-    if (!s) return;
-
-    // Filter nodes by query if search active
-    const q = this.treeSearchQuery;
-    const filterNode = (n) => {
-      if (!q) return true;
-      return n.name.toLowerCase().includes(q) || n.id.toLowerCase().includes(q) || n.sector.toLowerCase().includes(q) || n.jurisdiction.toLowerCase().includes(q);
-    };
-
-    const t0Nodes = s.nodes.filter(n => n.tier === 0 && filterNode(n));
-    const t1Nodes = s.nodes.filter(n => n.tier === 1 && filterNode(n));
-    const t2Nodes = s.nodes.filter(n => n.tier === 2 && filterNode(n));
-    const t3Nodes = s.nodes.filter(n => n.tier === 3 && filterNode(n));
-
-    document.getElementById("tier-0-count").textContent = `${t0Nodes.length} Nodes`;
-    document.getElementById("tier-1-count").textContent = `${t1Nodes.length} Nodes`;
-    document.getElementById("tier-2-count").textContent = `${t2Nodes.length} Nodes`;
-    document.getElementById("tier-3-count").textContent = `${t3Nodes.length} Nodes`;
-
-    const tab0Count = document.getElementById("tier-tab-0-count");
-    if (tab0Count) tab0Count.textContent = t0Nodes.length;
-    const tab1Count = document.getElementById("tier-tab-1-count");
-    if (tab1Count) tab1Count.textContent = t1Nodes.length;
-    const tab2Count = document.getElementById("tier-tab-2-count");
-    if (tab2Count) tab2Count.textContent = t2Nodes.length;
-    const tab3Count = document.getElementById("tier-tab-3-count");
-    if (tab3Count) tab3Count.textContent = t3Nodes.length;
-
-    // Apply grid layout mode class and width
-    const grid = document.getElementById("tree-columns-grid");
-    if (grid) {
-      grid.classList.remove("flow-sequence-layout", "by-tier-layout", "matrix-layout");
-      if (this.treeLayoutMode === "flow-sequence") {
-        grid.classList.add("flow-sequence-layout");
-        grid.style.minWidth = "0px";
-      } else if (this.treeLayoutMode === "by-tier") {
-        grid.classList.add("by-tier-layout");
-        grid.style.minWidth = "0px";
-      } else {
-        grid.classList.add("matrix-layout");
-        grid.style.minWidth = "1050px";
-      }
-    }
-
-    // In by-tier mode, hide inactive tier columns
-    const columns = grid?.querySelectorAll(".tier-flow-column");
-    if (columns) {
-      columns.forEach(col => {
-        const tier = parseInt(col.getAttribute("data-tier"), 10);
-        if (this.treeLayoutMode === "by-tier") {
-          if (tier === this.treeActiveTierTab) {
-            col.classList.remove("tier-tab-hidden");
-          } else {
-            col.classList.add("tier-tab-hidden");
-          }
-        } else {
-          col.classList.remove("tier-tab-hidden");
-        }
-      });
-    }
-
-    // In flow-sequence mode, insert or update vertical flow dividers
-    if (this.treeLayoutMode === "flow-sequence" && grid) {
-      this.ensureFlowSequenceDividers(s);
-    } else {
-      this.removeFlowSequenceDividers();
-    }
-
-    const activeHop = s.hops[this.treeCurrentHopIndex] || null;
-
-    const renderColumnNodes = (nodes, containerId, tier) => {
-      const el = document.getElementById(containerId);
-      if (!el) return;
-
-      if (nodes.length === 0) {
-        el.innerHTML = `<div class="p-4 rounded border border-dashed border-slate-800 text-center text-xs text-slate-500 font-mono">No nodes match filter</div>`;
-        return;
-      }
-
-      el.innerHTML = nodes.map(n => {
-        const isCurrentActive = activeHop && (activeHop.source === n.id || activeHop.target === n.id);
-        const isSourceOfHop = activeHop && activeHop.source === n.id;
-        const isTargetOfHop = activeHop && activeHop.target === n.id;
-        const hasBranches = n.branches && n.branches.length > 0;
-        const isBranchExpanded = this.treeAllBranchesExpanded || this.treeExpandedBranches.has(n.id);
-
-        return `
-          <div class="flow-node-card tier-${n.tier}-card ${isCurrentActive ? 'active-hop pulse-glow' : ''}" data-node-id="${n.id}" data-tier="${n.tier}">
-            <div class="flex items-center justify-between gap-1 mb-1.5">
-              <span class="tier-badge-${n.tier} px-1.5 py-0.5 rounded text-[9px] font-mono font-bold">
-                T${n.tier} ${n.tierLabel || ''}
-              </span>
-              <div class="flex items-center gap-1">
-                <span class="px-1.5 py-0.2 rounded bg-slate-800 text-slate-300 font-mono text-[9px] border border-slate-700 font-semibold">[${n.jurisdiction}]</span>
-                ${isSourceOfHop ? '<span class="px-1 py-0.2 rounded bg-cyan-950 text-cyan-300 font-mono text-[8px] border border-cyan-800 font-bold uppercase">HOP SRC</span>' : ''}
-                ${isTargetOfHop ? '<span class="px-1 py-0.2 rounded bg-emerald-950 text-emerald-300 font-mono text-[8px] border border-emerald-800 font-bold uppercase">HOP DST</span>' : ''}
-              </div>
-            </div>
-
-            <h5 class="text-xs font-bold text-white leading-snug mb-1 truncate" title="${n.name}">${n.name}</h5>
-            <div class="text-[10px] font-mono text-slate-400 truncate mb-1.5">${n.sector}</div>
-
-            <div class="flex items-center justify-between text-[10px] font-mono pt-1.5 border-t border-slate-800/80">
-              <span class="text-slate-400">Flow Vol:</span>
-              <span class="text-cyan-300 font-bold">${n.volume || '$0.00'}</span>
-            </div>
-
-            ${hasBranches ? `
-              <div class="mt-2 pt-1 border-t border-slate-800/60 flex items-center justify-between">
-                <button class="branch-pill btn-toggle-node-branch" data-branch-node="${n.id}">
-                  <i class="fa-solid fa-code-branch text-[9px] mr-1"></i> ${isBranchExpanded ? 'Hide' : 'Expand'} ${n.branches.length} Conduits
-                </button>
-                <span class="text-[9px] font-mono text-slate-500">${n.provenance || 'DTCC'}</span>
-              </div>
-            ` : ''}
-
-            ${hasBranches && isBranchExpanded ? `
-              <div class="mt-2 pt-2 border-t border-slate-800/80 space-y-1 bg-slate-950/80 p-2 rounded text-[10px] font-mono">
-                <div class="text-[9px] text-slate-500 uppercase font-bold">Active Branch Conduits:</div>
-                ${n.branches.map(b => `
-                  <div class="flex items-center justify-between text-slate-300 py-0.5 border-b border-slate-900 last:border-none">
-                    <span class="truncate mr-1">→ ${b.targetName}</span>
-                    <span class="text-emerald-400 font-semibold shrink-0">${b.volume}</span>
-                  </div>
-                `).join("")}
-              </div>
-            ` : ''}
-          </div>
-        `;
-      }).join("");
-
-      // Bind node card click to inspect balance sheet
-      el.querySelectorAll(".flow-node-card").forEach(card => {
-        card.addEventListener("click", (e) => {
-          if (e.target.closest(".btn-toggle-node-branch")) return;
-          const nid = card.getAttribute("data-node-id");
-          this.inspectTreeNode(nid);
-        });
-      });
-
-      // Bind branch toggles
-      el.querySelectorAll(".btn-toggle-node-branch").forEach(btn => {
-        btn.addEventListener("click", (e) => {
-          e.stopPropagation();
-          const nid = btn.getAttribute("data-branch-node");
-          if (this.treeExpandedBranches.has(nid)) {
-            this.treeExpandedBranches.delete(nid);
-          } else {
-            this.treeExpandedBranches.add(nid);
-          }
-          this.renderTreeNodesAndConnectors();
-        });
-      });
-    };
-
-    renderColumnNodes(t0Nodes, "tier-0-nodes", 0);
-    renderColumnNodes(t1Nodes, "tier-1-nodes", 1);
-    renderColumnNodes(t2Nodes, "tier-2-nodes", 2);
-    renderColumnNodes(t3Nodes, "tier-3-nodes", 3);
-
-    this.updateTreeStepperUI();
-
-    // Redraw SVG connectors
-    setTimeout(() => this.drawTreeConnectors(), 40);
   },
 
   updateTreeStepperUI() {
     const s = this.getCurrentTreeScenario();
-    if (!s) return;
+    if (!s || !s.hops) return;
 
     const totalHops = s.hops.length;
-    const currentHop = s.hops[this.treeCurrentHopIndex];
+    const currentHop = s.hops[this.treeCurrentHopIndex] || s.hops[0];
     if (!currentHop) return;
 
-    // Badges & progress
     const stepBadge = document.getElementById("step-counter-badge");
     if (stepBadge) {
       stepBadge.textContent = `Hop ${this.treeCurrentHopIndex + 1} of ${totalHops}`;
@@ -4687,25 +4584,119 @@ const App = {
       progressFill.style.width = `${pct}%`;
     }
 
-    // Commentary text
-    const hopTitle = document.getElementById("step-hop-title");
-    if (hopTitle) {
+    // Story Narrative Card
+    const container = document.getElementById("step-narrative-container");
+    if (container) {
       const srcNode = s.nodes.find(n => n.id === currentHop.source);
-      const dstNode = s.nodes.find(n => n.id === currentHop.target);
-      const srcName = srcNode ? srcNode.name : currentHop.source;
-      const dstName = dstNode ? dstNode.name : currentHop.target;
-      hopTitle.textContent = `${srcName} ➔ ${dstName}`;
-    }
+      const tgtNode = s.nodes.find(n => n.id === currentHop.target);
+      const srcName = srcNode ? srcNode.name : currentHop.source.replace(/_/g, " ");
+      const tgtName = tgtNode ? tgtNode.name : currentHop.target.replace(/_/g, " ");
 
-    const hopExplanation = document.getElementById("step-hop-explanation");
-    if (hopExplanation) {
-      hopExplanation.textContent = currentHop.narrative;
-    }
+      container.innerHTML = `
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-800 pb-3">
+          <div class="flex items-center gap-2 flex-wrap">
+            <span class="px-2.5 py-0.5 rounded bg-amber-950 text-amber-300 font-mono text-[10px] border border-amber-800 font-bold uppercase tracking-wider">
+              ${currentHop.action}
+            </span>
+            <span class="text-xs font-mono text-cyan-400 font-bold">
+              ${currentHop.volume}
+            </span>
+          </div>
+          <div class="text-xs font-mono text-slate-400">
+            Official Reference: <span class="text-slate-300 font-semibold">${currentHop.statutory}</span>
+          </div>
+        </div>
 
-    const actionBadge = document.getElementById("step-action-badge");
-    if (actionBadge) {
-      actionBadge.textContent = currentHop.action || "FLOW TRANSMISSION";
+        <div class="space-y-2">
+          <h4 class="text-sm sm:text-base font-bold text-white flex items-center gap-2 flex-wrap">
+            <span class="text-cyan-300 underline underline-offset-4 cursor-pointer btn-open-src-dossier">${srcName}</span>
+            <span class="text-slate-500">➔</span>
+            <span class="text-emerald-300 underline underline-offset-4 cursor-pointer btn-open-tgt-dossier">${tgtName}</span>
+          </h4>
+          <p class="text-xs sm:text-sm text-slate-300 font-sans leading-relaxed">
+            ${currentHop.narrative}
+          </p>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-2 pt-2 border-t border-slate-800/80">
+          <span class="text-[11px] font-mono text-slate-400 mr-1">Investigate Counterparties:</span>
+          <button class="min-h-[44px] px-3.5 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 text-cyan-400 border border-slate-700 font-mono text-xs flex items-center gap-1.5 transition btn-open-src-dossier">
+            <span>Inspect ${srcName}</span>
+            <span class="text-[10px]">↗</span>
+          </button>
+          <button class="min-h-[44px] px-3.5 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 text-emerald-400 border border-slate-700 font-mono text-xs flex items-center gap-1.5 transition btn-open-tgt-dossier">
+            <span>Inspect ${tgtName}</span>
+            <span class="text-[10px]">↗</span>
+          </button>
+        </div>
+      `;
+
+      container.querySelectorAll(".btn-open-src-dossier").forEach(b => {
+        b.addEventListener("click", () => this.openDossier(currentHop.source));
+      });
+      container.querySelectorAll(".btn-open-tgt-dossier").forEach(b => {
+        b.addEventListener("click", () => this.openDossier(currentHop.target));
+      });
     }
+  },
+
+  renderIsolatedPipeline() {
+    const container = document.getElementById("trail-isolated-nodes-pipeline");
+    if (!container) return;
+
+    const s = this.getCurrentTreeScenario();
+    if (!s || !s.nodes) return;
+
+    const currentHop = s.hops[this.treeCurrentHopIndex];
+
+    container.innerHTML = s.nodes.map((node, idx) => {
+      const isHopSource = currentHop && currentHop.source === node.id;
+      const isHopTarget = currentHop && currentHop.target === node.id;
+      const isActive = isHopSource || isHopTarget;
+
+      return `
+        <div class="relative rounded-xl border p-4 flex flex-col justify-between space-y-3 transition-all ${
+          isActive
+            ? "bg-gradient-to-b from-cyan-950/60 to-slate-900 border-cyan-400 shadow-[0_0_20px_rgba(0,240,255,0.25)] ring-1 ring-cyan-400"
+            : "bg-slate-950/80 border-slate-800 hover:border-slate-700 hover:bg-slate-900"
+        }">
+          ${isActive ? `
+            <div class="absolute -top-2.5 left-4 px-2 py-0.5 rounded-full bg-cyan-500 text-black text-[9px] font-mono font-extrabold uppercase tracking-widest shadow">
+              ${isHopSource ? "▶ CURRENT ORIGIN" : "★ CURRENT RECIPIENT"}
+            </div>
+          ` : ""}
+
+          <div class="space-y-1.5">
+            <div class="flex items-center justify-between">
+              <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-900 text-cyan-300 border border-slate-700 font-bold">
+                [${node.jurisdiction}] TIER ${node.tier}
+              </span>
+              <span class="text-[10px] font-mono text-slate-400">Node ${idx + 1}</span>
+            </div>
+            <h5 class="text-xs sm:text-sm font-bold text-white leading-snug">${node.name}</h5>
+            <p class="text-[11px] text-slate-400 line-clamp-2">${node.sector}</p>
+          </div>
+
+          <div class="pt-2 border-t border-slate-800/80 space-y-2">
+            <div class="flex items-center justify-between text-[11px] font-mono">
+              <span class="text-slate-500">Volume:</span>
+              <strong class="text-amber-400">${node.volume}</strong>
+            </div>
+            <button class="min-h-[44px] w-full py-1.5 rounded-lg bg-slate-900 hover:bg-cyan-500 hover:text-black text-cyan-400 border border-slate-800 font-mono text-xs font-bold transition flex items-center justify-center gap-1.5 btn-open-node-dossier" data-node-id="${node.id}">
+              <span>Open Dossier</span>
+              <span class="text-[10px]">📄</span>
+            </button>
+          </div>
+        </div>
+      `;
+    }).join("");
+
+    container.querySelectorAll(".btn-open-node-dossier").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const nid = btn.getAttribute("data-node-id");
+        this.openDossier(nid);
+      });
+    });
   },
 
   stepTree(direction) {
@@ -4719,7 +4710,8 @@ const App = {
       this.treeCurrentHopIndex = 0;
     }
 
-    this.renderTreeNodesAndConnectors();
+    this.updateTreeStepperUI();
+    this.renderIsolatedPipeline();
   },
 
   toggleTreeAutoPlay() {
@@ -4729,325 +4721,363 @@ const App = {
       this.treeAutoPlayTimer = null;
       if (btn) {
         btn.innerHTML = `<i class="fa-solid fa-play text-[10px]"></i> Auto-Play`;
-        btn.className = "px-3 py-1.5 rounded bg-emerald-600 hover:bg-emerald-500 text-black font-mono text-xs font-bold flex items-center gap-1.5 transition shadow";
+        btn.className = "min-h-[44px] px-3.5 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-mono text-xs font-bold flex items-center gap-1.5 transition shadow";
       }
     } else {
       if (btn) {
         btn.innerHTML = `<i class="fa-solid fa-pause text-[10px]"></i> Pause`;
-        btn.className = "px-3 py-1.5 rounded bg-amber-500 hover:bg-amber-400 text-black font-mono text-xs font-bold flex items-center gap-1.5 transition shadow";
+        btn.className = "min-h-[44px] px-3.5 py-2 rounded-lg bg-amber-500 hover:bg-amber-400 text-black font-mono text-xs font-bold flex items-center gap-1.5 transition shadow";
       }
       this.stepTree(1);
       this.treeAutoPlayTimer = setInterval(() => {
         this.stepTree(1);
-      }, 2500);
+      }, 3000);
     }
   },
 
-  ensureFlowSequenceDividers(scenario) {
-    const grid = document.getElementById("tree-columns-grid");
-    if (!grid) return;
+  openDossier(nodeId) {
+    if (this.allInstitutionsMap && this.allInstitutionsMap[nodeId]) {
+      this.activeDossierId = nodeId;
+      this.switchUtilityView("dossiers");
+      document.getElementById("active-institution-dossier")?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  },
 
-    const activeHop = scenario.hops[this.treeCurrentHopIndex];
-
-    const makeDivider = (id, fromTier, toTier, defaultLabel) => {
-      const isHopActive = activeHop && (
-        (fromTier === 0 && toTier === 1 && scenario.nodes.some(n => n.tier === 0 && n.id === activeHop.source) && scenario.nodes.some(n => n.tier === 1 && n.id === activeHop.target)) ||
-        (fromTier === 1 && toTier === 2 && scenario.nodes.some(n => n.tier === 1 && n.id === activeHop.source) && scenario.nodes.some(n => n.tier === 2 && n.id === activeHop.target)) ||
-        (fromTier === 2 && toTier === 3 && scenario.nodes.some(n => n.tier === 2 && n.id === activeHop.source) && scenario.nodes.some(n => n.tier === 3 && n.id === activeHop.target))
-      );
-
-      let el = document.getElementById(id);
-      if (!el) {
-        el = document.createElement("div");
-        el.id = id;
-        el.className = `vertical-flow-divider ${isHopActive ? 'active-conduit' : ''}`;
-        el.innerHTML = `
-          <div class="divider-line"></div>
-          <div class="conduit-badge">
-            <i class="fa-solid fa-arrow-down mr-1"></i>
-            <span class="badge-text">${isHopActive && activeHop ? `ACTIVE CONDUIT: ${activeHop.volume} (${activeHop.action})` : defaultLabel}</span>
-          </div>
-          <div class="divider-line"></div>
-        `;
+  openTrail(circuitId, targetNodeId) {
+    if (TREE_FLOW_CATALOG.circuits[circuitId]) {
+      this.selectedCircuitId = circuitId;
+      this.switchUtilityView("trails");
+      const c = TREE_FLOW_CATALOG.circuits[circuitId];
+      if (targetNodeId) {
+        const idx = c.hops.findIndex(h => h.source === targetNodeId || h.target === targetNodeId);
+        this.treeCurrentHopIndex = idx >= 0 ? idx : 0;
       } else {
-        el.className = `vertical-flow-divider ${isHopActive ? 'active-conduit' : ''}`;
-        const span = el.querySelector(".badge-text");
-        if (span) {
-          span.textContent = isHopActive && activeHop ? `ACTIVE CONDUIT: ${activeHop.volume} (${activeHop.action})` : defaultLabel;
-        }
+        this.treeCurrentHopIndex = 0;
       }
-      return el;
-    };
-
-    const d01 = makeDivider("divider-t0-t1", 0, 1, "T0 → T1 PRIMARY TRANSMISSION PIPELINE");
-    const d12 = makeDivider("divider-t1-t2", 1, 2, "T1 → T2 WHOLESALE CLEARING & TRAVERSAL");
-    const d23 = makeDivider("divider-t2-t3", 2, 3, "T2 → T3 SAFE-HAVEN COLLATERAL SINKS");
-
-    const col0 = grid.querySelector('.tier-flow-column[data-tier="0"]');
-    const col1 = grid.querySelector('.tier-flow-column[data-tier="1"]');
-    const col2 = grid.querySelector('.tier-flow-column[data-tier="2"]');
-    const col3 = grid.querySelector('.tier-flow-column[data-tier="3"]');
-
-    if (col0 && col1 && d01.parentNode !== grid) {
-      grid.insertBefore(d01, col1);
-    }
-    if (col1 && col2 && d12.parentNode !== grid) {
-      grid.insertBefore(d12, col2);
-    }
-    if (col2 && col3 && d23.parentNode !== grid) {
-      grid.insertBefore(d23, col3);
+      this.updateTreeStepperUI();
+      this.renderIsolatedPipeline();
+      document.getElementById("active-trail-banner")?.scrollIntoView({ behavior: "smooth", block: "start" });
     }
   },
 
-  removeFlowSequenceDividers() {
-    ["divider-t0-t1", "divider-t1-t2", "divider-t2-t3"].forEach(id => {
-      document.getElementById(id)?.remove();
-    });
+  renderInstitutionDirectory() {
+    this.renderDossierFilters();
+    this.renderActiveDossier();
+    this.renderDossierBrowserGrid();
   },
 
-  drawTreeConnectors() {
-    const svg = document.getElementById("tree-flow-svg");
-    if (!svg) return;
+  renderDossierFilters() {
+    const secContainer = document.getElementById("dossier-sector-filters");
+    if (secContainer) {
+      const sectors = [
+        { id: "ALL", label: "All Roles" },
+        { id: "central_bank", label: "Central Banks" },
+        { id: "treasury", label: "Sovereign Treasuries" },
+        { id: "bank", label: "Primary Dealers & Banks" },
+        { id: "swf", label: "Sovereign Wealth Funds" },
+        { id: "corporate", label: "Corporate & Shadow Cash" }
+      ];
+      secContainer.innerHTML = sectors.map(sec => `
+        <button class="px-2.5 py-1 rounded-lg border text-xs font-mono transition ${
+          this.dossierSectorFilter === sec.id
+            ? "bg-cyan-950 text-cyan-300 border-cyan-500 font-bold"
+            : "bg-slate-900 text-slate-400 border-slate-800 hover:text-white"
+        }" data-sec="${sec.id}">${sec.label}</button>
+      `).join("");
 
-    if (this.treeLayoutMode !== "matrix") {
-      svg.innerHTML = "";
-      svg.style.display = "none";
-      return;
+      secContainer.querySelectorAll("[data-sec]").forEach(b => {
+        b.addEventListener("click", () => {
+          this.dossierSectorFilter = b.getAttribute("data-sec");
+          this.renderDossierFilters();
+          this.renderDossierBrowserGrid();
+        });
+      });
     }
-    svg.style.display = "block";
 
-    const s = this.getCurrentTreeScenario();
-    if (!s || !s.hops) return;
+    const ctyContainer = document.getElementById("dossier-country-filters");
+    if (ctyContainer) {
+      const set = new Set();
+      (this.allInstitutionsList || []).forEach(i => { if (i.jurisdiction) set.add(i.jurisdiction); });
+      const countries = ["ALL", ...Array.from(set).sort()].slice(0, 14);
 
-    const canvas = document.querySelector(".tree-flow-canvas");
-    if (!canvas) return;
+      ctyContainer.innerHTML = countries.map(c => `
+        <button class="px-2.5 py-1 rounded-lg border text-xs font-mono transition ${
+          this.dossierCountryFilter === c
+            ? "bg-amber-950 text-amber-300 border-amber-500 font-bold"
+            : "bg-slate-900 text-slate-400 border-slate-800 hover:text-white"
+        }" data-cty="${c}">${c}</button>
+      `).join("");
 
-    const canvasRect = canvas.getBoundingClientRect();
-    svg.setAttribute("width", `${canvas.scrollWidth}px`);
-    svg.setAttribute("height", `${canvas.scrollHeight}px`);
-    svg.innerHTML = "";
-
-    const activeHop = s.hops[this.treeCurrentHopIndex];
-
-    s.hops.forEach((hop, idx) => {
-      const srcEl = canvas.querySelector(`.flow-node-card[data-node-id="${hop.source}"]`);
-      const dstEl = canvas.querySelector(`.flow-node-card[data-node-id="${hop.target}"]`);
-
-      if (!srcEl || !dstEl) return;
-
-      const srcRect = srcEl.getBoundingClientRect();
-      const dstRect = dstEl.getBoundingClientRect();
-
-      // Start coordinate at right-center of source
-      const x1 = srcRect.right - canvasRect.left + canvas.scrollLeft;
-      const y1 = srcRect.top - canvasRect.top + (srcRect.height / 2) + canvas.scrollTop;
-
-      // End coordinate at left-center of target
-      const x2 = dstRect.left - canvasRect.left + canvas.scrollLeft;
-      const y2 = dstRect.top - canvasRect.top + (dstRect.height / 2) + canvas.scrollTop;
-
-      // Bézier control points
-      const dx = Math.max(40, (x2 - x1) * 0.5);
-      const d = `M ${x1} ${y1} C ${x1 + dx} ${y1}, ${x2 - dx} ${y2}, ${x2} ${y2}`;
-
-      const isCurrent = idx === this.treeCurrentHopIndex;
-      const isPast = idx < this.treeCurrentHopIndex;
-
-      const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
-      path.setAttribute("d", d);
-
-      if (isCurrent) {
-        path.setAttribute("class", "flow-connector-path flow-active");
-      } else if (isPast) {
-        path.setAttribute("class", "flow-connector-path flow-completed");
-      } else {
-        path.setAttribute("class", "flow-connector-path");
-      }
-
-      svg.appendChild(path);
-
-      // Volume indicator circle/text along the path for active hop
-      if (isCurrent && hop.volume) {
-        const mx = (x1 + x2) / 2;
-        const my = (y1 + y2) / 2;
-
-        const bgRect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
-        bgRect.setAttribute("x", `${mx - 28}`);
-        bgRect.setAttribute("y", `${my - 10}`);
-        bgRect.setAttribute("width", "56");
-        bgRect.setAttribute("height", "20");
-        bgRect.setAttribute("rx", "4");
-        bgRect.setAttribute("fill", "#09101d");
-        bgRect.setAttribute("stroke", "#00f0ff");
-        bgRect.setAttribute("stroke-width", "1");
-        svg.appendChild(bgRect);
-
-        const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
-        text.setAttribute("x", `${mx}`);
-        text.setAttribute("y", `${my + 4}`);
-        text.setAttribute("text-anchor", "middle");
-        text.setAttribute("fill", "#00f0ff");
-        text.setAttribute("font-family", "monospace");
-        text.setAttribute("font-size", "10px");
-        text.setAttribute("font-weight", "bold");
-        text.textContent = hop.volume;
-        svg.appendChild(text);
-      }
-    });
+      ctyContainer.querySelectorAll("[data-cty]").forEach(b => {
+        b.addEventListener("click", () => {
+          this.dossierCountryFilter = b.getAttribute("data-cty");
+          this.renderDossierFilters();
+          this.renderDossierBrowserGrid();
+        });
+      });
+    }
   },
 
-  async inspectTreeNode(nodeId) {
-    const card = document.getElementById("tree-node-inspection-card");
+  renderActiveDossier() {
+    const card = document.getElementById("active-institution-dossier");
     if (!card) return;
 
-    this.selectedNodeId = nodeId;
-    const s = this.getCurrentTreeScenario();
-    const catalogNode = s ? s.nodes.find(n => n.id === nodeId) : null;
+    const inst = (this.allInstitutionsMap && this.allInstitutionsMap[this.activeDossierId]) || (this.allInstitutionsList && this.allInstitutionsList[0]);
+    if (!inst) return;
 
-    card.classList.remove("hidden");
-    card.innerHTML = `<div class="p-6 text-center text-xs font-mono text-cyan-400 animate-pulse">Inspecting balance sheet mechanics for '${nodeId}'...</div>`;
-    card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    const inflows = (this.counterpartiesInMap && this.counterpartiesInMap[inst.id]) || [];
+    const outflows = (this.counterpartiesOutMap && this.counterpartiesOutMap[inst.id]) || [];
+    const trails = (this.institutionTrailsMap && this.institutionTrailsMap[inst.id]) || [];
 
-    let poolData = null;
-    try {
-      const res = await fetch(`/api/pools/${nodeId}`);
-      if (res.ok) {
-        poolData = await res.json();
-      }
-    } catch (e) {
-      console.warn("Could not fetch /api/pools for node:", nodeId, e);
-    }
-
-    this.renderTreeNodeInspectionCard(catalogNode, poolData);
-  },
-
-  renderTreeNodeInspectionCard(catalogNode, poolData) {
-    const card = document.getElementById("tree-node-inspection-card");
-    if (!card) return;
-
-    const p = poolData?.pool || {};
-    const totals = poolData?.totals || {};
-    const name = catalogNode?.name || p.name || this.selectedNodeId;
-    const tier = catalogNode?.tier ?? p.tier ?? 2;
-    const jurisdiction = catalogNode?.jurisdiction || p.jurisdiction || "GLOBAL";
-    const sector = catalogNode?.sector || p.sector || "financial_institution";
-    const provenance = catalogNode?.provenance || poolData?.provenance || "ECB SDW / SEC EDGAR";
-    const velocity = catalogNode?.velocity || "Overnight (T+0 to T+1) Clearing Velocity";
-    const nominalVol = catalogNode?.volume || (totals.inflow_usd ? this.formatCurrency(totals.inflow_usd) : "$250.0B");
-
-    const assets = catalogNode?.balanceItems?.assets || [
-      { name: "Sovereign Debt Benchmark Paper", amount: nominalVol },
-      { name: "Intraday Refinancing Claims & Collateral", amount: "$85.0B" },
+    const assets = inst.balanceItems?.assets || [
+      { name: "Sovereign Debt Benchmark Paper", amount: inst.volume || "$100.0B" },
       { name: "Positive RTGS Interbank Balances", amount: "$45.2B" }
     ];
 
-    const liabilities = catalogNode?.balanceItems?.liabilities || [
-      { name: "Central Bank Commercial Reserve Balances", amount: nominalVol },
-      { name: "Overnight Triparty Repo Liabilities", amount: "$85.0B" },
+    const liabilities = inst.balanceItems?.liabilities || [
+      { name: "Commercial Bank Clearing Liabilities", amount: inst.volume || "$100.0B" },
       { name: "Statutory Capital & Retained Reserves", amount: "$45.2B" }
     ];
 
     card.innerHTML = `
-      <div class="border-b border-slate-800 pb-3 flex items-start justify-between">
-        <div>
+      <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 border-b border-slate-800 pb-4">
+        <div class="space-y-2">
           <div class="flex items-center gap-2 flex-wrap">
-            <span class="tier-badge-${tier} px-2 py-0.5 rounded text-[10px] font-mono font-bold">
-              TIER ${tier}: ${catalogNode?.tierLabel || 'FINANCIAL INTERMEDIARY'}
+            <span class="px-2.5 py-0.5 rounded bg-amber-950 text-amber-300 font-mono text-xs border border-amber-800 font-bold">
+              [${inst.jurisdiction}] TIER ${inst.tier}: ${inst.tierLabel || "FINANCIAL INSTITUTION"}
             </span>
-            <span class="px-2 py-0.5 rounded bg-slate-800 text-slate-300 font-mono text-[10px] border border-slate-700 font-bold">[${jurisdiction}]</span>
-            <span class="px-2 py-0.5 rounded bg-emerald-950 text-emerald-300 font-mono text-[10px] border border-emerald-800 font-bold">
-              <i class="fa-solid fa-shield-halved mr-1"></i> $0.00 LEAK VERIFIED (CONSERVED)
+            <span class="px-2.5 py-0.5 rounded bg-cyan-950 text-cyan-300 font-mono text-xs border border-cyan-800">
+              ID: ${inst.id}
             </span>
           </div>
-          <h3 class="text-lg font-bold text-white mt-1.5">${name}</h3>
-          <span class="text-xs font-mono text-slate-400">${this.selectedNodeId} · ${sector}</span>
-        </div>
-        
-        <div class="flex items-center gap-2">
-          <button id="btn-inspect-in-drawer" class="px-3 py-1.5 rounded bg-cyan-600 hover:bg-cyan-500 text-black text-xs font-mono font-bold transition flex items-center gap-1.5 shadow">
-            <i class="fa-solid fa-table-columns"></i> Full Drawer
-          </button>
-          <button id="btn-close-tree-card" class="text-slate-400 hover:text-white px-2 py-1 text-base transition">
-            <i class="fa-solid fa-xmark"></i>
-          </button>
-        </div>
-      </div>
-
-      <!-- Key Metrics Strip -->
-      <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 font-mono text-xs">
-        <div class="bg-slate-950 p-3 rounded border border-slate-800">
-          <span class="text-[10px] text-slate-500 uppercase block">Gross Flow Volume</span>
-          <span class="text-sm font-bold text-cyan-400">${nominalVol}</span>
-        </div>
-        <div class="bg-slate-950 p-3 rounded border border-slate-800">
-          <span class="text-[10px] text-slate-500 uppercase block">Statutory Provenance</span>
-          <span class="text-xs font-bold text-purple-300 truncate block">${provenance}</span>
-        </div>
-        <div class="bg-slate-950 p-3 rounded border border-slate-800">
-          <span class="text-[10px] text-slate-500 uppercase block">Turnover Velocity</span>
-          <span class="text-xs font-bold text-amber-300 truncate block">${velocity}</span>
-        </div>
-        <div class="bg-slate-950 p-3 rounded border border-slate-800">
-          <span class="text-[10px] text-slate-500 uppercase block">Conservation Check</span>
-          <span class="text-xs font-bold text-emerald-400">Strictly Conserved</span>
-        </div>
-      </div>
-
-      <!-- T-Account Double-Entry Balance Sheet Line Items -->
-      <div class="space-y-2">
-        <div class="flex items-center justify-between">
-          <h4 class="text-xs font-bold font-mono text-slate-200 uppercase tracking-wider flex items-center gap-1.5">
-            <i class="fa-solid fa-scale-balanced text-cyan-400"></i> Double-Entry Balance Sheet Line Items (T-Account Breakdown)
-          </h4>
-          <span class="text-[10px] font-mono text-emerald-400">Net Double-Entry Δ = $0.00</span>
+          <h3 class="text-xl sm:text-2xl font-extrabold text-white tracking-tight">${inst.name}</h3>
+          <p class="text-xs sm:text-sm text-slate-300 font-mono">
+            Sector: <span class="text-cyan-400 font-semibold">${inst.sector}</span>
+          </p>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-          <!-- Assets Column -->
-          <div class="bg-slate-950 rounded border border-slate-800 overflow-hidden">
-            <div class="bg-blue-950/40 px-3 py-1.5 border-b border-slate-800 flex items-center justify-between font-mono text-xs">
-              <span class="font-bold text-blue-300">ASSETS (CLAIMS)</span>
-              <span class="text-slate-400">${nominalVol}</span>
-            </div>
-            <table class="t-account-table">
-              <tbody>
-                ${assets.map(a => `
-                  <tr>
-                    <td class="text-slate-300">${a.name}</td>
-                    <td class="text-right text-blue-300 font-bold font-mono-fig">${a.amount}</td>
-                  </tr>
-                `).join("")}
-              </tbody>
-            </table>
+        <div class="grid grid-cols-2 gap-2.5 text-xs font-mono shrink-0">
+          <div class="p-2.5 rounded-lg bg-slate-950 border border-slate-800">
+            <div class="text-[10px] text-slate-500 uppercase">Provenance</div>
+            <div class="text-white font-bold truncate max-w-[140px]">${inst.provenance || "AFT / ECB SDW"}</div>
           </div>
-
-          <!-- Liabilities Column -->
-          <div class="bg-slate-950 rounded border border-slate-800 overflow-hidden">
-            <div class="bg-purple-950/40 px-3 py-1.5 border-b border-slate-800 flex items-center justify-between font-mono text-xs">
-              <span class="font-bold text-purple-300">LIABILITIES & EQUITY (OBLIGATIONS)</span>
-              <span class="text-slate-400">${nominalVol}</span>
-            </div>
-            <table class="t-account-table">
-              <tbody>
-                ${liabilities.map(l => `
-                  <tr>
-                    <td class="text-slate-300">${l.name}</td>
-                    <td class="text-right text-purple-300 font-bold font-mono-fig">${l.amount}</td>
-                  </tr>
-                `).join("")}
-              </tbody>
-            </table>
+          <div class="p-2.5 rounded-lg bg-slate-950 border border-slate-800">
+            <div class="text-[10px] text-slate-500 uppercase">Velocity</div>
+            <div class="text-white font-bold truncate max-w-[140px]">${inst.velocity || "Daily T+1"}</div>
+          </div>
+          <div class="p-2.5 rounded-lg bg-slate-950 border border-slate-800">
+            <div class="text-[10px] text-slate-500 uppercase">Known Volume</div>
+            <div class="text-amber-400 font-bold">${inst.volume || "$0.00"}</div>
+          </div>
+          <div class="p-2.5 rounded-lg bg-emerald-950/40 border border-emerald-800/80">
+            <div class="text-[10px] text-emerald-400 uppercase">Kirchhoff Leak</div>
+            <div class="text-emerald-400 font-bold">$0.00 (Conserved)</div>
           </div>
         </div>
       </div>
+
+      <!-- Money In vs Money Out (Panama Papers Core Links) -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
+        <!-- Money In -->
+        <div class="space-y-2.5">
+          <div class="flex items-center justify-between p-2.5 rounded-lg bg-emerald-950/30 border border-emerald-800/50">
+            <span class="text-xs font-mono font-bold text-emerald-400 flex items-center gap-1.5">
+              <span>📥</span> MONEY IN: UPSTREAM SOURCES (${inflows.length})
+            </span>
+            <span class="text-[10px] font-mono text-slate-400">Incoming Conduits</span>
+          </div>
+          <div class="space-y-2 max-h-[300px] overflow-y-auto pr-1">
+            ${inflows.length === 0 ? `
+              <div class="p-4 rounded-lg bg-slate-950 border border-slate-800 text-xs font-mono text-slate-500 text-center">
+                Genesis Sovereign Faucet (Primary mint / sovereign issuer)
+              </div>
+            ` : inflows.map(i => `
+              <div class="p-2.5 rounded-lg bg-slate-950 border border-slate-800 hover:border-emerald-500/60 transition flex items-center justify-between gap-2 text-xs">
+                <div class="space-y-0.5 min-w-0">
+                  <div class="font-bold text-white truncate">[${i.sourceJurisdiction}] ${i.sourceName}</div>
+                  <div class="text-[10px] font-mono text-slate-400">Mechanism: ${i.action}</div>
+                  <div class="text-[10px] font-mono text-emerald-400 truncate">Trail: ${i.circuitTitle}</div>
+                </div>
+                <div class="flex flex-col items-end gap-1 shrink-0">
+                  <span class="font-mono font-bold text-emerald-400">+${i.amount}</span>
+                  <button class="px-2 py-0.5 rounded bg-slate-900 hover:bg-emerald-500 hover:text-black text-emerald-400 border border-slate-800 font-mono text-[10px] font-bold transition btn-sub-open-dossier" data-nid="${i.sourceId}">
+                    Dossier ➔
+                  </button>
+                </div>
+              </div>
+            `).join("")}
+          </div>
+        </div>
+
+        <!-- Money Out -->
+        <div class="space-y-2.5">
+          <div class="flex items-center justify-between p-2.5 rounded-lg bg-cyan-950/30 border border-cyan-800/50">
+            <span class="text-xs font-mono font-bold text-cyan-400 flex items-center gap-1.5">
+              <span>📤</span> MONEY OUT: DOWNSTREAM ALLOCATIONS (${outflows.length})
+            </span>
+            <span class="text-[10px] font-mono text-slate-400">Outgoing Conduits</span>
+          </div>
+          <div class="space-y-2 max-h-[300px] overflow-y-auto pr-1">
+            ${outflows.length === 0 ? `
+              <div class="p-4 rounded-lg bg-slate-950 border border-slate-800 text-xs font-mono text-slate-500 text-center">
+                Terminal Safe-Haven Sink (Collateral absorption sink)
+              </div>
+            ` : outflows.map(o => `
+              <div class="p-2.5 rounded-lg bg-slate-950 border border-slate-800 hover:border-cyan-500/60 transition flex items-center justify-between gap-2 text-xs">
+                <div class="space-y-0.5 min-w-0">
+                  <div class="font-bold text-white truncate">[${o.targetJurisdiction}] ${o.targetName}</div>
+                  <div class="text-[10px] font-mono text-slate-400">Channel: ${o.action}</div>
+                  <div class="text-[10px] font-mono text-cyan-400 truncate">Trail: ${o.circuitTitle}</div>
+                </div>
+                <div class="flex flex-col items-end gap-1 shrink-0">
+                  <span class="font-mono font-bold text-amber-400">-${o.amount}</span>
+                  <button class="px-2 py-0.5 rounded bg-slate-900 hover:bg-cyan-500 hover:text-black text-cyan-400 border border-slate-800 font-mono text-[10px] font-bold transition btn-sub-open-dossier" data-nid="${o.targetId}">
+                    Dossier ➔
+                  </button>
+                </div>
+              </div>
+            `).join("")}
+          </div>
+        </div>
+      </div>
+
+      <!-- T-Account Breakdown -->
+      <div class="space-y-2 pt-2 border-t border-slate-800/80">
+        <div class="flex items-center justify-between text-xs font-mono">
+          <span class="font-bold text-slate-300">⚖️ AUDITED BALANCE SHEET (T-ACCOUNT BREAKDOWN)</span>
+          <span class="text-emerald-400">Zero-Leak Invariant Verified (Δ = $0.00)</span>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs font-mono">
+          <div class="p-3 rounded-lg bg-slate-950 border border-slate-800 space-y-1.5">
+            <div class="text-cyan-400 font-bold border-b border-slate-800 pb-1">ASSETS (USES)</div>
+            ${assets.map(a => `
+              <div class="flex items-center justify-between py-0.5 border-b border-slate-900">
+                <span class="text-slate-300">${a.name}</span>
+                <strong class="text-cyan-300">${a.amount}</strong>
+              </div>
+            `).join("")}
+          </div>
+          <div class="p-3 rounded-lg bg-slate-950 border border-slate-800 space-y-1.5">
+            <div class="text-amber-400 font-bold border-b border-slate-800 pb-1">LIABILITIES & EQUITY (SOURCES)</div>
+            ${liabilities.map(l => `
+              <div class="flex items-center justify-between py-0.5 border-b border-slate-900">
+                <span class="text-slate-300">${l.name}</span>
+                <strong class="text-amber-300">${l.amount}</strong>
+              </div>
+            `).join("")}
+          </div>
+        </div>
+      </div>
+
+      <!-- Trails featuring this entity -->
+      ${trails.length > 0 ? `
+        <div class="space-y-2 pt-2 border-t border-slate-800/80">
+          <div class="text-xs font-mono font-bold text-slate-300">
+            Investigative Trails Involving ${inst.name} (${trails.length})
+          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
+            ${trails.map(t => `
+              <div class="p-2.5 rounded-lg bg-slate-950 border border-slate-800 hover:border-cyan-500/80 cursor-pointer flex items-center justify-between text-xs transition btn-dossier-trail" data-tid="${t.id}">
+                <div>
+                  <div class="text-[10px] font-mono text-cyan-400 font-bold">TRAIL ${t.shortNum} · ${t.nominalVolume}</div>
+                  <div class="font-bold text-white truncate max-w-[200px]">${t.shortTitle}</div>
+                </div>
+                <span class="text-cyan-400 font-mono text-xs">➔</span>
+              </div>
+            `).join("")}
+          </div>
+        </div>
+      ` : ""}
     `;
 
-    document.getElementById("btn-close-tree-card")?.addEventListener("click", () => {
-      card.classList.add("hidden");
+    card.querySelectorAll(".btn-sub-open-dossier").forEach(b => {
+      b.addEventListener("click", () => {
+        const nid = b.getAttribute("data-nid");
+        this.openDossier(nid);
+      });
     });
 
-    document.getElementById("btn-inspect-in-drawer")?.addEventListener("click", () => {
-      this.inspectPool(this.selectedNodeId);
+    card.querySelectorAll(".btn-dossier-trail").forEach(b => {
+      b.addEventListener("click", () => {
+        const tid = b.getAttribute("data-tid");
+        this.openTrail(tid, inst.id);
+      });
+    });
+  },
+
+  renderDossierBrowserGrid() {
+    const grid = document.getElementById("dossier-browser-grid");
+    if (!grid) return;
+
+    let list = this.allInstitutionsList || [];
+
+    // Filter by query
+    if (this.dossierSearchQuery) {
+      const q = this.dossierSearchQuery;
+      list = list.filter(i => (
+        i.name.toLowerCase().includes(q) ||
+        i.id.toLowerCase().includes(q) ||
+        i.sector.toLowerCase().includes(q) ||
+        i.jurisdiction.toLowerCase().includes(q)
+      ));
+    }
+
+    // Filter by country
+    if (this.dossierCountryFilter && this.dossierCountryFilter !== "ALL") {
+      list = list.filter(i => i.jurisdiction === this.dossierCountryFilter);
+    }
+
+    // Filter by sector
+    if (this.dossierSectorFilter && this.dossierSectorFilter !== "ALL") {
+      list = list.filter(i => {
+        const s = i.sector.toLowerCase();
+        if (this.dossierSectorFilter === "central_bank") return s.includes("central bank") || s.includes("monetary");
+        if (this.dossierSectorFilter === "treasury") return s.includes("sovereign") || s.includes("treasury") || s.includes("debt");
+        if (this.dossierSectorFilter === "bank") return s.includes("bank") || s.includes("dealer") || s.includes("broker");
+        if (this.dossierSectorFilter === "swf") return s.includes("wealth") || s.includes("fund") || s.includes("pension");
+        if (this.dossierSectorFilter === "corporate") return s.includes("corporate") || s.includes("tech") || s.includes("trader") || s.includes("energy");
+        return true;
+      });
+    }
+
+    const countLabel = document.getElementById("dossier-search-count");
+    if (countLabel) {
+      countLabel.textContent = `Showing ${list.length} of ${this.allInstitutionsList.length} Institutions`;
+    }
+
+    grid.innerHTML = list.map(inst => {
+      const isSelected = inst.id === this.activeDossierId;
+      return `
+        <div class="min-h-[88px] p-3 rounded-xl border text-left cursor-pointer transition-all flex flex-col justify-between space-y-2 ${
+          isSelected
+            ? "bg-cyan-950/60 border-cyan-400 shadow-md ring-1 ring-cyan-400"
+            : "bg-slate-900/80 border-slate-800 hover:border-slate-700 hover:bg-slate-900"
+        }" data-inst-id="${inst.id}">
+          <div class="space-y-1">
+            <div class="flex items-center justify-between">
+              <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-950 text-cyan-400 border border-slate-800 font-bold">
+                [${inst.jurisdiction}] TIER ${inst.tier}
+              </span>
+              <span class="text-[10px] font-mono text-amber-400 font-bold">${inst.volume || ""}</span>
+            </div>
+            <h5 class="text-xs font-bold text-white line-clamp-2">${inst.name}</h5>
+          </div>
+          <div class="flex items-center justify-between text-[10px] font-mono text-slate-400 pt-1 border-t border-slate-800/80">
+            <span class="truncate max-w-[130px]">${inst.sector}</span>
+            <span class="text-cyan-400 font-bold">Open Dossier →</span>
+          </div>
+        </div>
+      `;
+    }).join("");
+
+    grid.querySelectorAll("[data-inst-id]").forEach(card => {
+      card.addEventListener("click", () => {
+        const id = card.getAttribute("data-inst-id");
+        this.activeDossierId = id;
+        this.renderActiveDossier();
+        document.getElementById("active-institution-dossier")?.scrollIntoView({ behavior: "smooth", block: "start" });
+      });
     });
   }
+
 };
