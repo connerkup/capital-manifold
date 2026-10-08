@@ -1,11 +1,11 @@
 {
-  "timestamp": "2026-10-07T02:14:59.371364+00:00",
-  "overall_resilience_score": 93.9,
+  "timestamp": "2026-10-08T17:08:04.095498+00:00",
+  "overall_resilience_score": 90.3,
   "summary_insights": [
-    "Sovereign OAT Crisis: French sovereign debt distribution safely redirected to CA-CIB / Natixis secondary syndicate with 20.33% impedance increase.",
+    "Sovereign OAT Crisis: French sovereign debt distribution safely redirected to CA-CIB / Natixis secondary syndicate with 11.82% impedance increase.",
     "Transatlantic Repo Freeze: 100% of US dollar carry trade and debt absorption preserved via FICC sponsored repo and Fed SRF backstop.",
     "Planetary Compound Crisis: Dual-Frontier A* cleanly detected physical maritime energy sanctions blockade with 0.0% hallucinated edges.",
-    "Critical Bottleneck Identification: High traffic concentration shifted to 'french_republic_tresor, ca_cib_natixis_dealer_syndicate, ficc_sponsored_repo_clearing' during compound crisis."
+    "Critical Bottleneck Identification: High traffic concentration shifted to 'french_republic_tresor, ficc_sponsored_repo_clearing, us_treasury_tga' during compound crisis."
   ],
   "regimes": {
     "REGIME-01-OAT-CRISIS": {
@@ -35,7 +35,7 @@
             "eurosystem_target2_pool"
           ],
           "shocked_success": true,
-          "shocked_cost": 1.7438,
+          "shocked_cost": 1.6529,
           "shocked_hops": 4,
           "shocked_path": [
             "french_republic_tresor",
@@ -43,8 +43,8 @@
             "banque_de_france",
             "eurosystem_target2_pool"
           ],
-          "cost_delta": 0.317,
-          "pct_cost_delta": 22.22,
+          "cost_delta": 0.2261,
+          "pct_cost_delta": 15.85,
           "hop_delta": 0,
           "bypasses_used": [
             "ca_cib_natixis_dealer_syndicate"
@@ -65,7 +65,7 @@
             "bund_risk_free_anchor"
           ],
           "shocked_success": true,
-          "shocked_cost": 1.5795,
+          "shocked_cost": 1.4506,
           "shocked_hops": 4,
           "shocked_path": [
             "french_republic_tresor",
@@ -73,8 +73,8 @@
             "french_republic_oat_market",
             "bund_risk_free_anchor"
           ],
-          "cost_delta": 0.2286,
-          "pct_cost_delta": 16.92,
+          "cost_delta": 0.0997,
+          "pct_cost_delta": 7.38,
           "hop_delta": 0,
           "bypasses_used": [
             "ca_cib_natixis_dealer_syndicate"
@@ -94,15 +94,15 @@
             "banque_de_france"
           ],
           "shocked_success": true,
-          "shocked_cost": 1.1418,
+          "shocked_cost": 1.0516,
           "shocked_hops": 3,
           "shocked_path": [
             "french_republic_tresor",
             "ca_cib_natixis_dealer_syndicate",
             "banque_de_france"
           ],
-          "cost_delta": 0.2048,
-          "pct_cost_delta": 21.85,
+          "cost_delta": 0.1145,
+          "pct_cost_delta": 12.22,
           "hop_delta": 0,
           "bypasses_used": [
             "ca_cib_natixis_dealer_syndicate"
@@ -111,9 +111,9 @@
           "zero_hallucinations_passed": true
         }
       },
-      "avg_cost_delta": 0.2501,
-      "avg_pct_cost_delta": 20.33,
-      "max_pct_cost_delta": 22.22,
+      "avg_cost_delta": 0.1468,
+      "avg_pct_cost_delta": 11.82,
+      "max_pct_cost_delta": 15.85,
       "avg_hop_delta": 0.0,
       "bypass_corridor_activation_pct": 100.0,
       "active_bypasses": [
@@ -133,7 +133,7 @@
         "banque_de_france"
       ],
       "zero_hallucinations_verified": true,
-      "execution_time_ms": 63.05
+      "execution_time_ms": 32.08
     },
     "REGIME-02-DOLLAR-FREEZE": {
       "regime_id": "REGIME-02-DOLLAR-FREEZE",
@@ -232,38 +232,10 @@
           ],
           "is_severed_expected": false,
           "zero_hallucinations_passed": true
-        },
-        "japan_institutional_carry_desk->us_treasuries_custody": {
-          "source_id": "japan_institutional_carry_desk",
-          "target_id": "us_treasuries_custody",
-          "baseline_success": true,
-          "baseline_cost": 1.5671,
-          "baseline_hops": 3,
-          "baseline_path": [
-            "japan_institutional_carry_desk",
-            "ficc_sponsored_repo_clearing",
-            "us_treasuries_custody"
-          ],
-          "shocked_success": true,
-          "shocked_cost": 1.5927,
-          "shocked_hops": 3,
-          "shocked_path": [
-            "japan_institutional_carry_desk",
-            "ficc_sponsored_repo_clearing",
-            "us_treasuries_custody"
-          ],
-          "cost_delta": 0.0256,
-          "pct_cost_delta": 1.63,
-          "hop_delta": 0,
-          "bypasses_used": [
-            "ficc_sponsored_repo_clearing"
-          ],
-          "is_severed_expected": false,
-          "zero_hallucinations_passed": true
         }
       },
-      "avg_cost_delta": 0.3044,
-      "avg_pct_cost_delta": 26.36,
+      "avg_cost_delta": 0.3973,
+      "avg_pct_cost_delta": 34.61,
       "max_pct_cost_delta": 40.2,
       "avg_hop_delta": 0.0,
       "bypass_corridor_activation_pct": 100.0,
@@ -272,20 +244,18 @@
         "fed_standing_repo_facility"
       ],
       "node_congestion_scores": {
-        "japan_institutional_carry_desk": 0.5,
+        "japan_institutional_carry_desk": 0.3333,
         "ficc_sponsored_repo_clearing": 1.0,
-        "us_treasury_tga": 0.75,
-        "offshore_fx_swap_desk": 0.25,
-        "us_prime_mmf_basin": 0.25,
-        "us_treasuries_custody": 0.25
+        "us_treasury_tga": 1.0,
+        "offshore_fx_swap_desk": 0.3333,
+        "us_prime_mmf_basin": 0.3333
       },
       "bottleneck_nodes": [
         "ficc_sponsored_repo_clearing",
-        "us_treasury_tga",
-        "japan_institutional_carry_desk"
+        "us_treasury_tga"
       ],
       "zero_hallucinations_verified": true,
-      "execution_time_ms": 60.33
+      "execution_time_ms": 28.95
     },
     "REGIME-03-COMPOUND-SUPER-CRISIS": {
       "regime_id": "REGIME-03-COMPOUND-SUPER-CRISIS",
@@ -345,20 +315,19 @@
             "bund_risk_free_anchor"
           ],
           "shocked_success": true,
-          "shocked_cost": 1.5795,
-          "shocked_hops": 4,
+          "shocked_cost": 2.0226,
+          "shocked_hops": 5,
           "shocked_path": [
             "french_republic_tresor",
-            "ca_cib_natixis_dealer_syndicate",
-            "french_republic_oat_market",
+            "french_economy_importers",
+            "foreign_export_economies",
+            "bundesbank",
             "bund_risk_free_anchor"
           ],
-          "cost_delta": 0.2286,
-          "pct_cost_delta": 16.92,
-          "hop_delta": 0,
-          "bypasses_used": [
-            "ca_cib_natixis_dealer_syndicate"
-          ],
+          "cost_delta": 0.6717,
+          "pct_cost_delta": 49.72,
+          "hop_delta": 1,
+          "bypasses_used": [],
           "is_severed_expected": false,
           "zero_hallucinations_passed": true
         },
@@ -464,11 +433,11 @@
           "zero_hallucinations_passed": true
         }
       },
-      "avg_cost_delta": 0.3216,
-      "avg_pct_cost_delta": 26.94,
-      "max_pct_cost_delta": 40.2,
-      "avg_hop_delta": 0.0,
-      "bypass_corridor_activation_pct": 100.0,
+      "avg_cost_delta": 0.4324,
+      "avg_pct_cost_delta": 35.14,
+      "max_pct_cost_delta": 49.72,
+      "avg_hop_delta": 0.25,
+      "bypass_corridor_activation_pct": 75.0,
       "active_bypasses": [
         "ca_cib_natixis_dealer_syndicate",
         "ficc_sponsored_repo_clearing",
@@ -476,10 +445,12 @@
       ],
       "node_congestion_scores": {
         "french_republic_tresor": 0.5,
-        "ca_cib_natixis_dealer_syndicate": 0.5,
+        "ca_cib_natixis_dealer_syndicate": 0.25,
         "banque_de_france": 0.25,
         "eurosystem_target2_pool": 0.25,
-        "french_republic_oat_market": 0.25,
+        "french_economy_importers": 0.25,
+        "foreign_export_economies": 0.25,
+        "bundesbank": 0.25,
         "bund_risk_free_anchor": 0.25,
         "japan_institutional_carry_desk": 0.25,
         "ficc_sponsored_repo_clearing": 0.5,
@@ -488,12 +459,11 @@
       },
       "bottleneck_nodes": [
         "french_republic_tresor",
-        "ca_cib_natixis_dealer_syndicate",
         "ficc_sponsored_repo_clearing",
         "us_treasury_tga"
       ],
       "zero_hallucinations_verified": true,
-      "execution_time_ms": 63.58
+      "execution_time_ms": 90.56
     }
   }
 }

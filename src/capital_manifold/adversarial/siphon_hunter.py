@@ -780,18 +780,27 @@ class SiphonHunter:
     # -------------------------------------------------------------------------
     # 5. Master Report Generation
     # -------------------------------------------------------------------------
-    def generate_siphon_report(self, output_path: Optional[Path | str] = None) -> SiphonAuditReport:
+    def generate_siphon_report(
+        self,
+        output_path: Optional[Path | str] = None,
+        cif_fob_adjustment_pct: float = DEFAULT_CIF_FOB_MARGIN_PCT,
+        sigma_threshold: float = 5.0,
+    ) -> SiphonAuditReport:
         """Synthesizes all 4 detection modules into an institutional audit report and saves to JSON."""
         logger.info("Executing Automated Siphon & Structural Discrepancy Hunt...")
 
         # 1. Bilateral Trade Discrepancies
-        trade_discrepancies = self.audit_bilateral_trade_discrepancies()
+        trade_discrepancies = self.audit_bilateral_trade_discrepancies(
+            cif_fob_adjustment_pct=cif_fob_adjustment_pct
+        )
 
         # 2. Absorbing Sinks & Dark Conduits
         absorbing_conduits = self.audit_absorbing_conduits()
 
         # 3. Custody Nominees
-        custody_nominees = self.audit_custody_nominees()
+        custody_nominees = self.audit_custody_nominees(
+            sigma_threshold=sigma_threshold
+        )
 
         # 4. Statistical Residuals (IMF NEO)
         neo_allocation = self.audit_statistical_residuals()

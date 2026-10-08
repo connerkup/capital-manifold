@@ -77,3 +77,23 @@ class MacroStressSnapshot(BaseModel):
     maastricht_debt_pct_gdp: float
     latest_monthly_trade_deficit_eur: float
     net_liquidity_pressure_score: float         # Normalized stress index (0 to 100)
+
+
+class SiphonAnomalyType(str, Enum):
+    BILATERAL_TRADE_DISCREPANCY = "bilateral_trade_discrepancy"
+    ABSORBING_CONDUIT = "absorbing_conduit"
+    CUSTODY_NOMINEE = "custody_nominee"
+    STATISTICAL_RESIDUAL = "statistical_residual"
+
+
+class SiphonAnomaly(BaseModel):
+    anomaly_id: str
+    anomaly_type: SiphonAnomalyType
+    severity: str                              # "CRITICAL", "HIGH", "MEDIUM", "LOW"
+    suspected_amount_usd: float
+    jurisdiction: Optional[str] = None
+    entities_involved: list[str] = Field(default_factory=list)
+    narrative: str
+    confidence: float = 1.0
+    detected_at: Optional[str] = None
+    metadata: Dict[str, Any] = Field(default_factory=dict)

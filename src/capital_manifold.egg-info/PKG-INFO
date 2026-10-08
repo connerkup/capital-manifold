@@ -1,11 +1,30 @@
 Metadata-Version: 2.4
 Name: capital-manifold
 Version: 0.1.0
-Summary: Macro-financial balance-sheet network dynamics and capital manifold analysis.
+Summary: Planetary Balance-Sheet Network Dynamics, Siphon Forensics, and Adversarial Macro-Financial Graph Engine.
+Author: Conner Kupferberg
+License: MIT
+Keywords: macro-finance,balance-sheet,graph-algorithms,forensics,duckdb,siphon-detection,procedural-graph-engine,central-banking,sovereign-debt
+Classifier: Development Status :: 4 - Beta
+Classifier: Intended Audience :: Financial and Insurance Industry
+Classifier: Intended Audience :: Science/Research
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Operating System :: OS Independent
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Programming Language :: Python :: 3.12
+Classifier: Topic :: Office/Business :: Financial
+Classifier: Topic :: Scientific/Engineering :: Information Analysis
 Requires-Python: >=3.10
-Requires-Dist: duckdb
-Requires-Dist: pyarrow
-Requires-Dist: pydantic
-Requires-Dist: numpy
-Requires-Dist: pandas
-Requires-Dist: httpx
+Description-Content-Type: text/markdown
+Requires-Dist: duckdb>=1.0.0
+Requires-Dist: fastapi>=0.110.0
+Requires-Dist: httpx>=0.27.0
+Requires-Dist: networkx>=3.0
+Requires-Dist: numpy>=1.26.0
+Requires-Dist: pandas>=2.0.0
+Requires-Dist: pyarrow>=15.0.0
+Requires-Dist: pydantic>=2.0.0
+Requires-Dist: pytest>=8.0.0
+Requires-Dist: uvicorn>=0.28.0
