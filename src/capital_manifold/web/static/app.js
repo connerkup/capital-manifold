@@ -4321,7 +4321,56 @@ const App = {
     });
     document.getElementById("btn-step-autoplay")?.addEventListener("click", () => this.toggleTreeAutoPlay());
 
-    // Window resize redraws SVG connectors
+    // Responsive Viewport Layout Mode Switcher (Flow Sequence vs By-Tier vs Wide Matrix)
+    this.treeLayoutMode = window.innerWidth < 1024 ? "flow-sequence" : "matrix";
+    this.treeActiveTierTab = 0;
+
+    const updateLayoutModeButtons = () => {
+      document.querySelectorAll(".tree-layout-mode-btn").forEach(btn => {
+        const mode = btn.getAttribute("data-mode");
+        if (mode === this.treeLayoutMode) {
+          btn.className = "min-h-[44px] px-3.5 py-2 rounded-lg font-bold transition flex items-center justify-center gap-1.5 bg-cyan-500 text-black shadow-md shadow-cyan-500/20 tree-layout-mode-btn active";
+        } else {
+          btn.className = "min-h-[44px] px-3.5 py-2 rounded-lg font-bold transition flex items-center justify-center gap-1.5 bg-slate-900 text-slate-300 hover:text-white border border-slate-800 tree-layout-mode-btn";
+        }
+      });
+      const tierTabsBar = document.getElementById("tree-tier-tabs-bar");
+      if (tierTabsBar) {
+        if (this.treeLayoutMode === "by-tier") {
+          tierTabsBar.classList.remove("hidden");
+        } else {
+          tierTabsBar.classList.add("hidden");
+        }
+      }
+    };
+    updateLayoutModeButtons();
+
+    document.querySelectorAll(".tree-layout-mode-btn").forEach(btn => {
+      btn.addEventListener("click", () => {
+        this.treeLayoutMode = btn.getAttribute("data-mode") || "flow-sequence";
+        updateLayoutModeButtons();
+        this.renderTreeNodesAndConnectors();
+      });
+    });
+
+    // By-Tier Tab Switcher buttons
+    document.querySelectorAll(".tier-tab-btn").forEach(btn => {
+      btn.addEventListener("click", () => {
+        this.treeActiveTierTab = parseInt(btn.getAttribute("data-tier-tab"), 10) || 0;
+        document.querySelectorAll(".tier-tab-btn").forEach(b => {
+          b.className = "tier-tab-btn min-h-[48px] p-3 rounded-xl border text-left transition bg-slate-950/60 border-slate-800 text-slate-400 hover:border-slate-700";
+        });
+        const tier = this.treeActiveTierTab;
+        const activeColor = tier === 0 ? "bg-amber-950/70 border-amber-500 text-amber-300 ring-1 ring-amber-500"
+          : tier === 1 ? "bg-cyan-950/70 border-cyan-500 text-cyan-300 ring-1 ring-cyan-500"
+          : tier === 2 ? "bg-purple-950/70 border-purple-500 text-purple-300 ring-1 ring-purple-500"
+          : "bg-emerald-950/70 border-emerald-500 text-emerald-300 ring-1 ring-emerald-500";
+        btn.className = `tier-tab-btn min-h-[48px] p-3 rounded-xl border text-left transition font-bold shadow-lg ${activeColor}`;
+        this.renderTreeNodesAndConnectors();
+      });
+    });
+
+    // Window resize redraws SVG connectors and adjusts mode
     window.addEventListener("resize", () => {
       if (this.activeTab === "tab-explorer") {
         this.drawTreeConnectors();
@@ -4470,6 +4519,55 @@ const App = {
     document.getElementById("tier-1-count").textContent = `${t1Nodes.length} Nodes`;
     document.getElementById("tier-2-count").textContent = `${t2Nodes.length} Nodes`;
     document.getElementById("tier-3-count").textContent = `${t3Nodes.length} Nodes`;
+
+    const tab0Count = document.getElementById("tier-tab-0-count");
+    if (tab0Count) tab0Count.textContent = t0Nodes.length;
+    const tab1Count = document.getElementById("tier-tab-1-count");
+    if (tab1Count) tab1Count.textContent = t1Nodes.length;
+    const tab2Count = document.getElementById("tier-tab-2-count");
+    if (tab2Count) tab2Count.textContent = t2Nodes.length;
+    const tab3Count = document.getElementById("tier-tab-3-count");
+    if (tab3Count) tab3Count.textContent = t3Nodes.length;
+
+    // Apply grid layout mode class and width
+    const grid = document.getElementById("tree-columns-grid");
+    if (grid) {
+      grid.classList.remove("flow-sequence-layout", "by-tier-layout", "matrix-layout");
+      if (this.treeLayoutMode === "flow-sequence") {
+        grid.classList.add("flow-sequence-layout");
+        grid.style.minWidth = "0px";
+      } else if (this.treeLayoutMode === "by-tier") {
+        grid.classList.add("by-tier-layout");
+        grid.style.minWidth = "0px";
+      } else {
+        grid.classList.add("matrix-layout");
+        grid.style.minWidth = "1050px";
+      }
+    }
+
+    // In by-tier mode, hide inactive tier columns
+    const columns = grid?.querySelectorAll(".tier-flow-column");
+    if (columns) {
+      columns.forEach(col => {
+        const tier = parseInt(col.getAttribute("data-tier"), 10);
+        if (this.treeLayoutMode === "by-tier") {
+          if (tier === this.treeActiveTierTab) {
+            col.classList.remove("tier-tab-hidden");
+          } else {
+            col.classList.add("tier-tab-hidden");
+          }
+        } else {
+          col.classList.remove("tier-tab-hidden");
+        }
+      });
+    }
+
+    // In flow-sequence mode, insert or update vertical flow dividers
+    if (this.treeLayoutMode === "flow-sequence" && grid) {
+      this.ensureFlowSequenceDividers(s);
+    } else {
+      this.removeFlowSequenceDividers();
+    }
 
     const activeHop = s.hops[this.treeCurrentHopIndex] || null;
 
@@ -4645,9 +4743,78 @@ const App = {
     }
   },
 
+  ensureFlowSequenceDividers(scenario) {
+    const grid = document.getElementById("tree-columns-grid");
+    if (!grid) return;
+
+    const activeHop = scenario.hops[this.treeCurrentHopIndex];
+
+    const makeDivider = (id, fromTier, toTier, defaultLabel) => {
+      const isHopActive = activeHop && (
+        (fromTier === 0 && toTier === 1 && scenario.nodes.some(n => n.tier === 0 && n.id === activeHop.source) && scenario.nodes.some(n => n.tier === 1 && n.id === activeHop.target)) ||
+        (fromTier === 1 && toTier === 2 && scenario.nodes.some(n => n.tier === 1 && n.id === activeHop.source) && scenario.nodes.some(n => n.tier === 2 && n.id === activeHop.target)) ||
+        (fromTier === 2 && toTier === 3 && scenario.nodes.some(n => n.tier === 2 && n.id === activeHop.source) && scenario.nodes.some(n => n.tier === 3 && n.id === activeHop.target))
+      );
+
+      let el = document.getElementById(id);
+      if (!el) {
+        el = document.createElement("div");
+        el.id = id;
+        el.className = `vertical-flow-divider ${isHopActive ? 'active-conduit' : ''}`;
+        el.innerHTML = `
+          <div class="divider-line"></div>
+          <div class="conduit-badge">
+            <i class="fa-solid fa-arrow-down mr-1"></i>
+            <span class="badge-text">${isHopActive && activeHop ? `ACTIVE CONDUIT: ${activeHop.volume} (${activeHop.action})` : defaultLabel}</span>
+          </div>
+          <div class="divider-line"></div>
+        `;
+      } else {
+        el.className = `vertical-flow-divider ${isHopActive ? 'active-conduit' : ''}`;
+        const span = el.querySelector(".badge-text");
+        if (span) {
+          span.textContent = isHopActive && activeHop ? `ACTIVE CONDUIT: ${activeHop.volume} (${activeHop.action})` : defaultLabel;
+        }
+      }
+      return el;
+    };
+
+    const d01 = makeDivider("divider-t0-t1", 0, 1, "T0 → T1 PRIMARY TRANSMISSION PIPELINE");
+    const d12 = makeDivider("divider-t1-t2", 1, 2, "T1 → T2 WHOLESALE CLEARING & TRAVERSAL");
+    const d23 = makeDivider("divider-t2-t3", 2, 3, "T2 → T3 SAFE-HAVEN COLLATERAL SINKS");
+
+    const col0 = grid.querySelector('.tier-flow-column[data-tier="0"]');
+    const col1 = grid.querySelector('.tier-flow-column[data-tier="1"]');
+    const col2 = grid.querySelector('.tier-flow-column[data-tier="2"]');
+    const col3 = grid.querySelector('.tier-flow-column[data-tier="3"]');
+
+    if (col0 && col1 && d01.parentNode !== grid) {
+      grid.insertBefore(d01, col1);
+    }
+    if (col1 && col2 && d12.parentNode !== grid) {
+      grid.insertBefore(d12, col2);
+    }
+    if (col2 && col3 && d23.parentNode !== grid) {
+      grid.insertBefore(d23, col3);
+    }
+  },
+
+  removeFlowSequenceDividers() {
+    ["divider-t0-t1", "divider-t1-t2", "divider-t2-t3"].forEach(id => {
+      document.getElementById(id)?.remove();
+    });
+  },
+
   drawTreeConnectors() {
     const svg = document.getElementById("tree-flow-svg");
     if (!svg) return;
+
+    if (this.treeLayoutMode !== "matrix") {
+      svg.innerHTML = "";
+      svg.style.display = "none";
+      return;
+    }
+    svg.style.display = "block";
 
     const s = this.getCurrentTreeScenario();
     if (!s || !s.hops) return;

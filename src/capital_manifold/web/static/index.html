@@ -288,16 +288,70 @@
           </div>
 
           <!-- Explorer Mode Switches: Circuits vs Sovereign Roots -->
-          <div class="flex items-center gap-2">
-            <div class="bg-slate-900 border border-slate-700/80 p-1 rounded-lg flex items-center gap-1 font-mono text-xs">
-              <button id="btn-mode-circuits" class="px-3 py-1.5 rounded-md font-bold transition bg-cyan-500 text-black shadow">
+          <div class="flex items-center gap-2 w-full sm:w-auto">
+            <div class="bg-slate-900 border border-slate-700/80 p-1 rounded-lg flex items-center gap-1 font-mono text-xs w-full sm:w-auto">
+              <button id="btn-mode-circuits" class="min-h-[44px] flex-1 sm:flex-none px-3.5 py-2 rounded-md font-bold transition bg-cyan-500 text-black shadow flex items-center justify-center gap-1">
                 <i class="fa-solid fa-bolt mr-1"></i> 14 Macro Circuits
               </button>
-              <button id="btn-mode-roots" class="px-3 py-1.5 rounded-md font-medium text-slate-300 hover:text-white transition">
+              <button id="btn-mode-roots" class="min-h-[44px] flex-1 sm:flex-none px-3.5 py-2 rounded-md font-medium text-slate-300 hover:text-white transition flex items-center justify-center gap-1">
                 <i class="fa-solid fa-landmark mr-1"></i> 9 Sovereign Roots
               </button>
             </div>
           </div>
+        </div>
+
+        <!-- Mobile / Desktop Layout Viewport Mode Switcher -->
+        <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 p-2.5 bg-slate-950/90 border border-slate-800 rounded-xl font-mono text-xs">
+          <div class="flex items-center gap-2 px-1 text-slate-300 font-semibold text-xs">
+            <span class="w-2 h-2 rounded-full bg-cyan-400 animate-pulse"></span>
+            <span>EXPLORER VIEWPORT MODE:</span>
+          </div>
+          <div class="grid grid-cols-3 sm:flex items-center gap-1.5">
+            <button id="btn-tree-layout-flow" class="min-h-[44px] px-3.5 py-2 rounded-lg font-bold transition flex items-center justify-center gap-1.5 bg-cyan-500 text-black shadow-md shadow-cyan-500/20 tree-layout-mode-btn active" data-mode="flow-sequence" title="Mobile cascading vertical flow pipeline">
+              <span>📱</span>
+              <span class="truncate">Flow Sequence</span>
+            </button>
+            <button id="btn-tree-layout-tier" class="min-h-[44px] px-3.5 py-2 rounded-lg font-bold transition flex items-center justify-center gap-1.5 bg-slate-900 text-slate-300 hover:text-white border border-slate-800 tree-layout-mode-btn" data-mode="by-tier" title="Mobile tabbed switcher by tier">
+              <span>📑</span>
+              <span class="truncate">By Tier</span>
+            </button>
+            <button id="btn-tree-layout-matrix" class="min-h-[44px] px-3.5 py-2 rounded-lg font-bold transition flex items-center justify-center gap-1.5 bg-slate-900 text-slate-300 hover:text-white border border-slate-800 tree-layout-mode-btn" data-mode="matrix" title="Desktop 4-column matrix">
+              <span>🖥️</span>
+              <span class="truncate">Wide Matrix</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- By-Tier Tab Switcher (Visible in By-Tier mode) -->
+        <div id="tree-tier-tabs-bar" class="hidden grid grid-cols-2 sm:grid-cols-4 gap-2 font-mono">
+          <button class="tier-tab-btn min-h-[48px] p-3 rounded-xl border text-left transition bg-amber-950/70 border-amber-500 text-amber-300 font-bold shadow-lg shadow-amber-950/50" data-tier-tab="0">
+            <div class="flex items-center justify-between text-xs">
+              <span class="font-bold">T0 GENESIS</span>
+              <span id="tier-tab-0-count" class="text-[10px] px-1.5 py-0.5 rounded bg-amber-900/60 text-amber-300">0</span>
+            </div>
+            <div class="text-[10px] opacity-75 truncate mt-0.5">Sovereign Faucets</div>
+          </button>
+          <button class="tier-tab-btn min-h-[48px] p-3 rounded-xl border text-left transition bg-slate-950/60 border-slate-800 text-slate-400 hover:border-slate-700" data-tier-tab="1">
+            <div class="flex items-center justify-between text-xs">
+              <span class="font-bold">T1 DEALERS</span>
+              <span id="tier-tab-1-count" class="text-[10px] px-1.5 py-0.5 rounded bg-cyan-900/60 text-cyan-300">0</span>
+            </div>
+            <div class="text-[10px] opacity-75 truncate mt-0.5">Transmission & CBs</div>
+          </button>
+          <button class="tier-tab-btn min-h-[48px] p-3 rounded-xl border text-left transition bg-slate-950/60 border-slate-800 text-slate-400 hover:border-slate-700" data-tier-tab="2">
+            <div class="flex items-center justify-between text-xs">
+              <span class="font-bold">T2 TRAVERSAL</span>
+              <span id="tier-tab-2-count" class="text-[10px] px-1.5 py-0.5 rounded bg-purple-900/60 text-purple-300">0</span>
+            </div>
+            <div class="text-[10px] opacity-75 truncate mt-0.5">Wholesale Clearing</div>
+          </button>
+          <button class="tier-tab-btn min-h-[48px] p-3 rounded-xl border text-left transition bg-slate-950/60 border-slate-800 text-slate-400 hover:border-slate-700" data-tier-tab="3">
+            <div class="flex items-center justify-between text-xs">
+              <span class="font-bold">T3 SINKS</span>
+              <span id="tier-tab-3-count" class="text-[10px] px-1.5 py-0.5 rounded bg-emerald-900/60 text-emerald-300">0</span>
+            </div>
+            <div class="text-[10px] opacity-75 truncate mt-0.5">Collateral Anchors</div>
+          </button>
         </div>
 
         <!-- Filter & Search Bar -->
