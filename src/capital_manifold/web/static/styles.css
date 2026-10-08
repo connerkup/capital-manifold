@@ -214,3 +214,160 @@ body {
 .table-dark-row:hover {
   background-color: rgba(0, 240, 255, 0.04);
 }
+
+/* =============================================================================
+   VISUAL TREE FLOW EXPLORER STYLES
+   Palantir Foundry / Bloomberg / Linear Dark Multi-Tier Flow Engine
+   ============================================================================= */
+
+.tree-flow-canvas {
+  background-color: #070a11;
+  background-image: 
+    radial-gradient(circle, rgba(0, 240, 255, 0.04) 1px, transparent 1px),
+    linear-gradient(to right, rgba(255, 255, 255, 0.015) 1px, transparent 1px);
+  background-size: 24px 24px, 120px 120px;
+  position: relative;
+  min-height: 580px;
+  overflow-x: auto;
+}
+
+/* Flow connector SVG lines */
+@keyframes flowDash {
+  0% { stroke-dashoffset: 0; }
+  100% { stroke-dashoffset: -24; }
+}
+
+@keyframes flowPulseGlow {
+  0%, 100% { filter: drop-shadow(0 0 4px rgba(0, 240, 255, 0.6)); }
+  50% { filter: drop-shadow(0 0 12px rgba(0, 240, 255, 1)); }
+}
+
+.flow-connector-path {
+  fill: none;
+  stroke: rgba(100, 116, 139, 0.35);
+  stroke-width: 1.75px;
+  stroke-dasharray: 5 4;
+  transition: stroke 0.25s ease, stroke-width 0.25s ease;
+}
+
+.flow-connector-path.flow-active {
+  stroke: #00f0ff;
+  stroke-width: 3.5px;
+  stroke-dasharray: 6 5;
+  animation: flowDash 1s linear infinite, flowPulseGlow 2s ease-in-out infinite;
+}
+
+.flow-connector-path.flow-completed {
+  stroke: #10b981;
+  stroke-width: 2.25px;
+  stroke-dasharray: 5 4;
+  animation: flowDash 1.8s linear infinite;
+}
+
+/* Node card styling */
+.flow-node-card {
+  position: relative;
+  background-color: #0e1524;
+  border: 1px solid #1e293b;
+  border-radius: 0.625rem;
+  padding: 0.875rem;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  cursor: pointer;
+}
+
+.flow-node-card:hover {
+  transform: translateY(-2px);
+  border-color: #38bdf8;
+  box-shadow: 0 8px 24px rgba(0, 240, 255, 0.12);
+}
+
+.flow-node-card.active-hop {
+  border-color: #00f0ff !important;
+  background-color: #101c30 !important;
+  box-shadow: 0 0 0 2px rgba(0, 240, 255, 0.35), 0 8px 28px rgba(0, 240, 255, 0.25) !important;
+  transform: translateY(-2px) scale(1.02);
+}
+
+.flow-node-card.pulse-glow {
+  animation: cardPulse 1.8s ease-in-out infinite;
+}
+
+@keyframes cardPulse {
+  0%, 100% { box-shadow: 0 0 15px rgba(0, 240, 255, 0.3); }
+  50% { box-shadow: 0 0 28px rgba(0, 240, 255, 0.7); }
+}
+
+.flow-node-card.tier-0-card {
+  border-left: 3px solid #f59e0b;
+}
+
+.flow-node-card.tier-1-card {
+  border-left: 3px solid #00f0ff;
+}
+
+.flow-node-card.tier-2-card {
+  border-left: 3px solid #a855f7;
+}
+
+.flow-node-card.tier-3-card {
+  border-left: 3px solid #10b981;
+}
+
+/* Branch indicator */
+.branch-pill {
+  font-family: var(--font-mono);
+  font-size: 0.625rem;
+  padding: 0.125rem 0.375rem;
+  border-radius: 0.25rem;
+  background-color: rgba(56, 189, 248, 0.1);
+  color: #38bdf8;
+  border: 1px solid rgba(56, 189, 248, 0.3);
+  transition: all 0.15s ease;
+}
+.branch-pill:hover {
+  background-color: rgba(56, 189, 248, 0.25);
+  color: #fff;
+}
+
+/* Flow Stepper Progress Bar */
+.flow-progress-bar {
+  height: 4px;
+  background: #1e293b;
+  border-radius: 2px;
+  overflow: hidden;
+  position: relative;
+}
+
+.flow-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #f59e0b 0%, #00f0ff 35%, #a855f7 70%, #10b981 100%);
+  transition: width 0.35s ease;
+}
+
+/* T-Account Balances */
+.t-account-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+}
+
+.t-account-table th {
+  background-color: #131c2e;
+  padding: 0.375rem 0.625rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  border-bottom: 1px solid #1e293b;
+}
+
+.t-account-table td {
+  padding: 0.375rem 0.625rem;
+  border-bottom: 1px solid rgba(30, 41, 59, 0.6);
+}
+
+.t-account-table tr:last-child td {
+  border-bottom: none;
+}

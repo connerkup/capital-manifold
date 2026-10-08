@@ -252,7 +252,7 @@
               <span class="px-2 py-0.5 rounded bg-cyan-900/60 text-cyan-300 font-mono text-xs border border-cyan-700/60 font-semibold">PLANETARY LIQUIDITY EXPLORER</span>
               <span class="text-xs text-slate-400">Etherscan & Palantir style balance-sheet navigation</span>
             </div>
-            <h2 class="text-xl font-bold text-white mt-1">Multi-Tier Capital Pools, Corridors & Circuit Navigation</h2>
+            <h2 class="text-xl font-bold text-white mt-1">Multi-Tier Capital Pools, Corridors & Visual Flow Explorer</h2>
             <p class="text-sm text-slate-300 mt-0.5">Explore how trillions of sovereign debt, interbank repo, cross-border currency swaps, and shadow banking transit across planetary capital pools.</p>
           </div>
           <div class="flex items-center gap-3">
@@ -261,6 +261,213 @@
             </button>
           </div>
         </div>
+      </div>
+
+      <!-- =====================================================================
+           VISUAL TREE FLOW EXPLORER CONTAINER
+           ===================================================================== -->
+      <div id="visual-flow-tree-section" class="bg-manifold-surface border border-manifold-border rounded-xl p-5 md:p-6 space-y-5 shadow-2xl relative">
+        
+        <!-- Section Header & Explorer Mode Toggles -->
+        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 border-b border-manifold-border pb-4">
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="px-2.5 py-0.5 rounded bg-cyan-950 text-cyan-300 font-mono text-[11px] font-bold border border-cyan-800 tracking-wider">
+                <i class="fa-solid fa-sitemap mr-1"></i> VISUAL TREE FLOW EXPLORER
+              </span>
+              <span class="text-xs font-mono text-emerald-400 bg-emerald-950/60 px-2 py-0.5 rounded border border-emerald-800">
+                <i class="fa-solid fa-shield-halved mr-1"></i> $0.00 LEAK VERIFIED
+              </span>
+            </div>
+            <h3 class="text-xl font-bold text-white tracking-tight mt-1.5 flex items-center gap-2">
+              Multi-Tier Capital Flow & Balance-Sheet Pipeline
+            </h3>
+            <p class="text-xs text-slate-400 mt-0.5 max-w-3xl">
+              Inspect how multi-billion capital flows traverse across sovereign genesis faucets, primary dealer books, wholesale clearing pools, and safe-haven sinks without balance-sheet leakage.
+            </p>
+          </div>
+
+          <!-- Explorer Mode Switches: Circuits vs Sovereign Roots -->
+          <div class="flex items-center gap-2">
+            <div class="bg-slate-900 border border-slate-700/80 p-1 rounded-lg flex items-center gap-1 font-mono text-xs">
+              <button id="btn-mode-circuits" class="px-3 py-1.5 rounded-md font-bold transition bg-cyan-500 text-black shadow">
+                <i class="fa-solid fa-bolt mr-1"></i> 14 Macro Circuits
+              </button>
+              <button id="btn-mode-roots" class="px-3 py-1.5 rounded-md font-medium text-slate-300 hover:text-white transition">
+                <i class="fa-solid fa-landmark mr-1"></i> 9 Sovereign Roots
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Filter & Search Bar -->
+        <div class="flex flex-wrap items-center justify-between gap-3 bg-slate-900/60 border border-slate-800/80 p-3 rounded-lg">
+          <!-- Currency Filter Pills -->
+          <div class="flex items-center gap-1.5 flex-wrap">
+            <span class="text-[11px] font-mono text-slate-400 uppercase tracking-wider mr-1">Currency:</span>
+            <div id="tree-currency-filters" class="flex items-center gap-1 flex-wrap">
+              <button class="px-2 py-0.5 rounded text-[11px] font-mono bg-cyan-900/80 text-cyan-200 border border-cyan-600 font-bold tree-curr-btn" data-currency="ALL">ALL</button>
+              <button class="px-2 py-0.5 rounded text-[11px] font-mono bg-slate-800 text-slate-300 border border-slate-700 hover:border-slate-500 tree-curr-btn" data-currency="USD">USD</button>
+              <button class="px-2 py-0.5 rounded text-[11px] font-mono bg-slate-800 text-slate-300 border border-slate-700 hover:border-slate-500 tree-curr-btn" data-currency="EUR">EUR</button>
+              <button class="px-2 py-0.5 rounded text-[11px] font-mono bg-slate-800 text-slate-300 border border-slate-700 hover:border-slate-500 tree-curr-btn" data-currency="CNY">CNY</button>
+              <button class="px-2 py-0.5 rounded text-[11px] font-mono bg-slate-800 text-slate-300 border border-slate-700 hover:border-slate-500 tree-curr-btn" data-currency="RUB">RUB</button>
+              <button class="px-2 py-0.5 rounded text-[11px] font-mono bg-slate-800 text-slate-300 border border-slate-700 hover:border-slate-500 tree-curr-btn" data-currency="NOK">NOK</button>
+              <button class="px-2 py-0.5 rounded text-[11px] font-mono bg-slate-800 text-slate-300 border border-slate-700 hover:border-slate-500 tree-curr-btn" data-currency="CHF">CHF</button>
+              <button class="px-2 py-0.5 rounded text-[11px] font-mono bg-slate-800 text-slate-300 border border-slate-700 hover:border-slate-500 tree-curr-btn" data-currency="JPY">JPY</button>
+              <button class="px-2 py-0.5 rounded text-[11px] font-mono bg-slate-800 text-slate-300 border border-slate-700 hover:border-slate-500 tree-curr-btn" data-currency="GBP">GBP</button>
+            </div>
+          </div>
+
+          <!-- Search Input & Branch Toggle -->
+          <div class="flex items-center gap-2">
+            <div class="relative w-52">
+              <i class="fa-solid fa-search absolute left-2.5 top-2 text-[10px] text-slate-500"></i>
+              <input id="tree-search-input" type="text" placeholder="Search tree nodes..." class="w-full bg-slate-950 border border-slate-700/80 rounded pl-7 pr-2.5 py-1 text-xs text-slate-200 focus:outline-none focus:border-cyan-400 font-mono">
+            </div>
+            <button id="btn-toggle-all-branches" class="px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 text-xs font-mono flex items-center gap-1.5 transition">
+              <i class="fa-solid fa-code-branch text-[10px] text-cyan-400"></i> <span id="branches-toggle-text">Expand Branches</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Circuit / Root Selector Carousel Pills -->
+        <div class="space-y-2">
+          <div id="tree-selector-pills" class="flex gap-2 overflow-x-auto pb-2 scrollbar-thin">
+            <!-- Populated dynamically by app.js -->
+          </div>
+        </div>
+
+        <!-- Active Circuit / Scenario Summary Banner -->
+        <div id="active-circuit-banner" class="bg-gradient-to-r from-slate-900 via-slate-900/90 to-slate-950 border border-slate-700/80 rounded-lg p-4 space-y-2.5">
+          <!-- Populated by app.js -->
+        </div>
+
+        <!-- "Walk the Flow" Stepper Controls & Narrative Banner -->
+        <div class="bg-slate-950 border border-cyan-900/40 rounded-lg p-4 space-y-3 shadow-inner">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-800/80 pb-3">
+            <div class="flex items-center gap-2">
+              <span class="text-xs font-mono font-bold text-cyan-400 flex items-center gap-1.5">
+                <i class="fa-solid fa-forward-step"></i> WALK THE CAPITAL FLOW:
+              </span>
+              <span id="step-counter-badge" class="px-2 py-0.5 rounded bg-cyan-950 text-cyan-300 font-mono text-xs border border-cyan-800 font-bold">
+                Hop 1 of 5
+              </span>
+            </div>
+
+            <!-- Stepper Navigation Buttons -->
+            <div class="flex items-center gap-2">
+              <button id="btn-step-prev" class="px-3 py-1.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-200 font-mono text-xs border border-slate-700 flex items-center gap-1.5 transition">
+                <i class="fa-solid fa-chevron-left text-[10px]"></i> Prev Hop
+              </button>
+              <button id="btn-step-next" class="px-3 py-1.5 rounded bg-cyan-600 hover:bg-cyan-500 text-black font-mono text-xs font-bold flex items-center gap-1.5 transition shadow">
+                Next Hop <i class="fa-solid fa-chevron-right text-[10px]"></i>
+              </button>
+              <button id="btn-step-autoplay" class="px-3 py-1.5 rounded bg-emerald-600 hover:bg-emerald-500 text-black font-mono text-xs font-bold flex items-center gap-1.5 transition shadow">
+                <i class="fa-solid fa-play text-[10px]"></i> Auto-Play
+              </button>
+              <button id="btn-step-reset" class="px-2.5 py-1.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-400 font-mono text-xs border border-slate-700 transition" title="Reset Hop">
+                <i class="fa-solid fa-rotate-left"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- Stepper Progress Bar -->
+          <div class="flow-progress-bar">
+            <div id="flow-progress-fill" class="flow-progress-fill" style="width: 20%;"></div>
+          </div>
+
+          <!-- Transaction Mechanism Commentary -->
+          <div id="step-narrative-container" class="bg-slate-900/90 border border-slate-800 rounded p-3 flex items-start gap-3">
+            <div class="w-7 h-7 rounded bg-cyan-950 border border-cyan-700/60 flex items-center justify-center text-cyan-400 shrink-0 mt-0.5">
+              <i class="fa-solid fa-circle-info text-xs"></i>
+            </div>
+            <div class="space-y-1 flex-1">
+              <div class="flex items-center justify-between">
+                <span id="step-hop-title" class="text-xs font-mono font-bold text-white">Origin Sovereign Issuance</span>
+                <span id="step-action-badge" class="px-2 py-0.5 rounded bg-amber-950 text-amber-300 font-mono text-[10px] border border-amber-800 font-bold uppercase">AUCTION ISSUANCE</span>
+              </div>
+              <p id="step-hop-explanation" class="text-xs text-slate-300 font-sans leading-relaxed">
+                French Republic Trésor issues €45.2B in 10-year OAT sovereign bonds via syndication to primary SVT dealers.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- 4-Tier Interactive Flow Tree Canvas -->
+        <div class="tree-flow-canvas rounded-xl border border-slate-800 p-4 relative overflow-hidden">
+          
+          <!-- SVG Connector Layer -->
+          <svg id="tree-flow-svg" class="absolute inset-0 w-full h-full pointer-events-none z-0" style="min-width: 1100px;">
+            <!-- Dynamic flow path curves inserted by app.js -->
+          </svg>
+
+          <!-- 4-Tier Columns Grid -->
+          <div id="tree-columns-grid" class="grid grid-cols-1 md:grid-cols-4 gap-4 sm:gap-6 relative z-10" style="min-width: 1050px;">
+            
+            <!-- Tier 0 Column -->
+            <div class="tier-flow-column space-y-3" data-tier="0">
+              <div class="tier-header p-2.5 rounded-lg bg-amber-950/30 border border-amber-800/50 flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                  <span class="w-6 h-6 rounded bg-amber-900/80 text-amber-300 font-mono text-xs font-bold flex items-center justify-center border border-amber-700">T0</span>
+                  <span class="text-xs font-mono font-bold text-amber-300">SOVEREIGN GENESIS</span>
+                </div>
+                <span class="text-[10px] font-mono text-slate-400" id="tier-0-count">0 Nodes</span>
+              </div>
+              <div id="tier-0-nodes" class="space-y-3 min-h-[300px]">
+                <!-- Node cards -->
+              </div>
+            </div>
+
+            <!-- Tier 1 Column -->
+            <div class="tier-flow-column space-y-3" data-tier="1">
+              <div class="tier-header p-2.5 rounded-lg bg-cyan-950/30 border border-cyan-800/50 flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                  <span class="w-6 h-6 rounded bg-cyan-900/80 text-cyan-300 font-mono text-xs font-bold flex items-center justify-center border border-cyan-700">T1</span>
+                  <span class="text-xs font-mono font-bold text-cyan-300">TRANSMISSION DEALERS</span>
+                </div>
+                <span class="text-[10px] font-mono text-slate-400" id="tier-1-count">0 Nodes</span>
+              </div>
+              <div id="tier-1-nodes" class="space-y-3 min-h-[300px]">
+                <!-- Node cards -->
+              </div>
+            </div>
+
+            <!-- Tier 2 Column -->
+            <div class="tier-flow-column space-y-3" data-tier="2">
+              <div class="tier-header p-2.5 rounded-lg bg-purple-950/30 border border-purple-800/50 flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                  <span class="w-6 h-6 rounded bg-purple-900/80 text-purple-300 font-mono text-xs font-bold flex items-center justify-center border border-purple-700">T2</span>
+                  <span class="text-xs font-mono font-bold text-purple-300">TRAVERSAL & CLEARING</span>
+                </div>
+                <span class="text-[10px] font-mono text-slate-400" id="tier-2-count">0 Nodes</span>
+              </div>
+              <div id="tier-2-nodes" class="space-y-3 min-h-[300px]">
+                <!-- Node cards -->
+              </div>
+            </div>
+
+            <!-- Tier 3 Column -->
+            <div class="tier-flow-column space-y-3" data-tier="3">
+              <div class="tier-header p-2.5 rounded-lg bg-emerald-950/30 border border-emerald-800/50 flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                  <span class="w-6 h-6 rounded bg-emerald-900/80 text-emerald-300 font-mono text-xs font-bold flex items-center justify-center border border-emerald-700">T3</span>
+                  <span class="text-xs font-mono font-bold text-emerald-300">COLLATERAL SINKS</span>
+                </div>
+                <span class="text-[10px] font-mono text-slate-400" id="tier-3-count">0 Nodes</span>
+              </div>
+              <div id="tier-3-nodes" class="space-y-3 min-h-[300px]">
+                <!-- Node cards -->
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Node Inspection Drawer / Card Anchor -->
+        <div id="tree-node-inspection-card" class="hidden bg-slate-900/95 border border-cyan-500/50 rounded-xl p-5 space-y-4 shadow-2xl transition">
+          <!-- Populated by app.js when any node in the tree is clicked -->
+        </div>
+
       </div>
 
       <!-- Section: Featured Institutional Circuits (One-Click Exploration) -->
