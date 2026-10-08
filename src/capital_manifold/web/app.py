@@ -426,6 +426,25 @@ def get_scorecard() -> Dict[str, Any]:
     return sc.to_dict()
 
 
+@app.get("/api/siphon_report")
+def get_siphon_report() -> Dict[str, Any]:
+    """Loads siphon_audit_report.json (Trade discrepancies, absorbing conduits, custody nominees, IMF NEO)."""
+    report_path = PROCESSED_DIR / "siphon_audit_report.json"
+    if report_path.exists():
+        try:
+            with open(report_path, "r", encoding="utf-8") as f:
+                data = json.load(f)
+            return data
+        except Exception as e:
+            logger.warning(f"Could not read siphon report file: {e}")
+
+    # Fallback to direct SiphonHunter execution
+    from capital_manifold.adversarial.siphon_hunter import SiphonHunter
+    hunter = SiphonHunter(duckdb_path=DUCKDB_PATH)
+    rep = hunter.generate_siphon_report(output_path=report_path)
+    return rep.to_dict()
+
+
 @app.get("/api/topology")
 def get_topology() -> Dict[str, Any]:
     """Exports full 140-node 317-edge balance-sheet graph formatted for Cytoscape.js."""

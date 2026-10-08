@@ -1,0 +1,628 @@
+{
+  "timestamp": "2026-10-08T03:24:19.582135+00:00",
+  "total_siphoned_volume_usd": 292200000000.0,
+  "total_discrepancy_volume_usd": 407000000000.0,
+  "bilateral_discrepancies": [
+    {
+      "corridor_id": "TRADE-DISCREPANCY-01-RUSSIA-URALS",
+      "exporter_country": "RU (Russian Federation)",
+      "importer_country": "IN (India - Direct Refining Hub)",
+      "commodity": "Urals & ESPO Seaborne Crude Petroleum",
+      "reported_export_fob_usd": 140000000000.0,
+      "reported_import_cif_usd": 55000000000.0,
+      "cif_fob_adjustment_pct": 6.0,
+      "expected_import_cif_usd": 148400000000.0,
+      "raw_discrepancy_usd": 85000000000.0,
+      "adjusted_discrepancy_usd": 93400000000.0,
+      "discrepancy_type": "SHADOW_MARITIME_DIVERSION",
+      "suspected_siphoned_amount_usd": 85000000000.0,
+      "suspected_intermediaries": [
+        "shadow_tanker_energy_arbitrage (Flag-of-convenience dark fleet)",
+        "chinese_state_banks_fx_desk ($60B diverted seaborne imports)",
+        "uae_adia_mubadala_basin ($25B unrecorded freight/insurance margin)"
+      ],
+      "severity": "CRITICAL",
+      "methodology_notes": "Russia reports $140.0B FOB crude leaving Baltic/Black Sea ports. Direct Indian refining customs record only $55.0B CIF, leaving a $85.0B raw mirror gap ($93.4B CIF-adjusted). Siphon Hunter triangulates that $60B was diverted to Chinese independent teapots, and $25B was extracted as dark maritime freight margin in the UAE."
+    },
+    {
+      "corridor_id": "TRADE-DISCREPANCY-02-SWISS-GOLD",
+      "exporter_country": "CH (Swiss Precious Metals Hub)",
+      "importer_country": "UK/US (LBMA London & COMEX New York)",
+      "commodity": "Unrefined Dore Gold vs 99.99% Refined Monetary Bullion",
+      "reported_export_fob_usd": 78000000000.0,
+      "reported_import_cif_usd": 45000000000.0,
+      "cif_fob_adjustment_pct": 6.0,
+      "expected_import_cif_usd": 47700000000.0,
+      "raw_discrepancy_usd": 33000000000.0,
+      "adjusted_discrepancy_usd": 30300000000.0,
+      "discrepancy_type": "REFINERY_VALUE_WASHING",
+      "suspected_siphoned_amount_usd": 33000000000.0,
+      "suspected_intermediaries": [
+        "swiss_precious_metals_refineries (Valcambi, PAMP, Argor-Heraeus, Metalor)",
+        "dubai_gold_souk_transit_conduits",
+        "geneva_commodity_trading_houses"
+      ],
+      "severity": "HIGH",
+      "methodology_notes": "Switzerland records $45.0B in raw unrefined dore gold imports (often originating from Sudan, Mali, and UAE re-exports) versus $78.0B in refined investment bullion exports. The $33.0B differential reflects value-addition coupled with provenance laundering, transforming sanctioned/conflict artisanal gold into LBMA-certified good-delivery bars."
+    },
+    {
+      "corridor_id": "TRADE-DISCREPANCY-03-US-CHINA-GAP",
+      "exporter_country": "CN (General Administration of Customs)",
+      "importer_country": "US (US Census Bureau / Customs & Border Protection)",
+      "commodity": "Manufactured Electronics, Industrial Machinery & Consumer Goods",
+      "reported_export_fob_usd": 318000000000.0,
+      "reported_import_cif_usd": 427000000000.0,
+      "cif_fob_adjustment_pct": 6.0,
+      "expected_import_cif_usd": 337080000000.0,
+      "raw_discrepancy_usd": 109000000000.0,
+      "adjusted_discrepancy_usd": 89920000000.0,
+      "discrepancy_type": "HONG_KONG_RE_INVOICING_MARKUP",
+      "suspected_siphoned_amount_usd": 89920000000.0,
+      "suspected_intermediaries": [
+        "hong_kong_re_invoicing_spvs",
+        "offshore_trade_finance_affiliates",
+        "multinational_transfer_pricing_vehicles"
+      ],
+      "severity": "HIGH",
+      "methodology_notes": "Persistent structural gap of $109.0B raw ($89.9B after standard 6.0% CIF/FOB margin). Chinese exporters under-invoice shipments to evade PBOC foreign-exchange surrender mandates, while Hong Kong intermediary entities add an offshore markup before goods enter US customs, siphoning untaxed corporate margin into offshore accounts."
+    }
+  ],
+  "absorbing_conduits": [
+    {
+      "entity_id": "russia_offshore_shadow_capital_basin",
+      "jurisdiction": "AE / IN / CH (Offshore Non-Aligned)",
+      "sector": "trapped_capital_nexus",
+      "total_inflow_usd": 180000000000.0,
+      "total_outflow_usd": 0.0,
+      "delta_reserves_usd": 0.0,
+      "siphoned_volume_usd": 180000000000.0,
+      "retention_ratio_pct": 100.0,
+      "anomaly_classification": "TRAPPED_CAPITAL_BASIN",
+      "suspected_counterparties": [
+        "gazprombank_energy_settlement_hub ($95B trapped European pipeline gas proceeds)",
+        "russian_hydrocarbon_export_revenues ($85B unconvertible Indian rupee balances & flight capital)",
+        "uae_commercial_vostro_banks"
+      ],
+      "severity": "CRITICAL",
+      "audit_narrative": "Trapped Capital Basin: Absorbed $180.0B with $0.0B recorded domestic repatriation. Capital remains frozen or siphoned in non-convertible Indian Special Rupee Vostro Accounts (SRVA) and UAE dirham corporate accounts, funding shadow tanker acquisitions and gold bullion."
+    },
+    {
+      "entity_id": "shadow_tanker_energy_arbitrage",
+      "jurisdiction": "MARITIME (Flag of Convenience / UAE / Seychelles)",
+      "sector": "maritime_energy_arbitrage",
+      "total_inflow_usd": 140000000000.0,
+      "total_outflow_usd": 140000000000.0,
+      "delta_reserves_usd": 0.0,
+      "siphoned_volume_usd": 25000000000.0,
+      "retention_ratio_pct": 17.86,
+      "anomaly_classification": "UNRECORDED_MARGIN_EXTRACTION",
+      "suspected_counterparties": [
+        "bank_of_russia_cbr_vault ($140B Urals crude supply)",
+        "reserve_bank_of_india_refining_hub ($55B discounted intake)",
+        "chinese_state_banks_fx_desk ($60B seaborne intake)",
+        "uae_adia_mubadala_basin ($25B extracted dark freight margin)"
+      ],
+      "severity": "HIGH",
+      "audit_narrative": "Maritime Arbitrage Skimming: While the conduit technically conserves $140.0B overall ($140.0B out), $25.0B is diverted directly into UAE maritime entities as opaque insurance premiums and tanker charter surcharges, circumventing the G7 $60/bbl price cap."
+    },
+    {
+      "entity_id": "africa_critical_minerals_debt_conduit",
+      "jurisdiction": "AFRICA (DRC / Zambia / Guinea / UAE)",
+      "sector": "frontier_mineral_conduit",
+      "total_inflow_usd": 15000000000.0,
+      "total_outflow_usd": 45000000000.0,
+      "delta_reserves_usd": 0.0,
+      "siphoned_volume_usd": 2200000000.0,
+      "retention_ratio_pct": 14.67,
+      "anomaly_classification": "COMMODITY_FEE_SKIMMING",
+      "suspected_counterparties": [
+        "pboc_safe_foreign_reserves (Belt and Road resource-backed lending)",
+        "chinese_state_banks_fx_desk (Resource concession debt service)",
+        "geneva_commodity_trading_houses (Off-balance-sheet cobalt/copper marketing fees)"
+      ],
+      "severity": "MEDIUM",
+      "audit_narrative": "Resource Concession Spread Skimming: Estimated $2.20B in unrecorded physical marketing discounts and off-balance-sheet trading house fees extracted from African critical minerals debt servicing."
+    }
+  ],
+  "custody_nominees": [
+    {
+      "custodian_entity": "london_eurodollar_pool",
+      "custodian_jurisdiction": "UK",
+      "custodian_name": "United Kingdom (City of London Eurodollar Pool)",
+      "reported_treasury_holdings_usd": 668300000000.0,
+      "estimated_domestic_capacity_usd": 120000000000.0,
+      "excess_nominee_holdings_usd": 548300000000.0,
+      "nominee_intensity_ratio": 5.57,
+      "sigma_deviation": 18.28,
+      "primary_fmi": "Euroclear UK & International Banks Syndicate",
+      "triangulated_beneficial_owners": [
+        {
+          "beneficial_owner": "Global Offshore Hedge Funds & Carry Desks",
+          "attributed_volume_usd": 274150000000.0,
+          "attributed_pct": 50.0,
+          "strategic_motive": "Cross-currency basis trades, sponsored repo, and offshore leverage."
+        },
+        {
+          "beneficial_owner": "Petrodollar Sovereign Recyclers",
+          "attributed_volume_usd": 191905000000.0,
+          "attributed_pct": 35.0,
+          "strategic_motive": "Eurodollar deposit deployment into benchmark Treasuries."
+        },
+        {
+          "beneficial_owner": "Commonwealth Institutional Pension Pools",
+          "attributed_volume_usd": 82245000000.0,
+          "attributed_pct": 15.0,
+          "strategic_motive": "Global high-quality liquid asset (HQLA) liquidity buffering."
+        }
+      ],
+      "severity": "HIGH",
+      "audit_narrative": "Custodial Nominee Anomaly: United Kingdom (City of London Eurodollar Pool) holds $668.3B in US Treasuries, exceeding estimated domestic absorption capacity ($120.0B) by 5.6x (18.3-sigma outlier). Siphon Hunter triangulates that $274.1B (50.0%) is beneficially owned by Global Offshore Hedge Funds & Carry Desks operating through Euroclear UK & International Banks Syndicate."
+    },
+    {
+      "custodian_entity": "ubs_group_consolidated_gsib",
+      "custodian_jurisdiction": "CH",
+      "custodian_name": "Switzerland (UBS Group & Swiss Private Banks)",
+      "reported_treasury_holdings_usd": 500000000000.0,
+      "estimated_domestic_capacity_usd": 45000000000.0,
+      "excess_nominee_holdings_usd": 455000000000.0,
+      "nominee_intensity_ratio": 11.11,
+      "sigma_deviation": 40.44,
+      "primary_fmi": "SIX Swiss Exchange & UBS Global Custody",
+      "triangulated_beneficial_owners": [
+        {
+          "beneficial_owner": "Middle Eastern Sovereign & Royal Family Accounts",
+          "attributed_volume_usd": 250250000000.0,
+          "attributed_pct": 55.0,
+          "strategic_motive": "Swiss numbered custodial secrecy and bespoke collateral management."
+        },
+        {
+          "beneficial_owner": "Asian Multi-Family Offices & Ultra-HNWIs",
+          "attributed_volume_usd": 136500000000.0,
+          "attributed_pct": 30.0,
+          "strategic_motive": "Offshore succession planning and geopolitical risk insulation."
+        },
+        {
+          "beneficial_owner": "European Corporate Treasury Escrow",
+          "attributed_volume_usd": 68250000000.0,
+          "attributed_pct": 15.0,
+          "strategic_motive": "Synthetic dollar swap and yield preservation outside home jurisdictions."
+        }
+      ],
+      "severity": "CRITICAL",
+      "audit_narrative": "Custodial Nominee Anomaly: Switzerland (UBS Group & Swiss Private Banks) holds $500.0B in US Treasuries, exceeding estimated domestic absorption capacity ($45.0B) by 11.1x (40.4-sigma outlier). Siphon Hunter triangulates that $250.2B (55.0%) is beneficially owned by Middle Eastern Sovereign & Royal Family Accounts operating through SIX Swiss Exchange & UBS Global Custody."
+    },
+    {
+      "custodian_entity": "luxembourg_ucits_pool",
+      "custodian_jurisdiction": "LU",
+      "custodian_name": "Luxembourg (Clearstream Banking & UCITS Funds)",
+      "reported_treasury_holdings_usd": 318200000000.0,
+      "estimated_domestic_capacity_usd": 15000000000.0,
+      "excess_nominee_holdings_usd": 303200000000.0,
+      "nominee_intensity_ratio": 21.21,
+      "sigma_deviation": 80.85,
+      "primary_fmi": "Clearstream Banking SA (Luxembourg)",
+      "triangulated_beneficial_owners": [
+        {
+          "beneficial_owner": "European Wealth Management & Private Banking Clients",
+          "attributed_volume_usd": 181920000000.0,
+          "attributed_pct": 60.0,
+          "strategic_motive": "Cross-border tax-advantaged UCITS fixed-income fund wrappers."
+        },
+        {
+          "beneficial_owner": "Latin American & Emerging Market Flight Capital",
+          "attributed_volume_usd": 75800000000.0,
+          "attributed_pct": 25.0,
+          "strategic_motive": "Offshore dollar preservation and domestic currency depreciation hedge."
+        },
+        {
+          "beneficial_owner": "Middle Eastern Institutional Escrow",
+          "attributed_volume_usd": 45480000000.0,
+          "attributed_pct": 15.0,
+          "strategic_motive": "Institutional liquidity and private placement holding."
+        }
+      ],
+      "severity": "CRITICAL",
+      "audit_narrative": "Custodial Nominee Anomaly: Luxembourg (Clearstream Banking & UCITS Funds) holds $318.2B in US Treasuries, exceeding estimated domestic absorption capacity ($15.0B) by 21.2x (80.9-sigma outlier). Siphon Hunter triangulates that $181.9B (60.0%) is beneficially owned by European Wealth Management & Private Banking Clients operating through Clearstream Banking SA (Luxembourg)."
+    },
+    {
+      "custodian_entity": "belgium_euroclear_custody",
+      "custodian_jurisdiction": "BE",
+      "custodian_name": "Belgium (Euroclear Bank SA/NV Brussels)",
+      "reported_treasury_holdings_usd": 331100000000.0,
+      "estimated_domestic_capacity_usd": 28000000000.0,
+      "excess_nominee_holdings_usd": 303100000000.0,
+      "nominee_intensity_ratio": 11.82,
+      "sigma_deviation": 43.3,
+      "primary_fmi": "Euroclear Bank SA/NV (Brussels)",
+      "triangulated_beneficial_owners": [
+        {
+          "beneficial_owner": "China PBOC SAFE (State Administration of Foreign Exchange)",
+          "attributed_volume_usd": 264909400000.0,
+          "attributed_pct": 87.4,
+          "strategic_motive": "Shield sovereign dollar reserves from direct US sanction visibility and bilateral political friction."
+        },
+        {
+          "beneficial_owner": "Gulf Sovereign Wealth (UAE ADIA / Saudi SAMA)",
+          "attributed_volume_usd": 24854200000.0,
+          "attributed_pct": 8.2,
+          "strategic_motive": "Euroclear multi-currency settlement and liquidity reserve placement."
+        },
+        {
+          "beneficial_owner": "Other Non-Aligned Central Banks",
+          "attributed_volume_usd": 13336400000.0,
+          "attributed_pct": 4.4,
+          "strategic_motive": "Secondary sovereign reserve diversification outside domestic custody."
+        }
+      ],
+      "severity": "CRITICAL",
+      "audit_narrative": "Custodial Nominee Anomaly: Belgium (Euroclear Bank SA/NV Brussels) holds $331.1B in US Treasuries, exceeding estimated domestic absorption capacity ($28.0B) by 11.8x (43.3-sigma outlier). Siphon Hunter triangulates that $264.9B (87.4%) is beneficially owned by China PBOC SAFE (State Administration of Foreign Exchange) operating through Euroclear Bank SA/NV (Brussels)."
+    },
+    {
+      "custodian_entity": "offshore_cayman_hedge_pool",
+      "custodian_jurisdiction": "KY",
+      "custodian_name": "Cayman Islands (Offshore Hedge Fund SPVs)",
+      "reported_treasury_holdings_usd": 285300000000.0,
+      "estimated_domestic_capacity_usd": 1500000000.0,
+      "excess_nominee_holdings_usd": 283800000000.0,
+      "nominee_intensity_ratio": 190.2,
+      "sigma_deviation": 756.8,
+      "primary_fmi": "Offshore Master-Feeder SPV Custody",
+      "triangulated_beneficial_owners": [
+        {
+          "beneficial_owner": "US & Global Relative-Value Hedge Funds (Basis Trade)",
+          "attributed_volume_usd": 227040000000.0,
+          "attributed_pct": 80.0,
+          "strategic_motive": "Cash-futures Treasury basis trade leverage (20x-50x) via bilateral/sponsored repo."
+        },
+        {
+          "beneficial_owner": "Global Tech & Crypto Offshore Treasury Reserves",
+          "attributed_volume_usd": 56760000000.0,
+          "attributed_pct": 20.0,
+          "strategic_motive": "Tax-exempt reserve buffering and yield arbitrage."
+        }
+      ],
+      "severity": "CRITICAL",
+      "audit_narrative": "Custodial Nominee Anomaly: Cayman Islands (Offshore Hedge Fund SPVs) holds $285.3B in US Treasuries, exceeding estimated domestic absorption capacity ($1.5B) by 190.2x (756.8-sigma outlier). Siphon Hunter triangulates that $227.0B (80.0%) is beneficially owned by US & Global Relative-Value Hedge Funds (Basis Trade) operating through Offshore Master-Feeder SPV Custody."
+    }
+  ],
+  "statistical_residual_allocation": {
+    "global_neo_annual_discrepancy_usd": 180000000000.0,
+    "modeled_neo_in_manifold_usd": 175000000000.0,
+    "unmodeled_neo_gap_usd": 5000000000.0,
+    "allocated_vectors": [
+      {
+        "vector_id": "VECTOR-01-SHADOW-MARITIME-TRADE",
+        "vector_name": "Shadow Maritime Fleet & Sanctioned Energy Transshipment",
+        "allocation_pct": 45.0,
+        "allocated_amount_usd": 81000000000.0,
+        "operational_mechanism": "Dark fleet oil shipments evading Western price caps, transshipments in international waters (STS transfers off Laconian Gulf / Fujairah), and cash-settled bunker fuel surcharges.",
+        "geographic_hotspots": [
+          "Persian Gulf / Strait of Hormuz",
+          "Malacca Strait",
+          "Baltic Sea / Gulf of Finland"
+        ],
+        "suspected_settlement_rails": [
+          "UAE Dirham OTC clearing",
+          "Russian Ruble-Rupee clearing accounts",
+          "Chinese CNH escrow"
+        ]
+      },
+      {
+        "vector_id": "VECTOR-02-NONBANK-INFORMAL-SETTLEMENT",
+        "vector_name": "Non-Bank Informal Settlement & Hawala / Stablecoin Clearing",
+        "allocation_pct": 35.0,
+        "allocated_amount_usd": 63000000000.0,
+        "operational_mechanism": "Under-the-table merchant trade settlements, Tether (USDT) cross-border wholesale remittances between Moscow, Guangzhou, and Dubai, and informal value transfer systems (Hawala/Fei-Chien).",
+        "geographic_hotspots": [
+          "Dubai (DMCC / Deira)",
+          "Hong Kong / Shenzhen border",
+          "Moscow City financial district"
+        ],
+        "suspected_settlement_rails": [
+          "Tether USDT on Tron / Ethereum",
+          "Bilateral commodity netting agreements",
+          "Gold bullion offsets"
+        ]
+      },
+      {
+        "vector_id": "VECTOR-03-OFFSHORE-REAL-ASSET-SINKS",
+        "vector_name": "Offshore Real Estate, Freeport Vaults & Private Capital Sinks",
+        "allocation_pct": 20.0,
+        "allocated_amount_usd": 36000000000.0,
+        "operational_mechanism": "Direct acquisition of luxury residential real estate, commercial property SPVs, and bonded freeport storage (Geneva / Singapore) absorbing unrecorded flight capital.",
+        "geographic_hotspots": [
+          "Dubai (Palm Jumeirah / Downtown)",
+          "London (Mayfair / Knightsbridge)",
+          "Singapore (Sentosa)"
+        ],
+        "suspected_settlement_rails": [
+          "Corporate SPV share transfers",
+          "Swiss escrow lawyer client accounts",
+          "Unregistered cash contributions"
+        ]
+      }
+    ],
+    "capital_flight_origin_jurisdictions": [
+      "RU (Russia)",
+      "CN (China)",
+      "IR (Iran)",
+      "VE (Venezuela)",
+      "NG (Nigeria)"
+    ],
+    "capital_flight_destination_sinks": [
+      "AE (UAE/Dubai)",
+      "CH (Switzerland)",
+      "SG (Singapore)",
+      "UK (London)",
+      "KY (Cayman Islands)"
+    ],
+    "audit_narrative": "Global IMF Net Errors & Omissions (NEO) accounts for $180.0B/year in unrecorded balance-of-payments residuals. Siphon Hunter unmasks this statistical dark matter: 45% ($81.0B) is driven by shadow maritime energy transit, 35% ($63.0B) routes through informal crypto/hawala rails, and 20% ($36.0B) absorbs into offshore luxury real assets."
+  },
+  "top_critical_leaks": [
+    {
+      "id": "LEAK-CONDUIT-RUSSIA_OFFSHORE_SHADOW_CAPITAL_BASIN",
+      "severity": "CRITICAL",
+      "entity": "russia_offshore_shadow_capital_basin",
+      "volume_usd": 180000000000.0,
+      "classification": "TRAPPED_CAPITAL_BASIN",
+      "description": "Trapped Capital Basin: Absorbed $180.0B with $0.0B recorded domestic repatriation. Capital remains frozen or siphoned in non-convertible Indian Special Rupee Vostro Accounts (SRVA) and UAE dirham corporate accounts, funding shadow tanker acquisitions and gold bullion."
+    },
+    {
+      "id": "LEAK-TRADE-TRADE-DISCREPANCY-03-US-CHINA-GAP",
+      "severity": "HIGH",
+      "entity": "CN (General Administration of Customs) -> US (US Census Bureau / Customs & Border Protection)",
+      "volume_usd": 89920000000.0,
+      "classification": "HONG_KONG_RE_INVOICING_MARKUP",
+      "description": "Persistent structural gap of $109.0B raw ($89.9B after standard 6.0% CIF/FOB margin). Chinese exporters under-invoice shipments to evade PBOC foreign-exchange surrender mandates, while Hong Kong intermediary entities add an offshore markup before goods enter US customs, siphoning untaxed corporate margin into offshore accounts."
+    },
+    {
+      "id": "LEAK-TRADE-TRADE-DISCREPANCY-01-RUSSIA-URALS",
+      "severity": "CRITICAL",
+      "entity": "RU (Russian Federation) -> IN (India - Direct Refining Hub)",
+      "volume_usd": 85000000000.0,
+      "classification": "SHADOW_MARITIME_DIVERSION",
+      "description": "Russia reports $140.0B FOB crude leaving Baltic/Black Sea ports. Direct Indian refining customs record only $55.0B CIF, leaving a $85.0B raw mirror gap ($93.4B CIF-adjusted). Siphon Hunter triangulates that $60B was diverted to Chinese independent teapots, and $25B was extracted as dark maritime freight margin in the UAE."
+    },
+    {
+      "id": "LEAK-TRADE-TRADE-DISCREPANCY-02-SWISS-GOLD",
+      "severity": "HIGH",
+      "entity": "CH (Swiss Precious Metals Hub) -> UK/US (LBMA London & COMEX New York)",
+      "volume_usd": 33000000000.0,
+      "classification": "REFINERY_VALUE_WASHING",
+      "description": "Switzerland records $45.0B in raw unrefined dore gold imports (often originating from Sudan, Mali, and UAE re-exports) versus $78.0B in refined investment bullion exports. The $33.0B differential reflects value-addition coupled with provenance laundering, transforming sanctioned/conflict artisanal gold into LBMA-certified good-delivery bars."
+    },
+    {
+      "id": "LEAK-CONDUIT-SHADOW_TANKER_ENERGY_ARBITRAGE",
+      "severity": "HIGH",
+      "entity": "shadow_tanker_energy_arbitrage",
+      "volume_usd": 25000000000.0,
+      "classification": "UNRECORDED_MARGIN_EXTRACTION",
+      "description": "Maritime Arbitrage Skimming: While the conduit technically conserves $140.0B overall ($140.0B out), $25.0B is diverted directly into UAE maritime entities as opaque insurance premiums and tanker charter surcharges, circumventing the G7 $60/bbl price cap."
+    }
+  ],
+  "suspected_intermediaries": [
+    {
+      "entity_name": "Clearstream Banking SA (Luxembourg) (Luxembourg (Clearstream Banking & UCITS Funds))",
+      "flagged_by_modules": [
+        "Bilateral Trade",
+        "Conduit Hunter",
+        "Nominee Scanner"
+      ]
+    },
+    {
+      "entity_name": "Euroclear Bank SA/NV (Brussels) (Belgium (Euroclear Bank SA/NV Brussels))",
+      "flagged_by_modules": [
+        "Bilateral Trade",
+        "Conduit Hunter",
+        "Nominee Scanner"
+      ]
+    },
+    {
+      "entity_name": "Euroclear UK & International Banks Syndicate (United Kingdom (City of London Eurodollar Pool))",
+      "flagged_by_modules": [
+        "Bilateral Trade",
+        "Conduit Hunter",
+        "Nominee Scanner"
+      ]
+    },
+    {
+      "entity_name": "Offshore Master-Feeder SPV Custody (Cayman Islands (Offshore Hedge Fund SPVs))",
+      "flagged_by_modules": [
+        "Bilateral Trade",
+        "Conduit Hunter",
+        "Nominee Scanner"
+      ]
+    },
+    {
+      "entity_name": "SIX Swiss Exchange & UBS Global Custody (Switzerland (UBS Group & Swiss Private Banks))",
+      "flagged_by_modules": [
+        "Bilateral Trade",
+        "Conduit Hunter",
+        "Nominee Scanner"
+      ]
+    },
+    {
+      "entity_name": "bank_of_russia_cbr_vault ($140B Urals crude supply)",
+      "flagged_by_modules": [
+        "Bilateral Trade",
+        "Conduit Hunter",
+        "Nominee Scanner"
+      ]
+    },
+    {
+      "entity_name": "chinese_state_banks_fx_desk ($60B diverted seaborne imports)",
+      "flagged_by_modules": [
+        "Bilateral Trade",
+        "Conduit Hunter",
+        "Nominee Scanner"
+      ]
+    },
+    {
+      "entity_name": "chinese_state_banks_fx_desk ($60B seaborne intake)",
+      "flagged_by_modules": [
+        "Bilateral Trade",
+        "Conduit Hunter",
+        "Nominee Scanner"
+      ]
+    },
+    {
+      "entity_name": "chinese_state_banks_fx_desk (Resource concession debt service)",
+      "flagged_by_modules": [
+        "Bilateral Trade",
+        "Conduit Hunter",
+        "Nominee Scanner"
+      ]
+    },
+    {
+      "entity_name": "dubai_gold_souk_transit_conduits",
+      "flagged_by_modules": [
+        "Bilateral Trade",
+        "Conduit Hunter",
+        "Nominee Scanner"
+      ]
+    },
+    {
+      "entity_name": "gazprombank_energy_settlement_hub ($95B trapped European pipeline gas proceeds)",
+      "flagged_by_modules": [
+        "Bilateral Trade",
+        "Conduit Hunter",
+        "Nominee Scanner"
+      ]
+    },
+    {
+      "entity_name": "geneva_commodity_trading_houses",
+      "flagged_by_modules": [
+        "Bilateral Trade",
+        "Conduit Hunter",
+        "Nominee Scanner"
+      ]
+    },
+    {
+      "entity_name": "geneva_commodity_trading_houses (Off-balance-sheet cobalt/copper marketing fees)",
+      "flagged_by_modules": [
+        "Bilateral Trade",
+        "Conduit Hunter",
+        "Nominee Scanner"
+      ]
+    },
+    {
+      "entity_name": "hong_kong_re_invoicing_spvs",
+      "flagged_by_modules": [
+        "Bilateral Trade",
+        "Conduit Hunter",
+        "Nominee Scanner"
+      ]
+    },
+    {
+      "entity_name": "multinational_transfer_pricing_vehicles",
+      "flagged_by_modules": [
+        "Bilateral Trade",
+        "Conduit Hunter",
+        "Nominee Scanner"
+      ]
+    },
+    {
+      "entity_name": "offshore_trade_finance_affiliates",
+      "flagged_by_modules": [
+        "Bilateral Trade",
+        "Conduit Hunter",
+        "Nominee Scanner"
+      ]
+    },
+    {
+      "entity_name": "pboc_safe_foreign_reserves (Belt and Road resource-backed lending)",
+      "flagged_by_modules": [
+        "Bilateral Trade",
+        "Conduit Hunter",
+        "Nominee Scanner"
+      ]
+    },
+    {
+      "entity_name": "reserve_bank_of_india_refining_hub ($55B discounted intake)",
+      "flagged_by_modules": [
+        "Bilateral Trade",
+        "Conduit Hunter",
+        "Nominee Scanner"
+      ]
+    },
+    {
+      "entity_name": "russian_hydrocarbon_export_revenues ($85B unconvertible Indian rupee balances & flight capital)",
+      "flagged_by_modules": [
+        "Bilateral Trade",
+        "Conduit Hunter",
+        "Nominee Scanner"
+      ]
+    },
+    {
+      "entity_name": "shadow_tanker_energy_arbitrage (Flag-of-convenience dark fleet)",
+      "flagged_by_modules": [
+        "Bilateral Trade",
+        "Conduit Hunter",
+        "Nominee Scanner"
+      ]
+    },
+    {
+      "entity_name": "swiss_precious_metals_refineries (Valcambi, PAMP, Argor-Heraeus, Metalor)",
+      "flagged_by_modules": [
+        "Bilateral Trade",
+        "Conduit Hunter",
+        "Nominee Scanner"
+      ]
+    },
+    {
+      "entity_name": "uae_adia_mubadala_basin ($25B extracted dark freight margin)",
+      "flagged_by_modules": [
+        "Bilateral Trade",
+        "Conduit Hunter",
+        "Nominee Scanner"
+      ]
+    },
+    {
+      "entity_name": "uae_adia_mubadala_basin ($25B unrecorded freight/insurance margin)",
+      "flagged_by_modules": [
+        "Bilateral Trade",
+        "Conduit Hunter",
+        "Nominee Scanner"
+      ]
+    },
+    {
+      "entity_name": "uae_commercial_vostro_banks",
+      "flagged_by_modules": [
+        "Bilateral Trade",
+        "Conduit Hunter",
+        "Nominee Scanner"
+      ]
+    }
+  ],
+  "summary_statistics": {
+    "total_siphoned_volume_usd": 292200000000.0,
+    "total_discrepancy_volume_usd": 407000000000.0,
+    "total_excess_custody_nominee_volume_usd": 1893400000000.0,
+    "bilateral_trade_discrepancies_count": 3,
+    "absorbing_conduits_count": 3,
+    "custody_nominee_hubs_count": 5,
+    "global_neo_annual_discrepancy_usd": 180000000000.0
+  },
+  "remediation_actions": [
+    {
+      "area": "Maritime Surveillance",
+      "action": "Ingest AIS Satellite Transponder Dark Fleet Telemetry",
+      "details": "Widen AIS tracking around STS transfer hotspots (Fujairah, Laconian Gulf) to map $25B Dubai freight margins back to beneficial owners."
+    },
+    {
+      "area": "Custody Transparency",
+      "action": "Look Through Euroclear & Clearstream Nominee Accounts",
+      "details": "Attribute Belgian and Luxembourg Treasury holdings to beneficial sovereigns (China PBOC SAFE $265B) in macro stress snapshots."
+    },
+    {
+      "area": "Balance of Payments",
+      "action": "Allocate IMF Net Errors & Omissions to Dark Shipping & Non-Bank Rails",
+      "details": "Disaggregate the $180B/yr global statistical residual into explicit shadow maritime, USDT crypto, and luxury asset flows."
+    },
+    {
+      "area": "Trade Invoicing",
+      "action": "Apply CIF/FOB Mirror Reconciliation to Hong Kong & Swiss Conduits",
+      "details": "Reconcile the $89.9B US-China transfer pricing gap and the $33B Swiss gold value-washing loop within the balance-sheet graph substrate."
+    }
+  ]
+}

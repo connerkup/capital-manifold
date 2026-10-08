@@ -20,6 +20,15 @@ from capital_manifold.adversarial.system_auditor import (
     FullAuditScorecard,
 )
 
+from capital_manifold.adversarial.siphon_hunter import (
+    SiphonHunter,
+    SiphonAuditReport,
+    BilateralTradeDiscrepancy,
+    AbsorbingConduitAnomaly,
+    CustodyNomineeAnomaly,
+    StatisticalResidualAllocation,
+)
+
 __all__ = [
     "AdversarialSubstrateBuilder",
     "BalanceSheetMetrics",
@@ -36,4 +45,10 @@ __all__ = [
     "SinkType",
     "TemporalCadence",
     "FullAuditScorecard",
+    "SiphonHunter",
+    "SiphonAuditReport",
+    "BilateralTradeDiscrepancy",
+    "AbsorbingConduitAnomaly",
+    "CustodyNomineeAnomaly",
+    "StatisticalResidualAllocation",
 ]
